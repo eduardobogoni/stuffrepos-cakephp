@@ -1,3 +1,6 @@
 [submodule "cakephp"]
 	path = cakephp
 	url = https://github.com/cakephp/cakephp.git
+[submodule "plugins/Migrations"]
+	path = plugins/Migrations
+	url = https://github.com/CakeDC/migrations.git
