@@ -11,3 +11,17 @@ if (!defined('DS')) {
 if (!defined('CORE_PATH')) {
     define('CORE_PATH', CAKE_CORE_INCLUDE_PATH . DS);
 }
+
+class StuffreposBootstrap {
+
+    public static function run() {
+        App::build(
+                array(
+                    'Plugin' => dirname(__FILE__) . '/plugins/'
+                )
+        );
+
+        CakePlugin::load('Migrations');
+    }
+
+}
