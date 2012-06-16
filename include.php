@@ -22,6 +22,7 @@ class StuffreposBootstrap {
         );
 
         CakePlugin::load('Migrations');
+        CakePlugin::load('StuffRepos');
     }
 
 }
