@@ -22,8 +22,40 @@ class UsersController extends AppController {
                 'email',
                 'active',
             )
-        )
+        ),
+        'StuffreposAuthentication.Authentication',
+        'Auth',
     );
+
+    
+    public function beforeFilter() {        
+        parent::beforeFilter();
+        
+        if ($this->request->action == 'add' && $this->request->isPost()) {
+            $this->currentPassword = $this->Authentication->generateRandomPassword();
+            $this->request->data['User']['password'] = $this->currentPassword;
+        }        
+    }
+
+    public function beforeRender() {
+        parent::beforeRender();
+
+        if (!isset($this->request->data['User']['active'])) {
+            $this->request->data['User']['active'] = true;
+        }
+    }
+    
+    public function afterScaffoldSave($method) {
+        
+        parent::afterScaffoldSave($method);
+
+        
+        if ($method == 'add') {
+            $this->Authentication->sendSelfUserCreationNotification(
+                    $this->User->id, $this->currentPassword
+            );
+        }
+    }
 
 }
 
