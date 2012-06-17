@@ -60,6 +60,19 @@ class CreateTableUsers extends CakeMigration {
      * @access public
      */
     public function after($direction) {
+        if ($direction == 'up') {
+            App::import('Component', 'Auth');
+            $User = $this->generateModel('User');
+            $User->create();
+            $User->save(
+                    array(
+                        'email' => 'admin@example.net',
+                        'password' => AuthComponent::password('admin'),
+                        'name' => 'Administrator',
+                        'enabled' => 1,
+                    )
+            );
+        }
         return true;
     }
 
