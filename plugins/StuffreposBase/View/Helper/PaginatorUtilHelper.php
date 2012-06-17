@@ -21,7 +21,7 @@
 
 class PaginatorUtilHelper extends AppHelper {
 
-    public $helpers = array('Html', 'StuffRepos.ExtendedForm');
+    public $helpers = array('Html', 'StuffreposBase.ExtendedForm');
 
     public function filterForm() {
 

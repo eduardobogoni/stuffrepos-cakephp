@@ -1,7 +1,8 @@
 <?php
 
 App::import('Helper', 'Form');
-App::import('Lib', 'ExtendedFieldsParser');
+App::import('Lib', 'StuffreposBase.ExtendedFieldsParser');
+App::import('Lib', 'StuffreposBase.ArrayUtil');
 require_once(dirname(__FILE__) . '/ExtendedFormHelper/ExtendedFormHelper_ExtendedFieldSet.php');
 require_once(dirname(__FILE__) . '/ExtendedFormHelper/ExtendedFormHelper_InputSearchable.php');
 require_once(dirname(__FILE__) . '/ExtendedFormHelper/ExtendedFormHelper_InputsOnSubmit.php');
@@ -14,9 +15,9 @@ class ExtendedFormHelper extends FormHelper {
 
     public $helpers = array(
         'Html',
-        'Lists',
-        'CakeLayers',
-        'ScaffoldUtil',
+        'StuffreposBase.Lists',
+        'StuffreposBase.CakeLayers',
+        'StuffreposBase.ScaffoldUtil',
     );
     private $inputsOnSubmit;
     private $formId;
@@ -25,10 +26,9 @@ class ExtendedFormHelper extends FormHelper {
         parent::__construct($View, $settings);
         $this->inputsOnSubmit = new ExtendedFormHelper_InputsOnSubmit($this);
     }
-
-    public function beforeLayout() {
-        parent::beforeLayout();
-
+    
+    public function beforeLayout($layoutFile) {
+        parent::beforeLayout($layoutFile);        
         $this->ScaffoldUtil->addJavascriptLink('dom_helper.js');
         $this->ScaffoldUtil->addJavascriptLink('lang.js');
         $this->ScaffoldUtil->addJavascriptLink('collections.js');
@@ -169,7 +169,7 @@ class ExtendedFormHelper extends FormHelper {
     }
 
     public function isFixed($fieldName) {
-        App::import('Lib', 'StuffRepos.ArrayUtil');
+        App::import('Lib', 'Stuffrepos.ArrayUtil');
         return ArrayUtil::arrayIndex(
                         $this->data, array_merge(
                                 array(self::FIXED_PREFIX), explode('.', $fieldName)

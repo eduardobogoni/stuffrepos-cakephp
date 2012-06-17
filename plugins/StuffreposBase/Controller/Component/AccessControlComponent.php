@@ -1,8 +1,8 @@
 <?php
 
-App::import('Component', 'StuffRepos.BaseModel');
+//App::import('Component', 'StuffreposBase.BaseModel');
 
-class AccessControlComponent extends BaseModelComponent {
+class AccessControlComponent extends Component {
 
     const NOT_LOGGED = "NOT_LOGGED";
     const ALLOWED = "ALLOWED";
@@ -14,9 +14,9 @@ class AccessControlComponent extends BaseModelComponent {
     private $controller;
     public $components = array(
         'Auth',
-    );
+    );        
 
-    public function initialize(&$controller, $settings = array()) {
+    public function initialize(&$controller) {
         parent::initialize($controller);
         $this->controller = &$controller;
         ClassRegistry::getInstance()->addObject(__CLASS__, $this);

@@ -1,6 +1,17 @@
 <?php
 
 class CakeLayersHelper extends Helper {
+    
+    public function getPluginNameByControllerClass($controllerClass) {
+        foreach(App::objects('plugin') as $pluginName) {            
+            foreach(App::objects("$pluginName.Controller") as $pluginControllerClass) {                
+                if ($pluginControllerClass == $controllerClass) {
+                    return $pluginName;
+                }
+            }
+        }
+        return null;
+    }
 
     public function getController($controllerName = null) {
         if (empty($controllerName)) {
@@ -13,6 +24,7 @@ class CakeLayersHelper extends Helper {
             $controllerClass = Inflector::camelize($controllerName . '_controller');
             $controller = new $controllerClass;
             $controller->constructClasses();
+            $controller->plugin = $this->getPluginNameByControllerClass($controllerClass);            
             if (!empty($controller->SubmoduleOneToMany)) {
                 $settings = array();
                 if (!empty($controller->components['SubmoduleOneToMany'])) {
@@ -31,7 +43,7 @@ class CakeLayersHelper extends Helper {
         return $this->getController($controllerName)->modelClass;
     }
 
-    public function getControllerDefaultModel($controllerName= null) {
+    public function getControllerDefaultModel($controllerName = null) {
         return $this->getModel($this->getControllerDefaultModelClass($controllerName));
     }
 
@@ -110,7 +122,7 @@ class CakeLayersHelper extends Helper {
 
                 $associations[$type][$assocKey]['foreignKey'] =
                         $assocData['foreignKey'];
-                
+
                 $associations[$type][$assocKey]['order'] =
                         (empty($assocData['order']) ? false : $assocData['order']);
 

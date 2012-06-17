@@ -3,12 +3,12 @@
 class ListsHelper extends AppHelper {
 
     public $helpers = array(
-        'StuffRepos.ActionList',
+        'StuffreposBase.ActionList',
         'Paginator',
-        'StuffRepos.PaginatorUtil',
-        'StuffRepos.AccessControl',
-        'StuffRepos.ViewUtil',
-        'StuffRepos.CakeLayers',
+        'StuffreposBase.PaginatorUtil',
+        'StuffreposBase.AccessControl',
+        'StuffreposBase.ViewUtil',
+        'StuffreposBase.CakeLayers',
     );
     private $model;
     private $controller;

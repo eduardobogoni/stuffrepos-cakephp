@@ -8,19 +8,27 @@ App::uses('AppHelper', 'View/Helper');
  * por controller;
  */
 class ActionListHelper extends AppHelper {
+
     const LAYOUT_LIST = 'line';
     const LAYOUT_TABLE = 'table';
 
     public $debug = false;
-    public $helpers = array('Html', 'StuffRepos.AccessControl', 'StuffRepos.CakeLayers');
+    public $helpers = array(
+        'Html',
+        'StuffreposBase.AccessControl',
+        'StuffreposBase.CakeLayers',
+    );
+
     /**
      * @var AppControler
      */
     private $currentController;
+
     /**
      * @var AppControler
      */
     private $targetController;
+
     /**
      * @var array
      */
@@ -42,6 +50,7 @@ class ActionListHelper extends AppHelper {
         array('url' => array('action' => 'delete'), 'hasId' => true, 'format' => 'Remover %s', 'plural' => false,
             'question' => 'Tem certeza de que deseja remover?')
     );
+
     /**
      * @var array
      */
@@ -67,11 +76,11 @@ class ActionListHelper extends AppHelper {
         $this->currentController = $this->_foundCurrentController();
         $this->targetController = $this->_foundTargetController();
         return $this->_outputActions(
-                $this->_navigableActions(
-                    $this->_controllerActions(
-                        $this->targetController
-                    )
-                )
+                        $this->_navigableActions(
+                                $this->_controllerActions(
+                                        $this->targetController
+                                )
+                        )
         );
     }
 
@@ -106,7 +115,7 @@ class ActionListHelper extends AppHelper {
         if (!empty($controller->menuActions)) {
             $groups[] = $controller->menuActions;
         }
-        
+
         $added = array();
 
         foreach ($groups as $group) {
@@ -119,7 +128,7 @@ class ActionListHelper extends AppHelper {
 
         return $added;
     }
-    
+
     public function outputActions($actions, $options = array()) {
         $this->options = $this->_mergeOptions($options);
         $this->currentController = $this->_foundCurrentController();
@@ -151,15 +160,14 @@ class ActionListHelper extends AppHelper {
 
     private function _outputActionsTable($actions) {
         if (count($actions) >= 4) {
-            $rows = floor(count($actions) / sqrt(count($actions)));                
+            $rows = floor(count($actions) / sqrt(count($actions)));
+        } else {
+            $rows = 1;
         }
-        else {
-            $rows = 1;            
-        }
-        
+
         $columns = ceil(count($actions) / $rows);
         if ($columns > 0) {
-            $cellWidth = floor(100/$columns).'%';
+            $cellWidth = floor(100 / $columns) . '%';
         }
 
         $b = $this->options['tableLayoutBeforeAll'];
@@ -169,17 +177,16 @@ class ActionListHelper extends AppHelper {
         for ($row = 0; $row < $rows; $row++) {
             $b .= '<tr>';
             for ($column = 0; $column < $columns; $column++) {
-                $index = $row*$columns + $column;                
-                $b .= "<td style='width: $cellWidth'>";                
+                $index = $row * $columns + $column;
+                $b .= "<td style='width: $cellWidth'>";
                 if (!empty($actions[$index])) {
                     $b .= $this->options['tableLayoutBeforeEach'];
                     $b .= $this->_buildActionLink($actions[$index]);
                     $b .= $this->options['tableLayoutAfterEach'];
-                }
-                else {
+                } else {
                     $b .= '&nbsp;';
                 }
-                
+
                 $b .= '</td>';
             }
             $b .= '</tr>';
@@ -224,7 +231,7 @@ class ActionListHelper extends AppHelper {
         $linkOptions = empty($action['linkOptions']) ? array() : $action['linkOptions'];
         $question = isset($action['question']) ? __($action['question'], true) : false;
         return $this->AccessControl->link(
-                $this->_getTitle($action), $this->_buildActionUrl($action), $linkOptions, $question);
+                        $this->_getTitle($action), $this->_buildActionUrl($action), $linkOptions, $question);
     }
 
     private function _isNavigable($targetAction) {
@@ -245,17 +252,17 @@ class ActionListHelper extends AppHelper {
 
         //Acesso negado
         if (!$this->AccessControl->hasAccess($this->_buildActionUrl($targetAction))) {
-            return __('Access denied.',true);
+            return __('Access denied.', true);
         }
 
         $currentUrl = $this->_extractCurrentUrl();
 
         // Mesma action
         if (($currentUrl['controller'] == $actionUrl['controller']) &&
-            ($currentUrl['action'] == $actionUrl['action'])) {
+                ($currentUrl['action'] == $actionUrl['action'])) {
             return __('Same controller/action.', true);
         }
-        
+
         // Formato curto
         if ($this->options['shortFormat'] && !empty($targetAction['skipOnShort'])) {
             return __('Skip on short format menu.', true);
@@ -263,12 +270,12 @@ class ActionListHelper extends AppHelper {
 
         // Não tem ID requerido
         if ($targetAction['hasId'] && $actionUrl['id'] == null) {
-            return __('Has not required id.',true);
+            return __('Has not required id.', true);
         }
 
         // Não necessita de ID e opção para excluir
         if (!$targetAction['hasId'] && $this->options['skipNoRequiredIdActions']) {
-            return __('Skip no required id actions.',true);
+            return __('Skip no required id actions.', true);
         }
 
         // Negado pelo controller
@@ -276,13 +283,13 @@ class ActionListHelper extends AppHelper {
                 isset($this->targetController->notModuleActions) &&
                 array_search($actionUrl['action'], $this->targetController->notModuleActions) !== false
         ) {
-            return __('Denied by controller.',true);
+            return __('Denied by controller.', true);
         }
 
         // Registrado na opção skipActions
         foreach ($this->options['skipActions'] as $skipActionUrl) {
             if ($this->_isUrlEquals($this->_parseUrl($skipActionUrl), $actionUrl)) {
-                return __('Action skipped.',true);
+                return __('Action skipped.', true);
             }
         }
 
@@ -297,8 +304,14 @@ class ActionListHelper extends AppHelper {
     private function _buildActionUrl($targetAction) {
         $actionUrl = $this->_extractActionUrl($targetAction);
 
-        $url = "/{$actionUrl['controller']}/{$actionUrl['action']}";        
-        
+        $url = '';
+
+        if ($actionUrl['plugin']) {
+            $url .= "/{$actionUrl['plugin']}";
+        }
+
+        $url .= "/{$actionUrl['controller']}/{$actionUrl['action']}";
+
         if ($targetAction['hasId']) {
             if (isset($targetAction['namedParam']) && $targetAction['namedParam']) {
                 $url .= "/{$targetAction['namedParam']}:{$actionUrl['id']}";
@@ -345,10 +358,15 @@ class ActionListHelper extends AppHelper {
         return Inflector::underscore($this->targetController->name);
     }
 
+    private function _getTargetControllerPluginUri() {
+        return empty($this->targetController->plugin) ? null : Inflector::underscore($this->targetController->plugin);
+    }
+
     private function _extractActionUrl($action) {
         $actionUrl = $this->_parseUrl($action['url']);
 
         $url = array(
+            'plugin' => $actionUrl['plugin'] ? $actionUrl['plugin'] : $this->_getTargetControllerPluginUri(),
             'controller' => $actionUrl['controller'] ? $actionUrl['controller'] : $this->_getTargetControllerUri(),
             'action' => isset($actionUrl['action']) ? $actionUrl['action'] : 'index',
             'id' => $this->_extractActionId($action)
@@ -362,6 +380,7 @@ class ActionListHelper extends AppHelper {
             $url = Router::parse($url);
         }
 
+        $url['plugin'] = isset($url['plugin']) ? $url['plugin'] : null;
         $url['controller'] = isset($url['controller']) ? $url['controller'] : null;
         $url['action'] = isset($url['action']) ? $url['action'] : 'index';
 
@@ -387,7 +406,7 @@ class ActionListHelper extends AppHelper {
             return null;
         }
     }
-    
+
     private function _getTargetObjectModel() {
         return $this->targetController->{$this->targetController->modelClass};
     }
@@ -395,11 +414,11 @@ class ActionListHelper extends AppHelper {
     private function _getTargetControllerObject($primaryKeyValue) {
         $model = $this->_getTargetObjectModel();
         return $model->find(
-                'first', array(
-                'conditions' => array(
-                    "{$model->name}.{$model->primaryKey}" => $primaryKeyValue
-                )
-                )
+                        'first', array(
+                    'conditions' => array(
+                        "{$model->name}.{$model->primaryKey}" => $primaryKeyValue
+                    )
+                        )
         );
     }
 
@@ -420,7 +439,7 @@ class ActionListHelper extends AppHelper {
         }
         if (count($parts) == 1) {
             $parts = array_merge(
-                $this->CakeLayers->getModel()->alias, $parts
+                    $this->CakeLayers->getModel()->alias, $parts
             );
         }
         if (ArrayUtil::hasArrayIndex($this->data, $parts)) {
@@ -432,7 +451,7 @@ class ActionListHelper extends AppHelper {
 
     private function _isUrlEquals($url1, $url2) {
         return $url1['controller'] == $url2['controller']
-        && $url1['action'] == $url2['action'];
+                && $url1['action'] == $url2['action'];
     }
 
     private function _isNavigableControllerMethod($targetAction) {
@@ -443,11 +462,11 @@ class ActionListHelper extends AppHelper {
 
         if (method_exists($controller, $methodName)) {
             return call_user_func(array($controller, $methodName), array(
-                    'options' => $this->options,
-                    'currentUrl' => $this->_extractCurrentUrl(),
-                    'targetAction' => $targetAction,
-                    'targetActionUrl' => $actionUrl,
-                ));
+                        'options' => $this->options,
+                        'currentUrl' => $this->_extractCurrentUrl(),
+                        'targetAction' => $targetAction,
+                        'targetActionUrl' => $actionUrl,
+                    ));
         } else {
             return true;
         }

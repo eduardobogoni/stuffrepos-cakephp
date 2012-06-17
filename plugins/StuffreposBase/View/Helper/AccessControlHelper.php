@@ -7,21 +7,21 @@ class AccessControlHelper extends Helper {
     public $helpers = array('Html');
     
     public function hasAccess($url) {        
-        $AccessControlComponent = ClassRegistry::getObject('AccessControlComponent');
+        $AccessControlComponent = ClassRegistry::getObject('AccessControlComponent');        
         if (empty($AccessControlComponent)) {
             throw new Exception("Objeto 'AccessControlComponent' não foi encontrado em ClassRegistry (Foi adicionado como componente no controller?).");
         }
         return $AccessControlComponent->hasAccess($url);
     }
 
-    public function output($url, $contentIfTrue, $contentIfFalse = '', $return = true) {        
+    public function output($url, $contentIfTrue, $contentIfFalse = '', $return = true) {
         $out = $this->hasAccess($url) ? $contentIfTrue : $contentIfFalse;
         return $this->Html->output($out, $return);
     }
 
     public function link($title, $url = null, $htmlAttributes = array(), $confirmMessage = false, $escapeTitle = true, $showTextIfAccessDenied = false) {
         return $this->output(
-                $url, $this->Html->link($title, $url, $htmlAttributes, $confirmMessage, $escapeTitle), ($showTextIfAccessDenied ? $title : '')
+                        $url, $this->Html->link($title, $url, $htmlAttributes, $confirmMessage, $escapeTitle), ($showTextIfAccessDenied ? $title : '')
         );
     }
 
@@ -31,7 +31,7 @@ class AccessControlHelper extends Helper {
 
     public function image($title, $image, $url, $confirmationMessage = null) {
         return $this->output(
-                $url, $this->Html->image($image, array("alt" => $title, "title" => $title, 'url' => $url, "onclick" => (!empty($confirmationMessage) ? "return confirm('$confirmationMessage')" : "")))
+                        $url, $this->Html->image($image, array("alt" => $title, "title" => $title, 'url' => $url, "onclick" => (!empty($confirmationMessage) ? "return confirm('$confirmationMessage')" : "")))
         );
     }
 

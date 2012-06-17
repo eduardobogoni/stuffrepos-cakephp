@@ -4,7 +4,7 @@ App::uses('AppHelper', 'View/Helper');
 
 class MenuHelper extends Helper {
 
-    public $helpers = array('StuffRepos.AccessControl');
+    public $helpers = array('StuffreposBase.AccessControl');
 
     public function dropdown($entries, $mainEntriesEqualsWidth = false) {
         return $mainEntriesEqualsWidth ?

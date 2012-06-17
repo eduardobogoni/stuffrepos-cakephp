@@ -27,7 +27,7 @@ class ScaffoldUtilComponent extends Component {
     const OPTION_NAME_SEPARATOR = ',';
     public $components = array('Session');
     public $currentAction = null;
-    
+        
     public function initialize(Controller $controller) {
         $this->controller = $controller;
     }
@@ -77,27 +77,7 @@ class ScaffoldUtilComponent extends Component {
     }
 
     private function _getActionOption($name) {
-        $action = ($this->currentAction ? $this->currentAction : $this->controller->params['action']);
-        $optionName = Inflector::camelize($action . '_' . Inflector::underscore($name));
-        $optionName = strtolower(substr($optionName, 0, 1)) . substr($optionName, 1, strlen($optionName) - 1);
-        return $this->_findOption($optionName);                
-    }
-    
-    private function _findOption($optionName) {
-        if (empty($this->controller->scaffoldUtilOptions)
-                || !is_array($this->controller->scaffoldUtilOptions)) {
-            return false;
-        }
-        
-        foreach($this->controller->scaffoldUtilOptions as $key => $value) {
-            foreach(explode(self::OPTION_NAME_SEPARATOR,$key) as $keyOption) {
-                if (trim($keyOption) == trim($optionName)) {
-                    return $value;
-                }
-            }
-        }
-        
-        return false;
-    }
+        return empty($this->settings[$name]) ? false : $this->settings[$name];
+    }    
 
 }
