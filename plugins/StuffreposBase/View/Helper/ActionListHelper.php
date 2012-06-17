@@ -48,7 +48,7 @@ class ActionListHelper extends AppHelper {
         array('url' => array('action' => 'view'), 'hasId' => true, 'format' => 'Visualizar %s', 'plural' => false),
         array('url' => array('action' => 'edit'), 'hasId' => true, 'format' => 'Editar %s', 'plural' => false),
         array('url' => array('action' => 'delete'), 'hasId' => true, 'format' => 'Remover %s', 'plural' => false,
-            'question' => 'Tem certeza de que deseja remover?')
+            'question' => 'Tem certeza de que deseja remover?', 'linkOptions' => array('method' => 'post'))
     );
 
     /**
@@ -228,7 +228,7 @@ class ActionListHelper extends AppHelper {
     }
 
     private function _buildActionLink($action) {
-        $linkOptions = empty($action['linkOptions']) ? array() : $action['linkOptions'];
+        $linkOptions = empty($action['linkOptions']) ? array() : $action['linkOptions'];        
         $question = isset($action['question']) ? __($action['question'], true) : false;
         return $this->AccessControl->link(
                         $this->_getTitle($action), $this->_buildActionUrl($action), $linkOptions, $question);

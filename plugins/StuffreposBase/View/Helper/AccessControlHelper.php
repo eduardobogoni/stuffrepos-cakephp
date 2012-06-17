@@ -4,7 +4,10 @@ App::import('Model', 'Usuario');
 
 class AccessControlHelper extends Helper {
 
-    public $helpers = array('Html');
+    public $helpers = array(
+        'Html',
+        'Form',
+    );
     
     public function hasAccess($url) {        
         $AccessControlComponent = ClassRegistry::getObject('AccessControlComponent');        
@@ -21,7 +24,10 @@ class AccessControlHelper extends Helper {
 
     public function link($title, $url = null, $htmlAttributes = array(), $confirmMessage = false, $escapeTitle = true, $showTextIfAccessDenied = false) {
         return $this->output(
-                        $url, $this->Html->link($title, $url, $htmlAttributes, $confirmMessage, $escapeTitle), ($showTextIfAccessDenied ? $title : '')
+                    $url, 
+                !empty($htmlAttributes['method']) && $htmlAttributes['method'] == 'post'
+                ? $this->Form->postlink($title, $url, $htmlAttributes, $confirmMessage, $escapeTitle)
+                : $this->Html->link($title, $url, $htmlAttributes, $confirmMessage, $escapeTitle), ($showTextIfAccessDenied ? $title : '')
         );
     }
 

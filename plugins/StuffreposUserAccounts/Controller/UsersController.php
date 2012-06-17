@@ -1,8 +1,6 @@
 <?php
 
-App::uses('StuffreposAppController', 'StuffreposBase.Controller');
-
-class UsersController extends StuffreposAppController {
+class UsersController extends AppController {
 
     public $scaffold;
     
