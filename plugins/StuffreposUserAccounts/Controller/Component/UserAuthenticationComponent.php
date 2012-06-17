@@ -12,7 +12,7 @@ class UserAuthenticationComponent extends Component {
             'action' => 'login',
         );
         $controller->Auth->userModel = 'User';
-        //$controller->scope = array('User.enabled' => 1);
+        $controller->scope = array('User.enabled' => 1);
         $controller->Auth->authenticate = array(
             'Form' => array(
                 'fields' => array(

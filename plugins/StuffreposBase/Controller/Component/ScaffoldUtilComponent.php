@@ -34,6 +34,7 @@ class ScaffoldUtilComponent extends Component {
 
     public function beforeRender(Controller $controller) {
         parent::beforeRender($controller);
+        $this->currentAction = $controller->params['action'];        
         if (isset($controller->viewVars['scaffoldFields'])) {
 
             if ($this->_getActionOption('setFields')) {
@@ -77,7 +78,27 @@ class ScaffoldUtilComponent extends Component {
     }
 
     private function _getActionOption($name) {
-        return empty($this->settings[$name]) ? false : $this->settings[$name];
-    }    
+        $action = ($this->currentAction ? $this->currentAction : $this->controller->params['action']);
+        $optionName = Inflector::camelize($action . '_' . Inflector::underscore($name));
+        $optionName = strtolower(substr($optionName, 0, 1)) . substr($optionName, 1, strlen($optionName) - 1);
+        return $this->_findOption($optionName);                
+    }
+    
+    private function _findOption($optionName) {
+        if (empty($this->settings)
+                || !is_array($this->settings)) {
+            return false;
+        }
+        
+        foreach($this->settings as $key => $value) {
+            foreach(explode(self::OPTION_NAME_SEPARATOR,$key) as $keyOption) {
+                if (trim($keyOption) == trim($optionName)) {
+                    return $value;
+                }
+            }
+        }
+        
+        return false;
+    }
 
 }

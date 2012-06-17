@@ -6,10 +6,21 @@ class UsersController extends AppController {
     
     public $components = array(
         'StuffreposBase.ScaffoldUtil' => array(
-            'setFields' => array(
+            'indexSetFields' => array(
                 'name',
                 'email',
+                'active',
                 'created',
+            ),
+            'viewUnsetFields' => array(
+                'id',
+                'password',
+            ),
+            'editSetFields,addSetFields' => array(
+                'id',
+                'name',
+                'email',
+                'active',
             )
         )
     );
