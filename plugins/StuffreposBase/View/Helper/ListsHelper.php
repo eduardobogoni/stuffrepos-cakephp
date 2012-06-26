@@ -167,7 +167,7 @@ class ListsHelper extends AppHelper {
         if (!empty($associations['belongsTo'])) {
             foreach ($associations['belongsTo'] as $_alias => $_details) {
                 if ($field === $_details['foreignKey']) {
-                    return mergeArrayWithKeys(array('alias' => $_alias), $_details);
+                    return ArrayUtil::mergeArrayWithKeys(array('alias' => $_alias), $_details);
                 }
             }
         }

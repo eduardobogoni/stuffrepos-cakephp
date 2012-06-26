@@ -61,6 +61,15 @@ class ArrayUtil {
         }
         return $params;
     }
+
+    public static function mergeArrayWithKeys($array1, $array2) {
+        foreach ($array2 as $key => $value) {
+            $array1[$key] = $value;
+        }
+
+        return $array1;
+    }
+
 }
 
 ?>
