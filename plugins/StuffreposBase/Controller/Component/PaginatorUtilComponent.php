@@ -19,6 +19,8 @@
  * CakePHP Bog Util. If not, see http://www.gnu.org/licenses/.
  */
 
+App::import('Lib', 'StuffreposBase.ArrayUtil');
+
 class PaginatorUtilComponent extends Component {
 
     public $components = array('Session');
@@ -39,10 +41,12 @@ class PaginatorUtilComponent extends Component {
     private function startupIndex(&$controller) {
         foreach ($this->getAllFilters($controller) as $filter) {
             $value = $filter->getValue();
+            $condition = $filter->getCurrentCondition();
 
-            if ($value !== null) {
+
+            if ($value !== null && $condition) {
                 $this->Controller->paginate['conditions'][] =
-                        $filter->hasConditionValue() ? array($filter->getCurrentCondition() => $value) : $filter->getCurrentCondition();
+                        $filter->hasConditionValue() ? array($condition => $value) : $condition;
             }
 
             $filter->writePersistentValue();
@@ -107,6 +111,13 @@ class PaginatorUtilComponentFilter {
     private $name;
     private $component;
 
+    /**
+     *
+     * @param Component $component
+     * @param Controller $controller
+     * @param string $name
+     * @param array $options 
+     */
     public function __construct(&$component, &$controller, $name, $options) {
         $this->controller = $controller;
         $this->name = $name;
@@ -114,15 +125,29 @@ class PaginatorUtilComponentFilter {
         $this->options = $options;
     }
 
+    /**
+     *
+     * @return string
+     */
     public function getName() {
         return $this->name;
     }
 
+    /**
+     *
+     * @param string $config
+     * @return boolean 
+     */
     private function hasConfig($config) {
         return isset($this->options[$config])
                 && $this->options[$config];
     }
 
+    /**
+     *
+     * @param string $config
+     * @return mixed
+     */
     private function getConfig($config) {
         if ($this->hasConfig($config)) {
             return $this->options[$config];
@@ -131,17 +156,31 @@ class PaginatorUtilComponentFilter {
         }
     }
 
+    /**
+     *
+     * @return boolean
+     */
     public function isInputSelectType() {
         return $this->hasConfig('valuesFunction') ||
-                $this->hasConfig('conditionsFunction');
+                $this->hasConfig('conditionsFunction') ||
+                $this->hasConfig('conditionsPerValue');
     }
 
+    /**
+     *
+     * @return array
+     */
     public function getValuesList() {
         if ($this->hasConfig('valuesFunction')) {
             return $this->controller->{$this->getConfig('valuesFunction')}();
+        } else if ($this->hasConfig('conditionsPerValue')) {
+            return ArrayUtil::keysAsValues(
+                            array_keys($this->getConfig('conditionsPerValue'))
+            );
         } else if ($this->hasConfig('conditionsFunction')) {
-            $values = array_keys($this->controller->{$this->getConfig('conditionsFunction')}());
-            return keysAsValues($values);
+            return ArrayUtil::keysAsValues(
+                            $this->controller->{$this->getConfig('conditionsFunction')}()
+            );
         } else {
             return null;
         }
@@ -158,8 +197,13 @@ class PaginatorUtilComponentFilter {
     public function getCurrentCondition() {
         if ($this->hasConfig('conditions')) {
             return $this->getConfig('conditions');
-        } else if ($this->hasConfig('conditionsFunction')) {
-            $conditions = $this->controller->{$this->getConfig('conditionsFunction')}();
+        } else if ($this->hasConfig('conditionsFunction') || $this->hasConfig('conditionsPerValue')) {
+            if ($this->hasConfig('conditionsFunction')) {
+                $conditions = $this->controller->{$this->getConfig('conditionsFunction')}();
+            } else { // if ($this->hasConfig('conditionsPerValue'))                
+                $conditions = $this->getConfig('conditionsPerValue');
+            }
+
             $value = $this->getValue();
             if ($value !== null) {
                 if (isset($conditions[$value])) {
@@ -171,7 +215,7 @@ class PaginatorUtilComponentFilter {
                 return $value;
             }
         } else {
-            throw new Exception("Não foi definido uma condição para o filtro \"$filterName\" em \"$controller\".");
+            throw new Exception("Não foi definido uma condição para o filtro \"{$this->name}\" em \"{$this->controller->name}\".");
         }
     }
 
