@@ -1,10 +1,10 @@
 <?php
 
 class CakeLayersHelper extends Helper {
-    
-    public function getPluginNameByControllerClass($controllerClass) {
-        foreach(App::objects('plugin') as $pluginName) {            
-            foreach(App::objects("$pluginName.Controller") as $pluginControllerClass) {                
+
+    public function getPluginNameByControllerClass($controllerClass) {        
+        foreach (CakePlugin::loaded() as $pluginName) {
+            foreach (App::objects("$pluginName.Controller") as $pluginControllerClass) {
                 if ($pluginControllerClass == $controllerClass) {
                     return $pluginName;
                 }
