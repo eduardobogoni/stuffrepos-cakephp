@@ -9,7 +9,7 @@ function exitWithError {
 
 APP_ROOT_DIRECTORY=$1
 APP_ROOT_DIRECTORY=${APP_ROOT_DIRECTORY%/}
-if [ -z "naovazio" ]; then
+
 #
 # Create app directory.
 # 
@@ -27,7 +27,7 @@ EMPTY_DIR=`ls -A "$APP_ROOT_DIRECTORY"`
 (cd "$APP_ROOT_DIRECTORY"; git init)
 (cd "$APP_ROOT_DIRECTORY"; git submodule add 'https://code.google.com/p/stuffrepos-cakephp' stuffrepos-cakephp)
 (cd "$APP_ROOT_DIRECTORY"; git submodule update --init --recursive)
-fi
+
 #
 # Builds the appĺication skeleton.
 #
