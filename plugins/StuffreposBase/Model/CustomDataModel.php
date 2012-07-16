@@ -8,6 +8,13 @@ abstract class CustomDataModel extends AppModel {
 
     protected abstract function customSchema();
 
+    /**
+     * @return bool
+     */
+    protected abstract function customSave($isNew);
+
+    protected abstract function customDelete($row);
+
     public function schema() {
         return $this->customSchema();
     }
@@ -15,12 +22,10 @@ abstract class CustomDataModel extends AppModel {
     public function _filter($rowsData, $query) {
         if (!empty($query['conditions']) && is_array($query['conditions'])) {
             foreach ($query['conditions'] as $conditionKey => $conditionValue) {
-                list($conditionAlias, $conditionField) = explode('.', $conditionKey);
-
                 $newData = array();
-                foreach ($rowsData as $index => $rowData) {
-                    if (isset($rowData[$conditionAlias][$conditionField]) && $rowData[$conditionAlias][$conditionField] == $conditionValue) {
-                        $newData[] = $rowData;
+                foreach ($rowsData as $row) {
+                    if ($this->_filterInCondition($row, $conditionKey, $conditionValue)) {
+                        $newData[] = $row;
                     }
                 }
                 $rowsData = $newData;
@@ -30,24 +35,64 @@ abstract class CustomDataModel extends AppModel {
         return $rowsData;
     }
 
+    private function _filterInCondition($row, $conditionKey, $conditionValue) {
+        if ($conditionKey == 'or') {
+            foreach ($conditionValue as $subConditionKey => $subConditionValue) {
+                if ($this->_filterInCondition($row, $subConditionKey, $subConditionValue)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            list($conditionAlias, $conditionField) = explode('.', $conditionKey);
+            return isset($row[$conditionAlias][$conditionField]) && $row[$conditionAlias][$conditionField] == $conditionValue;
+        }
+    }
+
     public function find($type = 'first', $query = array()) {
-        $keysData = $this->customData();
+        $data = $this->_filter($this->customData(), $query);
         switch ($type) {
             case 'count':
-                return count($keysData);
+                return count($data);
 
             case 'all':
-                $keysData = $this->_filter($keysData, $query);
-                return $keysData;
+                return $data;
 
             case 'first':
-                $keysData = $this->_filter($keysData, $query);
-                if (isset($keysData[0])) {
-                    return $keysData[0];
+                if (isset($data[0])) {
+                    return $data[0];
                 } else {
                     return array();
                 }
         }
+    }
+
+    public function save($data = null, $validate = true, $fieldList = array()) {
+        if ($data) {
+            $this->set($data);
+        }
+
+        if (!$this->beforeSave()) {
+            return false;
+        }
+
+        if (!$this->validates()) {
+            return false;
+        }
+
+        return $this->customSave(empty($this->data[$this->alias][$this->primaryKey]));
+    }
+
+    public function delete($id = null, $cascade = true) {
+        if ($id) {
+            $this->id;
+        }
+        $row = $this->find('first', array(
+            'conditions' => array(
+                "{$this->alias}.{$this->primaryKey}" => $this->id
+            )
+                ));
+        return $this->customDelete($row);
     }
 
 }
