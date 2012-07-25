@@ -1,12 +1,23 @@
 <?php
 
-class ConfigurationKey extends AppModel {
+App::import('Model', 'StuffreposBase.CustomDataModel');
+
+class ConfigurationKey extends CustomDataModel {
 
     public $displayField = 'name';
-    public $primaryKey = 'name';
-    public $useTable = false;
+    public $primaryKey = 'name';    
 
-    private function _getKeysData() {
+    private function _findKeyValue($name) {
+        $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
+        $settedConfigurationKey = $SettedConfigurationKey->findByName($name);
+        if ($settedConfigurationKey) {
+            return $settedConfigurationKey[$SettedConfigurationKey->alias]['value'];
+        } else {
+            return null;
+        }
+    }
+
+    protected function customData() {
         $ConfigurationKeysComponent = ClassRegistry::getObject('ConfigurationKeysComponent');
         if (empty($ConfigurationKeysComponent)) {
             throw new Exception("Objeto 'ConfigurationKeysComponent' não foi encontrado em ClassRegistry (Foi adicionado como componente no controller?).");
@@ -31,55 +42,7 @@ class ConfigurationKey extends AppModel {
         return $data;
     }
 
-    private function _findKeyValue($name) {
-        $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
-        $settedConfigurationKey = $SettedConfigurationKey->findByName($name);
-        if ($settedConfigurationKey) {
-            return $settedConfigurationKey[$SettedConfigurationKey->alias]['value'];
-        } else {
-            return null;
-        }
-    }
-
-    public function find($type = 'first', $query = array()) {
-        $keysData = $this->_getKeysData();
-        switch ($type) {
-            case 'count':
-                return count($keysData);
-
-            case 'all':
-                $keysData = $this->_filter($keysData, $query);
-                return $keysData;
-
-            case 'first':
-                $keysData = $this->_filter($keysData, $query);
-                if (isset($keysData[0])) {
-                    return $keysData[0];
-                } else {
-                    return array();
-                }
-        }
-    }
-
-    public function _filter($rowsData, $query) {
-        if (!empty($query['conditions']) && is_array($query['conditions'])) {
-            foreach ($query['conditions'] as $conditionKey => $conditionValue) {
-                list($conditionAlias, $conditionField) = explode('.', $conditionKey);
-
-                $newData = array();
-                foreach ($rowsData as $index => $rowData) {
-                    if (isset($rowData[$conditionAlias][$conditionField]) && $rowData[$conditionAlias][$conditionField] == $conditionValue) {
-                        $newData[] = $rowData;
-                    }
-                }
-                $rowsData = $newData;
-            }
-        }
-
-        return $rowsData;
-    }
-
-    public function schema() {
+    protected function customSchema() {
         return array(
             'name' => array('type' => 'string'),
             'description' => array('type' => 'string'),
@@ -89,12 +52,18 @@ class ConfigurationKey extends AppModel {
         );
     }
 
-    public function save($data = null, $validate = true, $fieldList = array()) {
-        if (!empty($data)) {
-            $this->set($data);
+    protected function customDelete($row) {
+        $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
+        $settedConfigurationKey = $SettedConfigurationKey->findByName($this->id);
+
+        if ($settedConfigurationKey) {
+            return $SettedConfigurationKey->delete($settedConfigurationKey[$SettedConfigurationKey->alias][$SettedConfigurationKey->primaryKey], $cascade);
+        } else {
+            return false;
         }
+    }
 
-
+    protected function customSave($isNew) {
         if (empty($this->data[$this->alias]['name']) || !isset($this->data[$this->alias]['setted_value'])) {
             return false;
         }
@@ -109,21 +78,6 @@ class ConfigurationKey extends AppModel {
         $settedConfigurationKey[$SettedConfigurationKey->alias]['value'] = $this->data[$this->alias]['setted_value'];
 
         return $SettedConfigurationKey->save($settedConfigurationKey);
-    }
-
-    public function delete($id = null, $cascade = true) {
-        if ($id != null) {
-            $this->id = id;
-        }
-
-        $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
-        $settedConfigurationKey = $SettedConfigurationKey->findByName($this->id);
-
-        if ($settedConfigurationKey) {
-            return $SettedConfigurationKey->delete($settedConfigurationKey[$SettedConfigurationKey->alias][$SettedConfigurationKey->primaryKey], $cascade);
-        } else {
-            return false;
-        }
     }
 
 }

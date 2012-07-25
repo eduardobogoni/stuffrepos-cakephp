@@ -6,6 +6,9 @@ class ConfigurationKeysController extends AppController {
     public $paginate = array(
         'limit' => 10000
     );
+    public $notModuleActions = array(
+        'add'
+    );
     public $components = array(
         'StuffreposBase.ScaffoldUtil' => array(
             'editSetFields' => array(

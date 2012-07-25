@@ -4,7 +4,10 @@ App::import('Component', 'StuffreposBase.BaseModel');
 
 class ConfigurationKeysComponent extends BaseModelComponent {
 
-    public $uses = array('ConfigurationKey', 'SettedConfigurationKey');
+    public $uses = array(
+        'StuffreposConfigurationKeys.ConfigurationKey',
+        'StuffreposConfigurationKeys.SettedConfigurationKey',
+    );
     private $keys = array();
 
     public function initialize(&$controller) {
