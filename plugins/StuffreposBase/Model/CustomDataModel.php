@@ -3,20 +3,41 @@
 abstract class CustomDataModel extends AppModel {
 
     public $useTable = false;
+    public $useCache = true;
+    private $cache = null;
 
+    /**
+     * @return array 
+     */
     protected abstract function customData();
 
+    /**
+     * @return array 
+     */
     protected abstract function customSchema();
 
     /**
+     * @param $isNew bool
      * @return bool
      */
     protected abstract function customSave($isNew);
 
+    /**
+     * @param $row array
+     * @return bool 
+     */
     protected abstract function customDelete($row);
 
-    public function schema() {
-        return $this->customSchema();
+    public function schema($field = false) {
+        $this->_schema = $this->customSchema();
+        if (is_string($field)) {
+            if (isset($this->_schema[$field])) {
+                return $this->_schema[$field];
+            } else {
+                return null;
+            }
+        }
+        return $this->_schema;
     }
 
     public function _filter($rowsData, $query) {
@@ -45,18 +66,46 @@ abstract class CustomDataModel extends AppModel {
             return false;
         } else {
             list($conditionAlias, $conditionField) = explode('.', $conditionKey);
+            if (!$this->_isFieldInSchema($conditionAlias, $conditionField)) {
+                throw new Exception("Field \"$conditionAlias.$conditionField\" is not in {$this->name} model schema.");
+            }
+
             return isset($row[$conditionAlias][$conditionField]) && $row[$conditionAlias][$conditionField] == $conditionValue;
         }
     }
 
+    private function _isFieldInSchema($alias, $field) {
+        if ($alias == $this->alias) {
+            $schema = $this->schema();
+        } else {
+            $schema = array();
+        }
+
+        return in_array($field, array_keys($schema));
+    }
+
     public function find($type = 'first', $query = array()) {
-        $data = $this->_filter($this->customData(), $query);
+        if ($this->useCache && $this->cache !== null) {
+            $data = $this->cache;
+        } else {
+            $this->cache = $this->_filter($this->customData(), $query);
+            $data = $this->cache;
+        }
+
         switch ($type) {
             case 'count':
                 return count($data);
 
             case 'all':
                 return $data;
+
+            case 'list':
+                $list = array();
+                foreach ($data as $row) {                    
+                    $list[$row[$this->alias][$this->primaryKey]] = $row[$this->alias][$this->displayField];
+                }
+                asort($list);
+                return $list;
 
             case 'first':
                 if (isset($data[0])) {
