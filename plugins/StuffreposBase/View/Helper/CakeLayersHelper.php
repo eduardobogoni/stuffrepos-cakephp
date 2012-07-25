@@ -1,6 +1,8 @@
 <?php
 
 class CakeLayersHelper extends Helper {
+    
+    private $dataCache;
 
     public function getPluginNameByControllerClass($controllerClass) {        
         foreach (CakePlugin::loaded() as $pluginName) {
@@ -350,7 +352,7 @@ class CakeLayersHelper extends Helper {
     }
 
     private function belongsToAssociationInstance(Model $model, $association, $instance) {
-        if (!isset($this->cache['belongsToAssociationInstance'][$model->name][$association['alias']][$instance[$association['foreignKey']]])) {
+        if (!isset($this->dataCache['belongsToAssociationInstance'][$model->name][$association['alias']][$instance[$association['foreignKey']]])) {
 
             $associationModel = $this->getModel($association['className']);
             $model = $this->getModel($model, true);
@@ -359,7 +361,7 @@ class CakeLayersHelper extends Helper {
                 throw new Exception("Association Model is null");
             }
 
-            $this->cache['belongsToAssociationInstance'][$model->name][$association['alias']][$instance[$association['foreignKey']]] = $associationModel->find(
+            $this->dataCache['belongsToAssociationInstance'][$model->name][$association['alias']][$instance[$association['foreignKey']]] = $associationModel->find(
                     'first'
                     , array(
                 'conditions' => array(
@@ -369,7 +371,7 @@ class CakeLayersHelper extends Helper {
             );
         }
 
-        return $this->cache['belongsToAssociationInstance'][$model->name][$association['alias']][$instance[$association['foreignKey']]];
+        return $this->dataCache['belongsToAssociationInstance'][$model->name][$association['alias']][$instance[$association['foreignKey']]];
     }
 
     private function hasOneAssociationInstance(Model $model, $association, $instance) {
@@ -380,11 +382,11 @@ class CakeLayersHelper extends Helper {
         $modelName = $model->name;
 
         //debug(compact('modelName', 'association', 'instance'));
-        if (!isset($this->cache[__METHOD__][$model->name][$association['alias']][$instance[$model->primaryKey]])) {
+        if (!isset($this->dataCache[__METHOD__][$model->name][$association['alias']][$instance[$model->primaryKey]])) {
             $associationModel = $this->getModel($association['className'], true);
             $model = $this->getModel($model, true);
 
-            $this->cache[__METHOD__][$model->name][$association['alias']][$instance[$model->primaryKey]] = $associationModel->find(
+            $this->dataCache[__METHOD__][$model->name][$association['alias']][$instance[$model->primaryKey]] = $associationModel->find(
                     'first'
                     , array(
                 'conditions' => array(
@@ -394,7 +396,7 @@ class CakeLayersHelper extends Helper {
             );
         }
 
-        return $this->cache[__METHOD__][$model->name][$association['alias']][$instance[$model->primaryKey]];
+        return $this->dataCache[__METHOD__][$model->name][$association['alias']][$instance[$model->primaryKey]];
     }
 
     private function _associationByForeingKey($model, $field) {

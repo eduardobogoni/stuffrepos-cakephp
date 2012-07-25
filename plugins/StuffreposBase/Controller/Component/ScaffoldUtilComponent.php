@@ -70,7 +70,7 @@ class ScaffoldUtilComponent extends Component {
     public function render($action, $scaffoldFields = array()) {                
         App::import('Lib', 'Scaffold');
         
-        $this->controller->view = 'Scaffold';
+        $this->controller->viewClass = 'Scaffold';
         $this->controller->set('pluralVar',Inflector::variable($this->controller->name));
         $this->controller->set('singularHumanName', Inflector::humanize(Inflector::underscore($this->controller->modelClass)));
         $this->controller->set('scaffoldFields', $scaffoldFields);
