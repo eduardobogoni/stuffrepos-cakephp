@@ -64,13 +64,34 @@ abstract class CustomDataModel extends AppModel {
                 }
             }
             return false;
-        } else {
-            list($conditionAlias, $conditionField) = explode('.', $conditionKey);
+        } else {            
+            if (preg_match('/\s*([a-zA-Z\._]+)\s*([!=<>]{1,2})?\s*/', $conditionKey, $matches)) {
+                list($conditionAlias, $conditionField) = explode('.', $matches[1]);
+                $operation = isset($matches[2]) ? $matches[2] : '==';
+            } else {
+                throw new Exception("Condition not parsed: \"$conditionKey\"");
+            }
+
             if (!$this->_isFieldInSchema($conditionAlias, $conditionField)) {
                 throw new Exception("Field \"$conditionAlias.$conditionField\" is not in {$this->name} model schema.");
             }
 
-            return isset($row[$conditionAlias][$conditionField]) && $row[$conditionAlias][$conditionField] == $conditionValue;
+            if (!isset($row[$conditionAlias][$conditionField])) {
+                throw new Exception(print_r(compact('conditionAlias', 'conditionField', 'row'), true));
+            }
+
+            $rowValue = $row[$conditionAlias][$conditionField];
+
+            switch ($operation) {
+                case '==':
+                    return $rowValue == $conditionValue;
+
+                case '!=':
+                    return $rowValue != $conditionValue;
+
+                default:
+                    throw new Exception("Operation not mapped: \"$operation\"");
+            }
         }
     }
 
@@ -88,9 +109,10 @@ abstract class CustomDataModel extends AppModel {
         if ($this->useCache && $this->cache !== null) {
             $data = $this->cache;
         } else {
-            $this->cache = $this->_filter($this->customData(), $query);
-            $data = $this->cache;
+            $this->cache = $this->customData();
         }
+
+        $data = $this->_filter($this->cache, $query);
 
         switch ($type) {
             case 'count':
