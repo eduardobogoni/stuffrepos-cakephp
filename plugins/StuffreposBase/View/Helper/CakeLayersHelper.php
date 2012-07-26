@@ -167,9 +167,8 @@ class CakeLayersHelper extends Helper {
                     return $this->modelInstanceFieldByPath(
                                     $model, $instance, array(
                                 $association['alias'],
-                                $this->getModel($association['className'])->displayField,
+                                $this->getModel($association['className'])->displayField),
                                 $toDisplay
-                                    )
                     );
                 }
                 $value = $instance[$path[0]];
