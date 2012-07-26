@@ -27,9 +27,19 @@ class ScaffoldUtilComponent extends Component {
     const OPTION_NAME_SEPARATOR = ',';
     public $components = array('Session');
     public $currentAction = null;
+    public $defaultOptions;
         
     public function initialize(Controller $controller) {
         $this->controller = $controller;
+        if ($this->controller->modelClass) {
+            $this->defaultOptions = array(
+                'indexUnsetFields,viewUnsetFields' => array(
+                    $this->controller->{$this->controller->modelClass}->primaryKey
+                )
+            );
+        } else {
+            $this->defaultOptions = array();
+        }
     }
 
     public function beforeRender(Controller $controller) {
@@ -85,12 +95,17 @@ class ScaffoldUtilComponent extends Component {
     }
     
     private function _findOption($optionName) {
-        if (empty($this->settings)
-                || !is_array($this->settings)) {
-            return false;
+        if (is_array($this->settings)) {
+            foreach ($this->settings as $key => $value) {
+                foreach (explode(self::OPTION_NAME_SEPARATOR, $key) as $keyOption) {
+                    if (trim($keyOption) == trim($optionName)) {
+                        return $value;
+                    }
+                }
+            }
         }
-        
-        foreach($this->settings as $key => $value) {
+
+        foreach($this->defaultOptions as $key => $value) {
             foreach(explode(self::OPTION_NAME_SEPARATOR,$key) as $keyOption) {
                 if (trim($keyOption) == trim($optionName)) {
                     return $value;
