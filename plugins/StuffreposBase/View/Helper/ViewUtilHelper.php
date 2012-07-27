@@ -1,6 +1,7 @@
 <?php
 
-App::import('Lib', 'ExtendedFieldsParser');
+App::import('Lib', 'StuffreposBase.ExtendedFieldsParser');
+App::import('Lib', 'StuffreposBase.ModelTraverser');
 
 class ViewUtilHelper extends AppHelper {
     const VALUE_TYPE_UNKNOWN = 'unknown';
@@ -156,11 +157,14 @@ class ViewUtilHelper extends AppHelper {
                         $viewFields[] = array(
                             'label' => __(Inflector::humanize($_alias), true),
                             'value' => $this->AccessControl->linkOrText(
-                                    $instance[$_alias][$_details['displayField']], array(
-                                'controller' => $_details['controller'],
-                                'action' => 'view',
-                                $instance[$_alias][$_details['primaryKey']])),
-                            'fieldName' => $_field,
+                                    ModelTraverser::value($this->_getCurrentController()->{$modelClass}, $instance, "$_alias.{$_details['displayField']}")
+                                    , array(
+                                'controller' => $_details['controller']
+                                , 'action' => 'view'
+                                , ModelTraverser::value($this->_getCurrentController()->{$modelClass}, $instance, "$_alias.{$_details['primaryKey']}")
+                                    )
+                            )
+                            , 'fieldName' => $_field
                         );
 
                         break;
@@ -170,7 +174,7 @@ class ViewUtilHelper extends AppHelper {
             if ($isKey !== true) {
                 $viewFields[] = array(
                     'label' => __(Inflector::humanize($_field), true),
-                    'value' => $instance[$modelClass][$_field],
+                    'value' => ModelTraverser::value($this->_getCurrentController()->{$modelClass}, $instance, $_field),
                     'fieldName' => $_field,
                 );
             }

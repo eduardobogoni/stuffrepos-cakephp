@@ -17,7 +17,6 @@ class TraverserArticleFixture extends CakeTestFixture {
 
 class TraverserArticle extends Model {
 
-    public $actsAs = array('StuffreposBase.Traverser');
     public $belongsTo = array(
         'Author' => array(
             'className' => 'TraverserAuthor'

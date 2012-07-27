@@ -11,6 +11,3 @@ class TraverserAuthorFixture extends CakeTestFixture {
         array('id' => 2, 'name' => 'Second Author'),
     );
 }
-
-class TraverserAuthor extends Model {    
-}
