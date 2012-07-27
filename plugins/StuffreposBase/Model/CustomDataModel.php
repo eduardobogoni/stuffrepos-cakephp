@@ -112,7 +112,14 @@ abstract class CustomDataModel extends AppModel {
             $this->cache = $this->customData();
         }
 
-        $data = $this->_filter($this->cache, $query);
+        foreach ($this->Behaviors->enabled() as $behaviorName) {
+            $query = $this->Behaviors->{$behaviorName}->beforeFind($this, $query);
+        }
+
+        $data = $this->_filter($this->cache, $query);        
+        foreach ($this->Behaviors->enabled() as $behaviorName) {            
+            $data = $this->Behaviors->{$behaviorName}->afterFind($this, $data, true);
+        }
 
         switch ($type) {
             case 'count':
