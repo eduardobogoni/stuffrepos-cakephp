@@ -105,6 +105,18 @@ abstract class CustomDataModel extends AppModel {
         return in_array($field, array_keys($schema));
     }
 
+    private function paginateResults($results, $query) {
+        if (!empty($query['limit'])) {
+            $offset = 0;
+            if (!empty($query['page'])) {
+                $offset = ($query['page'] - 1) * $query['limit'];
+            }
+            return array_slice($results, $offset, $query['limit']);
+        } else {
+            return $results;
+        }
+    }
+
     public function find($type = 'first', $query = array()) {
         if ($this->useCache && $this->cache !== null) {
             $data = $this->cache;
@@ -125,6 +137,8 @@ abstract class CustomDataModel extends AppModel {
                 $data = $afterFindResults;
             }
         }
+
+        $data = $this->paginateResults($data, $query);
 
         switch ($type) {
             case 'count':
@@ -168,7 +182,7 @@ abstract class CustomDataModel extends AppModel {
 
     public function delete($id = null, $cascade = true) {
         if ($id) {
-            $this->id;
+            $this->id = $id;
         }
         $row = $this->find('first', array(
             'conditions' => array(
