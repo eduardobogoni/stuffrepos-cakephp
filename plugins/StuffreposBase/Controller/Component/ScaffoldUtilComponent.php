@@ -59,17 +59,19 @@ class ScaffoldUtilComponent extends Component {
                 );
             }
 
-            if ($this->_getActionOption('unsetFields')) {
-                $tempFields = array();
-                foreach ($scaffoldFields as $field) {
-                    if (!in_array($field, $this->_getActionOption('unsetFields'))) {
-                        $tempFields[] = $field;
+            if (empty($scaffoldFields['_extended'])) {
+                if ($this->_getActionOption('unsetFields')) {
+                    $tempFields = array();
+                    foreach ($scaffoldFields as $field) {
+                        if (!in_array($field, $this->_getActionOption('unsetFields'))) {
+                            $tempFields[] = $field;
+                        }
                     }
+                    $scaffoldFields = $tempFields;
                 }
-                $scaffoldFields = $tempFields;
             }
 
-            $controller->set('scaffoldFields', $scaffoldFields);            
+            $controller->set('scaffoldFields', $scaffoldFields);
         }
     }
 

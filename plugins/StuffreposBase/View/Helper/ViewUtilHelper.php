@@ -2,6 +2,7 @@
 
 App::import('Lib', 'StuffreposBase.ExtendedFieldsParser');
 App::import('Lib', 'StuffreposBase.ModelTraverser');
+App::import('Lib', 'StuffreposBase.Basics');
 
 class ViewUtilHelper extends AppHelper {
     const VALUE_TYPE_UNKNOWN = 'unknown';
@@ -322,7 +323,7 @@ class ViewUtilHelper_ExtendedFieldset {
     public function getLinesFieldCountLcd() {
         $previous = 1;
         foreach ($this->lines as $line) {
-            $lcd = lcd($previous, $line->getFieldCount());
+            $lcd = Basics::lcd($previous, $line->getFieldCount());
         }
         return $lcd;
     }
@@ -524,7 +525,7 @@ class ViewUtilHelper_ExtendedField {
     }
 
     private function _getModelClass() {
-        $nameParts = fieldName2Array($this->name);
+        $nameParts = Basics::fieldNameToArray($this->name);
         if (count($nameParts) > 1) {
             return $nameParts[0];
         } else {
@@ -533,7 +534,7 @@ class ViewUtilHelper_ExtendedField {
     }
 
     private function _getFieldName() {
-        $nameParts = fieldName2Array($this->name);
+        $nameParts = Basics::fieldNameToArray($this->name);
         if (count($nameParts) > 1) {
             return $nameParts[1];
         } else {
@@ -645,10 +646,10 @@ class ViewUtilHelper_ListFieldset {
     }
 
     private function _rows() {
-        return $this->parent->CakeLayers->associationInstances(
-                        $this->scaffoldVars['modelClass']
-                        , $this->listAssociation
+        return ModelTraverser::value(
+                        $this->parent->CakeLayers->getModel($this->scaffoldVars['modelClass'])
                         , $this->scaffoldVars['instance']
+                        , $this->listAssociation
         );
     }
 

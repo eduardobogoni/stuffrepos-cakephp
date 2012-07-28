@@ -16,15 +16,15 @@ class ModelTraverser {
                 if (count($path) == 1) {
                     return $model->schema($path[0]);
                 } else {
-                    throw new Exception("Path continues, but reached a field. Path: " . print_r($path, true));
+                    throw new Exception("Path continues, but reached a field.");
                 }
             } else if (self::isBelongsToAssociation($model, $path[0])) {
                 return self::schema($model->{$path[0]}, self::pathPopFirst($path));
             } else {
-                throw new Exception("Term is not a field or association. Path: " . print_r($path, true));
+                throw new Exception("Term is not a field or association.");
             }
         } catch (Exception $ex) {
-            throw new ModelTraverserException($ex->getMessage(), $model, $row, $path, $ex);
+            throw new ModelTraverserException($ex->getMessage(), $model, null, $path, $ex);
         }
     }
 
