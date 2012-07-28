@@ -105,6 +105,35 @@ abstract class CustomDataModel extends AppModel {
         return in_array($field, array_keys($schema));
     }
 
+    private function orderResults($results, $query) {
+        if ($this->displayField) {
+            $displayFieldSchema = $this->schema($this->displayField);
+            $_THIS = $this;
+            usort(
+                    $results
+                    , function($r1, $r2) use ($_THIS, $displayFieldSchema) {
+                        $r1 = $r1[$_THIS->alias][$_THIS->displayField];
+                        $r2 = $r2[$_THIS->alias][$_THIS->displayField];
+                        switch ($displayFieldSchema['type']) {
+                            case 'string':
+                                return strcmp($r1, $r2);
+
+                            default:
+                                if ($r1 < $r2) {
+                                    return -1;
+                                } else if ($r1 > $r2) {
+                                    return 1;
+                                } else {
+                                    return 0;
+                                }
+                        }
+                    }
+            );
+        }
+        
+        return $results;
+    }
+
     private function paginateResults($results, $query) {
         if (!empty($query['limit'])) {
             $offset = 0;
@@ -138,6 +167,7 @@ abstract class CustomDataModel extends AppModel {
             }
         }
 
+        $data = $this->orderResults($data, $query);
         $data = $this->paginateResults($data, $query);
 
         switch ($type) {
