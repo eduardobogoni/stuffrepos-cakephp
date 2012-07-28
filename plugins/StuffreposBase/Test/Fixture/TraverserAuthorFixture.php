@@ -11,3 +11,14 @@ class TraverserAuthorFixture extends CakeTestFixture {
         array('id' => 2, 'name' => 'Second Author'),
     );
 }
+
+class TraverserAuthor extends Model {
+
+    public $hasMany = array(
+        'Article' => array(
+            'className' => 'TraverserArticle',
+            'foreignKey' => 'author_id',
+        )
+    );
+
+}

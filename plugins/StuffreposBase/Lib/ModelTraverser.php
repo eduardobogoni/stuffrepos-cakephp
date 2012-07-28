@@ -77,7 +77,7 @@ class ModelTraverser {
                     return array(
                         'all' => $row[self::CACHE_KEY][$path[0]],
                         'lastInstance' => $row[self::CACHE_KEY][$path[0]],
-                        'model' => $model,
+                        'model' => $model->{$path[0]},
                     );
                 }
                 else {
@@ -88,7 +88,19 @@ class ModelTraverser {
                                 , $row[self::CACHE_KEY][$path[0]]
                 );
                 }
-                
+            } else if (self::isHasManyAssociation($model, $path[0])) {
+                if (!isset($row->{$path[0]})) {
+                    $row[self::CACHE_KEY][$path[0]] = self::findHasManyInstance($model, $path[0], $row);
+                    if (count($path) == 1) {
+                        return array(
+                            'all' => $row[self::CACHE_KEY][$path[0]],
+                            'lastInstance' => $row[self::CACHE_KEY][$path[0]],
+                            'model' => $model->{$path[0]},
+                        );
+                    } else if ($model) {
+                        throw new Exception("Path continues, but reached hasMany association.");
+                    }
+                }
             } else {
                 throw new Exception("Term is not a field or association.");
             }
@@ -111,6 +123,22 @@ class ModelTraverser {
                     'conditions' => array(
                         "{$alias}.{$model->{$alias}->primaryKey}" => $row[$model->alias][$model->belongsTo[$alias]['foreignKey']]
                     ), 'recursive' => 0
+                        )
+        );
+    }
+
+    private static function isHasManyAssociation(Model $model, $alias) {
+        return in_array($alias, $model->getAssociated('hasMany'));
+    }
+
+    private static function findHasManyInstance(Model $model, $alias, $row) {
+        return $model->{$alias}->find(
+                        'all'
+                        , array(
+                    'conditions' => array(
+                        "{$alias}.{$model->hasMany[$alias]['foreignKey']}" => $row[$model->alias][$model->primaryKey]
+                    )
+                    , 'recursive' => 0
                         )
         );
     }

@@ -19,7 +19,8 @@ class TraverserArticle extends Model {
 
     public $belongsTo = array(
         'Author' => array(
-            'className' => 'TraverserAuthor'
+            'className' => 'TraverserAuthor',
+            'foreignKey' => 'author_id',
         )
     );
 

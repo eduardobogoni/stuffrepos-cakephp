@@ -16,12 +16,25 @@ class ModelTraverserTest extends CakeTestCase {
         $this->Author->alias = 'Author';
     }
 
-    public function testBelongsToAssociationValue() {
+    public function testValue() {
+        $articles = $this->Article->find('all');
+
+        foreach ($articles as $article) {
+            foreach (array_keys($this->Article->schema()) as $field) {
+                $this->assertEqual(
+                        ModelTraverser::value($this->Article, $article, $field)
+                        , $article[$this->Article->alias][$field]
+                );
+            }
+        }
+    }
+
+    public function testValueBelongsTo() {
         $articles = $this->Article->find('all');
 
         foreach ($articles as $article) {
             $author = $this->Author->findById(
-                    ModelTraverser::value($this->Article, $article, 'author_id')
+                    $article[$this->Article->alias]['author_id']
             );
             $this->assertNotEqual($author, false);
 
@@ -39,12 +52,34 @@ class ModelTraverserTest extends CakeTestCase {
         }
     }
 
-    public function testBelongsToAssociationInstance() {
+    public function testValueHasMany() {
+        $authors = $this->Author->find('all');
+
+        foreach ($authors as $author) {
+            $articles = $this->Author->Article->findAllByAuthorId(
+                    $author[$this->Author->alias]['id']
+            );
+
+            $this->assertEqual(
+                    ModelTraverser::value($this->Author, $author, $this->Author->Article->alias)
+                    , $articles
+            );
+        }
+    }
+
+    public function testlastInstanceBelongsTo() {
         $articles = $this->Article->find('all');
 
         foreach ($articles as $article) {
-            $author = $this->Author->findById(
-                    ModelTraverser::value($this->Article, $article, 'author_id')
+            $author = $this->Author->find(
+                    'first',
+                    array(
+                        'conditions' => array(
+                            'id' => ModelTraverser::value($this->Article, $article, 'author_id')
+                        ),
+                        'recursive' => 0,
+                    )
+                    
             );
             $this->assertNotEqual($author, false);
 
