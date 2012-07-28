@@ -1,6 +1,6 @@
 <?php
 
-class TraverserAuthorFixture extends CakeTestFixture {
+class AuthorFixture extends CakeTestFixture {
 
     public $fields = array(
         'id' => array('type' => 'integer', 'key' => 'primary'),
@@ -10,15 +10,13 @@ class TraverserAuthorFixture extends CakeTestFixture {
         array('id' => 1, 'name' => 'First Author'),
         array('id' => 2, 'name' => 'Second Author'),
     );
+
 }
 
-class TraverserAuthor extends Model {
+class Author extends Model {
 
     public $hasMany = array(
-        'Article' => array(
-            'className' => 'TraverserArticle',
-            'foreignKey' => 'author_id',
-        )
+        'Article'
     );
 
 }
