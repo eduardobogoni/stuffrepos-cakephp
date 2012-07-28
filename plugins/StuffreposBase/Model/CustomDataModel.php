@@ -114,12 +114,16 @@ abstract class CustomDataModel extends AppModel {
         }
 
         foreach ($this->Behaviors->enabled() as $behaviorName) {
-            $query = $this->Behaviors->{$behaviorName}->beforeFind($this, $query);
+            if (is_array($beforeFindQuery = $this->Behaviors->{$behaviorName}->beforeFind($this, $query))) {
+                $query = $beforeFindQuery;
+            }
         }
 
         $data = $this->_filter($data, $query);        
-        foreach ($this->Behaviors->enabled() as $behaviorName) {            
-            $data = $this->Behaviors->{$behaviorName}->afterFind($this, $data, true);
+        foreach ($this->Behaviors->enabled() as $behaviorName) {
+            if (is_array($afterFindResults = $this->Behaviors->{$behaviorName}->afterFind($this, $data, true))) {
+                $data = $afterFindResults;
+            }
         }
 
         switch ($type) {
