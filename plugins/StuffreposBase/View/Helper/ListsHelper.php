@@ -132,6 +132,8 @@ class ListsHelper extends AppHelper {
             $name = $value;
         }
 
+        $association = $this->_fieldAssociation($name);
+
         $nameParts = explode('.', $name);
         if (count($nameParts) == 1) {
             $path = array(
@@ -164,6 +166,7 @@ class ListsHelper extends AppHelper {
                         , 'valueFunction'
                         , 'extraData'
                         , 'mask'
+                        , 'association'
         );
     }
 
@@ -278,7 +281,7 @@ class ListsHelper extends AppHelper {
             $link = array(
                 'controller' => $field['association']['controller']
                 , 'action' => 'view'
-                , ModelTraverser::lastAssociationPrimaryKeyValue(
+                , ModelTraverser::lastInstancePrimaryKeyValue(
                         $this->model
                         , $row
                         , $field['path']
@@ -289,7 +292,7 @@ class ListsHelper extends AppHelper {
                 $link = array(
                     'controller' => Inflector::underscore($this->controller->name),
                     'action' => 'view',
-                    ModelTraverser::lastAssociationPrimaryKeyValue(
+                    ModelTraverser::lastInstancePrimaryKeyValue(
                             $this->model
                             , $row
                             , $field['path']
@@ -303,7 +306,15 @@ class ListsHelper extends AppHelper {
         } else if ($field['staticValue'] !== null) {
             $value = $field['staticValue'];
         } else {
-            $value = ModelTraverser::value($this->model, $row, $field['path']);
+            if (empty($field['association'])) {
+                $value = ModelTraverser::value($this->model, $row, $field['path']);
+            } else {
+                $value = ModelTraverser::lastInstanceAssociationDisplayFieldValue(
+                                $this->model
+                                , $row
+                                , $field['path']
+                );
+            }
 
             if (is_array($value)) {
                 $value = $this->_formatValueAsList($value);

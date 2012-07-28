@@ -3,17 +3,15 @@
 class ModelTraverserTest extends CakeTestCase {
 
     public $fixtures = array(
-        'plugin.StuffreposBase.TraverserArticle',
-        'plugin.StuffreposBase.TraverserAuthor',
+        'plugin.StuffreposBase.Article',
+        'plugin.StuffreposBase.Author',
     );
 
     public function setUp() {
         parent::setUp();
         App::import('Lib', 'StuffreposBase.ModelTraverser');
-        $this->Article = ClassRegistry::init('TraverserArticle');
-        $this->Article->alias = 'Article';
-        $this->Author = ClassRegistry::init('TraverserAuthor');
-        $this->Author->alias = 'Author';
+        $this->Article = ClassRegistry::init('Article');
+        $this->Author = ClassRegistry::init('Author');
     }
 
     public function testValue() {
@@ -72,14 +70,12 @@ class ModelTraverserTest extends CakeTestCase {
 
         foreach ($articles as $article) {
             $author = $this->Author->find(
-                    'first',
-                    array(
-                        'conditions' => array(
-                            'id' => ModelTraverser::value($this->Article, $article, 'author_id')
-                        ),
-                        'recursive' => 0,
+                    'first', array(
+                'conditions' => array(
+                    'id' => ModelTraverser::value($this->Article, $article, 'author_id')
+                ),
+                'recursive' => 0,
                     )
-                    
             );
             $this->assertNotEqual($author, false);
 
@@ -107,7 +103,7 @@ class ModelTraverserTest extends CakeTestCase {
 
             foreach (array_keys($this->Author->schema()) as $authorField) {
                 $this->assertEquals(
-                        ModelTraverser::lastAssociationPrimaryKeyValue(
+                        ModelTraverser::lastInstancePrimaryKeyValue(
                                 $this->Article
                                 , $article
                                 , $this->Article->Author->alias . '.' . $authorField

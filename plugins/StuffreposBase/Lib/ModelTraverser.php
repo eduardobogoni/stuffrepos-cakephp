@@ -43,9 +43,59 @@ class ModelTraverser {
         return $result['lastInstance'];
     }
 
-    public static function lastAssociationPrimaryKeyValue(Model $model, $row, $path) {
+    public static function lastInstancePrimaryKeyValue(Model $model, $row, $path) {
         $result = self::find($model, $row, $path, $row);
         return $result['lastInstance'][$result['model']->alias][$result['model']->primaryKey];
+    }
+
+    public static function lastInstanceAssociationDisplayFieldValue(Model $model, $row, $path) {
+        $result = self::find($model, $row, $path, $row);
+
+        $associationAlias = self::oneToManyAssociationByForeignKey(
+                        $model, $path[count($path) - 1]
+        );
+
+        if (!$associationAlias) {
+            throw new ModelTraverserException("Association not found for foreingKey: \"{$path[count($path) - 1]}\"", $model, $row, $path);
+        }
+
+        $associationInstance = self::oneToManyAssociationInstanceByPrimaryKey(
+                        $model
+                        , $associationAlias
+                        , $result['all']
+        );
+
+        return $associationInstance[$model->{$associationAlias}->alias][$model->{$associationAlias
+                }
+                ->displayField];
+    }
+
+    private static function oneToManyAssociationInstanceByPrimaryKey(
+    $model
+    , $associationAlias
+    , $primaryKeyValue
+    ) {
+        return $model->{$associationAlias}->find(
+                        'first', array(
+                    'conditions' => array(
+                        "$associationAlias.{$model->{$associationAlias}->primaryKey}" => $primaryKeyValue
+                    )
+                        )
+        );
+    }
+
+    private static function oneToManyAssociationByForeignKey(Model $model, $foreignKey) {
+        foreach ($model->getAssociated() as $associationAlias => $type) {
+            switch ($type) {
+                case 'belongsTo':
+                case 'hasOne':
+                    if ($model->{$type}[$associationAlias]['foreignKey'] == $foreignKey) {
+                        return $associationAlias;
+                    }
+            }
+        }
+
+        return false;
     }
 
     private static function find(Model $model, &$row, $path, &$lastInstance = null) {
