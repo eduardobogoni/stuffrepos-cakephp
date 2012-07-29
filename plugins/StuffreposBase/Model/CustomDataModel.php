@@ -83,9 +83,11 @@ abstract class CustomDataModel extends AppModel {
             $rowValue = $row[$conditionAlias][$conditionField];
 
             switch ($operation) {
+                case '=':
                 case '==':
                     return $rowValue == $conditionValue;
 
+                case '<>':
                 case '!=':
                     return $rowValue != $conditionValue;
 
