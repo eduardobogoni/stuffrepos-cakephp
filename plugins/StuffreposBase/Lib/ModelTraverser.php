@@ -14,7 +14,7 @@ class ModelTraverser {
 
             if (self::isField($model, $path[0])) {
                 if (count($path) == 1) {
-                    return $model->schema($path[0]);
+                    return self::fieldSchema($model, $path[0]);
                 } else {
                     throw new Exception("Path continues, but reached a field.");
                 }
@@ -129,14 +129,13 @@ class ModelTraverser {
                         'lastInstance' => $row[self::CACHE_KEY][$path[0]],
                         'model' => $model->{$path[0]},
                     );
-                }
-                else {
+                } else {
                     return self::find(
-                                $model->{$path[0]}
-                                , $row[self::CACHE_KEY][$path[0]]
-                                , self::pathPopFirst($path)
-                                , $row[self::CACHE_KEY][$path[0]]
-                );
+                                    $model->{$path[0]}
+                                    , $row[self::CACHE_KEY][$path[0]]
+                                    , self::pathPopFirst($path)
+                                    , $row[self::CACHE_KEY][$path[0]]
+                    );
                 }
             } else if (self::isHasManyAssociation($model, $path[0])) {
                 if (!isset($row->{$path[0]})) {
@@ -159,8 +158,25 @@ class ModelTraverser {
         }
     }
 
+    private static function fieldSchema(Model $model, $name) {
+        if (($fieldSchema = $model->schema($name))) {
+            return $fieldSchema;
+        } else if (!empty($model->virtualFields[$name])) {
+            if (!empty($model->virtualFieldsSchema[$name])) {
+                return $model->virtualFieldsSchema[$name];
+            } else {
+                return array(
+                    'type' => 'string'
+                );
+            }
+        } else {
+            throw new Exception("Field not found: {$model->name}.{$name}.");
+        }
+    }
+
     private static function isField(Model $model, $name) {
-        return in_array($name, array_keys($model->schema()));
+        return in_array($name, array_keys($model->schema())) ||
+                !empty($model->virtualFields[$name]);
     }
 
     private static function isBelongsToAssociation(Model $model, $alias) {
