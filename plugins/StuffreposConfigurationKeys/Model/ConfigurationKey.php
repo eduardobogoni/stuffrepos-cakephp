@@ -1,6 +1,7 @@
 <?php
 
 App::import('Model', 'StuffreposBase.CustomDataModel');
+App::import('Lib', 'StuffreposConfigurationKeys.ConfigurationKeys');
 
 class ConfigurationKey extends CustomDataModel {
 
@@ -18,16 +19,9 @@ class ConfigurationKey extends CustomDataModel {
     }
 
     protected function customData() {
-        $ConfigurationKeysComponent = ClassRegistry::getObject('ConfigurationKeysComponent');
-        if (empty($ConfigurationKeysComponent)) {
-            throw new Exception("Objeto 'ConfigurationKeysComponent' não foi encontrado em ClassRegistry (Foi adicionado como componente no controller?).");
-        }
+        $data = array();                
 
-        $keys = $ConfigurationKeysComponent->getKeys();
-
-        $data = array();
-
-        foreach ($keys as $name => $options) {
+        foreach (ConfigurationKeys::getInstance()->getKeys() as $name => $options) {
             $row = array(
                 'name' => $name,
                 'description' => $options['description'],

@@ -1,25 +1,42 @@
 <?php
 
-App::import('Component', 'StuffreposBase.BaseModel');
+class ConfigurationKeys {
 
-class ConfigurationKeysComponent extends BaseModelComponent {
+    /**
+     * @var ConfigurationKeys
+     */
+    private static $instance;
 
-    public $uses = array(
-        'StuffreposConfigurationKeys.ConfigurationKey',
-        'StuffreposConfigurationKeys.SettedConfigurationKey',
-    );
+    /**
+     * @return ConfigurationKeys
+     */
+    public static function getInstance() {
+        if (!self::$instance) {
+            self::$instance = new ConfigurationKeys();
+        }
+        return self::$instance;
+    }
+
     private $keys = array();
+    private $SettedConfigurationKey = null;
 
-    public function initialize(&$controller) {
-        parent::initialize($controller);
-        //$this->controller = &$controller;
-        ClassRegistry::getInstance()->addObject(__CLASS__, $this);
+    protected function __construct() {
+        $this->SettedConfigurationKey = ClassRegistry::init('StuffreposConfigurationKeys.SettedConfigurationKey');
+        if (($keys = Configure::read('configurationKeys'))) {
+            foreach ($keys as $key => $options) {
+                if (is_int($key)) {
+                    $key = $options;
+                    $options = array();
+                }
+                $this->keys[$key] = $this->_mergeDefaultOptions($options);
+            }
+        }
     }
 
     public function addKey($key, $options = array()) {
         $this->keys[$key] = $this->_mergeDefaultOptions($options);
     }
-    
+
     public function getKeys() {
         return $this->keys;
     }
@@ -46,14 +63,15 @@ class ConfigurationKeysComponent extends BaseModelComponent {
     }
 
     private function _mergeDefaultOptions($options) {
-        foreach(array('description','defaultValue') as $option) {
+        foreach (array('description', 'defaultValue') as $option) {
             if (!isset($options[$option])) {
                 $options[$option] = null;
             }
         }
-        
+
         return $options;
     }
+
 }
 
 ?>
