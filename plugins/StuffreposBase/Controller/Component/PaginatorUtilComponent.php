@@ -161,7 +161,8 @@ class PaginatorUtilComponentFilter {
      * @return boolean
      */
     public function isInputSelectType() {
-        return $this->hasConfig('valuesFunction') ||
+        return $this->hasConfig('values') ||
+                $this->hasConfig('valuesFunction') ||
                 $this->hasConfig('conditionsFunction') ||
                 $this->hasConfig('conditionsPerValue');
     }
@@ -173,6 +174,10 @@ class PaginatorUtilComponentFilter {
     public function getValuesList() {
         if ($this->hasConfig('valuesFunction')) {
             return $this->controller->{$this->getConfig('valuesFunction')}();
+        } else if ($this->hasConfig('values')) {
+            return ArrayUtil::keysAsValues(
+                            array_keys($this->getConfig('values'))
+            );
         } else if ($this->hasConfig('conditionsPerValue')) {
             return ArrayUtil::keysAsValues(
                             array_keys($this->getConfig('conditionsPerValue'))
