@@ -24,6 +24,9 @@ class CakeLayersHelper extends Helper {
         if (!$controller) {
             App::import('Controller', $controllerName);
             $controllerClass = Inflector::camelize($controllerName . '_controller');
+            if (!class_exists($controllerClass)) {
+                return null;
+            }
             $controller = new $controllerClass;
             $controller->constructClasses();
             $controller->plugin = $this->getPluginNameByControllerClass($controllerClass);            
@@ -51,7 +54,7 @@ class CakeLayersHelper extends Helper {
 
     public function getModel($model, $required = false) {
         if ($model instanceof Model) {
-            $modelName = $model->name;
+            return $model;
         } elseif (is_string($model)) {
             $modelName = $model;
             $model = ClassRegistry::getObject($modelName);
@@ -223,13 +226,13 @@ class CakeLayersHelper extends Helper {
     public function modelAssociationModelByPath($model, $associationPath, $required = false) {
         $model = $this->getModel($model);
         $associationModel = false;
-        if ($model->name == $associationPath[0]) {
+        if ($model->alias == $associationPath[0]) {
             $associationModel = $model;
         } else {
             $association = $this->modelAssociation($model, $associationPath[0]);
 
             if ($association) {
-                $associationModel = $this->getModel($association['className'], $required);
+                $associationModel = $model->{$association['alias']};
             }
         }
 

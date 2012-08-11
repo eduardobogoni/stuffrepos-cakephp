@@ -638,7 +638,8 @@ class ViewUtilHelper_ListFieldset {
                 , $this->_rows()
                 , array(
             'model' => $this->_model()
-            , 'showActions' => false,
+            , 'showActions' => false
+                    , 'controller' => $this->_controller()
                 )
         );
 
@@ -658,7 +659,19 @@ class ViewUtilHelper_ListFieldset {
                         $this->scaffoldVars['modelClass']
                         , $this->listAssociation
                         , true
-                )->name;
+                );
+    }
+    
+    private function _controller() {
+        $controller = $this->parent->CakeLayers->getController(
+                Inflector::pluralize($this->_model()->name), false
+                );
+        if ($controller) {
+            return $controller->name;
+        }
+        else {
+            return null;
+        }
     }
 
 }

@@ -110,6 +110,9 @@ class ModelTraverser {
 
             if (self::isField($model, $path[0])) {
                 if (count($path) == 1) {
+                    if (!isset($row[$model->alias])) {
+                        throw new Exception("{$model->alias} not found in ".print_r($row,true));
+                    }
                     return array(
                         'all' => $row[$model->alias][$path[0]],
                         'lastInstance' => $lastInstance,
