@@ -1,6 +1,8 @@
 <?php
 
-App::import('Lib', 'ExtendedFieldsParser');
+App::import('Lib', 'StuffreposBase.ExtendedFieldsParser');
+App::import('Lib', 'StuffreposBase.ModelTraverser');
+App::import('Lib', 'StuffreposBase.Basics');
 
 class ViewUtilHelper extends AppHelper {
     const VALUE_TYPE_UNKNOWN = 'unknown';
@@ -156,11 +158,14 @@ class ViewUtilHelper extends AppHelper {
                         $viewFields[] = array(
                             'label' => __(Inflector::humanize($_alias), true),
                             'value' => $this->AccessControl->linkOrText(
-                                    $instance[$_alias][$_details['displayField']], array(
-                                'controller' => $_details['controller'],
-                                'action' => 'view',
-                                $instance[$_alias][$_details['primaryKey']])),
-                            'fieldName' => $_field,
+                                    ModelTraverser::value($this->_getCurrentController()->{$modelClass}, $instance, "$_alias.{$_details['displayField']}")
+                                    , array(
+                                'controller' => $_details['controller']
+                                , 'action' => 'view'
+                                , ModelTraverser::value($this->_getCurrentController()->{$modelClass}, $instance, "$_alias.{$_details['primaryKey']}")
+                                    )
+                            )
+                            , 'fieldName' => $_field
                         );
 
                         break;
@@ -170,7 +175,7 @@ class ViewUtilHelper extends AppHelper {
             if ($isKey !== true) {
                 $viewFields[] = array(
                     'label' => __(Inflector::humanize($_field), true),
-                    'value' => $instance[$modelClass][$_field],
+                    'value' => ModelTraverser::value($this->_getCurrentController()->{$modelClass}, $instance, $_field),
                     'fieldName' => $_field,
                 );
             }
@@ -318,7 +323,7 @@ class ViewUtilHelper_ExtendedFieldset {
     public function getLinesFieldCountLcd() {
         $previous = 1;
         foreach ($this->lines as $line) {
-            $lcd = lcd($previous, $line->getFieldCount());
+            $lcd = Basics::lcd($previous, $line->getFieldCount());
         }
         return $lcd;
     }
@@ -520,7 +525,7 @@ class ViewUtilHelper_ExtendedField {
     }
 
     private function _getModelClass() {
-        $nameParts = fieldName2Array($this->name);
+        $nameParts = Basics::fieldNameToArray($this->name);
         if (count($nameParts) > 1) {
             return $nameParts[0];
         } else {
@@ -529,7 +534,7 @@ class ViewUtilHelper_ExtendedField {
     }
 
     private function _getFieldName() {
-        $nameParts = fieldName2Array($this->name);
+        $nameParts = Basics::fieldNameToArray($this->name);
         if (count($nameParts) > 1) {
             return $nameParts[1];
         } else {
@@ -641,10 +646,10 @@ class ViewUtilHelper_ListFieldset {
     }
 
     private function _rows() {
-        return $this->parent->CakeLayers->associationInstances(
-                        $this->scaffoldVars['modelClass']
-                        , $this->listAssociation
+        return ModelTraverser::value(
+                        $this->parent->CakeLayers->getModel($this->scaffoldVars['modelClass'])
                         , $this->scaffoldVars['instance']
+                        , $this->listAssociation
         );
     }
 

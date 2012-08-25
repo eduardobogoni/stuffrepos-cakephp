@@ -27,9 +27,19 @@ class ScaffoldUtilComponent extends Component {
     const OPTION_NAME_SEPARATOR = ',';
     public $components = array('Session');
     public $currentAction = null;
+    public $defaultOptions;
         
     public function initialize(Controller $controller) {
         $this->controller = $controller;
+        if ($this->controller->modelClass) {
+            $this->defaultOptions = array(
+                'indexUnsetFields,viewUnsetFields' => array(
+                    $this->controller->{$this->controller->modelClass}->primaryKey
+                )
+            );
+        } else {
+            $this->defaultOptions = array();
+        }
     }
 
     public function beforeRender(Controller $controller) {
@@ -49,17 +59,19 @@ class ScaffoldUtilComponent extends Component {
                 );
             }
 
-            if ($this->_getActionOption('unsetFields')) {
-                $tempFields = array();
-                foreach ($scaffoldFields as $field) {
-                    if (!in_array($field, $this->_getActionOption('unsetFields'))) {
-                        $tempFields[] = $field;
+            if (empty($scaffoldFields['_extended'])) {
+                if ($this->_getActionOption('unsetFields')) {
+                    $tempFields = array();
+                    foreach ($scaffoldFields as $field) {
+                        if (!in_array($field, $this->_getActionOption('unsetFields'))) {
+                            $tempFields[] = $field;
+                        }
                     }
+                    $scaffoldFields = $tempFields;
                 }
-                $scaffoldFields = $tempFields;
             }
 
-            $controller->set('scaffoldFields', $scaffoldFields);            
+            $controller->set('scaffoldFields', $scaffoldFields);
         }
     }
 
@@ -70,7 +82,7 @@ class ScaffoldUtilComponent extends Component {
     public function render($action, $scaffoldFields = array()) {                
         App::import('Lib', 'Scaffold');
         
-        $this->controller->view = 'Scaffold';
+        $this->controller->viewClass = 'Scaffold';
         $this->controller->set('pluralVar',Inflector::variable($this->controller->name));
         $this->controller->set('singularHumanName', Inflector::humanize(Inflector::underscore($this->controller->modelClass)));
         $this->controller->set('scaffoldFields', $scaffoldFields);
@@ -85,12 +97,17 @@ class ScaffoldUtilComponent extends Component {
     }
     
     private function _findOption($optionName) {
-        if (empty($this->settings)
-                || !is_array($this->settings)) {
-            return false;
+        if (is_array($this->settings)) {
+            foreach ($this->settings as $key => $value) {
+                foreach (explode(self::OPTION_NAME_SEPARATOR, $key) as $keyOption) {
+                    if (trim($keyOption) == trim($optionName)) {
+                        return $value;
+                    }
+                }
+            }
         }
-        
-        foreach($this->settings as $key => $value) {
+
+        foreach($this->defaultOptions as $key => $value) {
             foreach(explode(self::OPTION_NAME_SEPARATOR,$key) as $keyOption) {
                 if (trim($keyOption) == trim($optionName)) {
                     return $value;

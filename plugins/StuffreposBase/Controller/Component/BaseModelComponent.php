@@ -10,6 +10,7 @@ class BaseModelComponent extends Component {
         if ($this->uses !== false) {
             foreach ($this->uses as $modelClass) {
                 $controller->loadModel($modelClass);
+                list(,$modelClass) = pluginSplit($modelClass);
                 $this->$modelClass = $controller->$modelClass;
             }
         }

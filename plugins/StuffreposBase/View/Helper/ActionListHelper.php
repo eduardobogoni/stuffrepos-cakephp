@@ -112,8 +112,8 @@ class ActionListHelper extends AppHelper {
 
     private function _controllerActions(&$controller) {
         $groups = array($this->defaultActions);
-        if (!empty($controller->menuActions)) {
-            $groups[] = $controller->menuActions;
+        if (!empty($controller->moduleActions)) {
+            $groups[] = $controller->moduleActions;
         }
 
         $added = array();
@@ -457,7 +457,7 @@ class ActionListHelper extends AppHelper {
     private function _isNavigableControllerMethod($targetAction) {
         $actionUrl = $this->_extractActionUrl($targetAction);
         $methodName = Inflector::camelize("is_navigable_" . $actionUrl['action']);
-        $methodName = strtolower(substr($methodName, 0, 1)) . substr($methodName, 1, strlen($methodName) - 1);
+        $methodName = '_' . strtolower(substr($methodName, 0, 1)) . substr($methodName, 1, strlen($methodName) - 1);
         $controller = $this->_getController($actionUrl['controller']);
 
         if (method_exists($controller, $methodName)) {

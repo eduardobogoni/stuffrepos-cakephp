@@ -2,7 +2,7 @@
 
 App::uses('AppHelper', 'View/Helper');
 
-class MenuHelper extends Helper {
+class MenuHelper extends AppHelper {
 
     public $helpers = array('StuffreposBase.AccessControl');
 

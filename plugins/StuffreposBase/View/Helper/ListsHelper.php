@@ -1,5 +1,7 @@
 <?php
 
+App::import('Lib', 'StuffreposBase.ModelTraverser');
+
 class ListsHelper extends AppHelper {
 
     public $helpers = array(
@@ -135,7 +137,6 @@ class ListsHelper extends AppHelper {
         $nameParts = explode('.', $name);
         if (count($nameParts) == 1) {
             $path = array(
-                $this->model->alias,
                 $nameParts[0]
             );
             $model = &$this->model;
@@ -151,15 +152,22 @@ class ListsHelper extends AppHelper {
             }
         }
 
-        $modelSchema = $model->schema();
+        $fieldSchema = ModelTraverser::schema($this->model, $path);
+        $type = $fieldSchema['type'];
 
-        if (!empty($modelSchema[$path[1]])) {
-            $type = $modelSchema[$path[1]]['type'];
-        } else if (!empty($model->virtualFieldsSchema[$path[1]]['type'])) {
-            $type = $model->virtualFieldsSchema[$path[1]]['type'];
-        }
-
-        return compact('staticValue', 'name', 'path', 'type', 'emptyValue', 'label', 'association', 'align', 'valueFunction', 'extraData', 'mask');
+        return compact(
+                        'staticValue'
+                        , 'name'
+                        , 'path'
+                        , 'type'
+                        , 'emptyValue'
+                        , 'label'
+                        , 'align'
+                        , 'valueFunction'
+                        , 'extraData'
+                        , 'mask'
+                        , 'association'
+        );
     }
 
     private function _fieldAssociation($field) {
@@ -270,19 +278,27 @@ class ListsHelper extends AppHelper {
     private function _rowFieldValue($field, $row, $firstField) {
         $link = $value = null;
         if (!empty($field['association'])) {
-            $modelIndex = $field['association']['alias'];
-            $fieldIndex = $field['association']['displayField'];
-            $link = array('controller' => $field['association']['controller'], 'action' => 'view',
-                $row[$field['association']['alias']][$field['association']['primaryKey']]);
+            $link = array(
+                'controller' => $field['association']['controller']
+                , 'action' => 'view'
+                , ModelTraverser::lastInstancePrimaryKeyValue(
+                        $this->model
+                        , $row
+                        , $field['path']
+                )
+            );
         } else {
             if ($firstField && $this->firstColumnViewLink) {
                 $link = array(
                     'controller' => Inflector::underscore($this->controller->name),
                     'action' => 'view',
-                    $row[$this->model->alias][$this->model->primaryKey]
+                    ModelTraverser::lastInstancePrimaryKeyValue(
+                            $this->model
+                            , $row
+                            , $field['path']
+                    )
                 );
             }
-            list($modelIndex, $fieldIndex) = $field['path'];
         }
 
         if ($field['valueFunction']) {
@@ -290,9 +306,15 @@ class ListsHelper extends AppHelper {
         } else if ($field['staticValue'] !== null) {
             $value = $field['staticValue'];
         } else {
-            $value = $this->CakeLayers->modelInstanceFieldByPath(
-                    $this->model, $row, $field['path'], true
-            );
+            if (empty($field['association'])) {
+                $value = ModelTraverser::value($this->model, $row, $field['path']);
+            } else {
+                $value = ModelTraverser::lastInstanceAssociationDisplayFieldValue(
+                                $this->model
+                                , $row
+                                , $field['path']
+                );
+            }
 
             if (is_array($value)) {
                 $value = $this->_formatValueAsList($value);
