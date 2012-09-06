@@ -70,6 +70,21 @@ class ArrayUtil {
         return $array1;
     }
 
+    /**
+     *
+     * @param array $array
+     * @param array $index
+     * @param mixed $value 
+     */
+    public static function setByArray(&$array, $index, $value) {
+        $ref = &$array;
+        foreach ($index as $i) {
+            $ref = &$ref[$i];
+        }
+
+        $ref = $value;
+    }
+
 }
 
 ?>

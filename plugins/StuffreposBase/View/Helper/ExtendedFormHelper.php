@@ -112,7 +112,7 @@ class ExtendedFormHelper extends FormHelper {
         }
 
         if ($this->isFixed($fieldName)) {
-            setByArray($this->data[self::FIXED_PREFIX], fieldName2Array($fieldName), true);
+            ArrayUtil::setByArray($this->request->data[self::FIXED_PREFIX], Basics::fieldNameToArray($fieldName), true);
             $options['readonly'] = true;
 
             if ($this->isListable($fieldName)) {
@@ -138,9 +138,8 @@ class ExtendedFormHelper extends FormHelper {
         return $b;
     }
 
-    public function isListable($fieldName) {
-        $view = & ClassRegistry::getObject('view');
-        return $view->getVar($this->getListVariableDefaultName($fieldName)) !== null;
+    public function isListable($fieldName) {        
+        return $this->_View->getVar($this->getListVariableDefaultName($fieldName)) !== null;
     }
 
     public function getListVariableDefaultName($fieldName) {
