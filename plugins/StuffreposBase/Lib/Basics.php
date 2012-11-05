@@ -75,6 +75,12 @@ class Basics {
             return $r;
     }
 
+    public static function multibyteTrim($string) {
+        $string = preg_replace("/(^\s+)|(\s+$)/us", "", $string);
+
+        return $string;
+    }
+
 }
 
 ?>
