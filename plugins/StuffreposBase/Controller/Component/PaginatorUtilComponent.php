@@ -293,7 +293,7 @@ class PaginatorUtilComponentFilter {
     }
 
     public function hasConditionValue() {
-        return !$this->hasConfig('conditionsFunction');
+        return !$this->hasConfig('conditionsFunction') && !$this->hasConfig('conditionsPerValue');
     }
 
 }
