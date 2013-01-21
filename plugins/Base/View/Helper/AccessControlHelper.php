@@ -1,6 +1,6 @@
 <?php
 
-App::import('Model', 'Usuario');
+App::import('Lib', 'Base.AccessControl');
 
 class AccessControlHelper extends Helper {
 
@@ -10,11 +10,7 @@ class AccessControlHelper extends Helper {
     );
     
     public function hasAccess($url) {        
-        $AccessControlComponent = ClassRegistry::getObject('AccessControlComponent');        
-        if (empty($AccessControlComponent)) {
-            throw new Exception("Objeto 'AccessControlComponent' não foi encontrado em ClassRegistry (Foi adicionado como componente no controller?).");
-        }
-        return $AccessControlComponent->hasAccess($url);
+        return AccessControl::sessionUserHasAccessByUrl($url);
     }
 
     public function output($url, $contentIfTrue, $contentIfFalse = '', $return = true) {
