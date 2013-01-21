@@ -1,2 +1,0 @@
-<?php
-CakePlugin::load('StuffreposUserAccounts');

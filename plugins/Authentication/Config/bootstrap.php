@@ -1,0 +1,2 @@
+<?php
+CakePlugin::load('Base');
