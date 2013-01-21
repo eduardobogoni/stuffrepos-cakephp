@@ -15,8 +15,8 @@ class ActionListHelper extends AppHelper {
     public $debug = false;
     public $helpers = array(
         'Html',
-        'StuffreposBase.AccessControl',
-        'StuffreposBase.CakeLayers',
+        'Base.AccessControl',
+        'Base.CakeLayers',
     );
 
     /**
