@@ -1,16 +1,16 @@
 <?php
 
-App::import('Lib', 'StuffreposBase.ModelTraverser');
+App::import('Lib', 'Base.ModelTraverser');
 
 class ListsHelper extends AppHelper {
 
     public $helpers = array(
-        'StuffreposBase.ActionList',
+        'Widgets.ActionList',
         'Paginator',
-        'StuffreposBase.PaginatorUtil',
-        'StuffreposBase.AccessControl',
-        'StuffreposBase.ViewUtil',
-        'StuffreposBase.CakeLayers',
+        'Base.PaginatorUtil',
+        'Base.AccessControl',
+        'ExtendedScaffold.ViewUtil',
+        'Base.CakeLayers',
     );
     private $model;
     private $controller;

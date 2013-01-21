@@ -1,8 +1,8 @@
 <?php
 
 App::import('Helper', 'Form');
-App::import('Lib', 'StuffreposBase.ExtendedFieldsParser');
-App::import('Lib', 'StuffreposBase.ArrayUtil');
+App::import('Lib', 'Base.ExtendedFieldsParser');
+App::import('Lib', 'Base.ArrayUtil');
 require_once(dirname(__FILE__) . '/ExtendedFormHelper/ExtendedFormHelper_ExtendedFieldSet.php');
 require_once(dirname(__FILE__) . '/ExtendedFormHelper/ExtendedFormHelper_InputSearchable.php');
 require_once(dirname(__FILE__) . '/ExtendedFormHelper/ExtendedFormHelper_InputsOnSubmit.php');
@@ -15,9 +15,9 @@ class ExtendedFormHelper extends FormHelper {
 
     public $helpers = array(
         'Html',
-        'StuffreposBase.Lists',
-        'StuffreposBase.CakeLayers',
-        'StuffreposBase.ScaffoldUtil',
+        'ExtendedScaffold.Lists',
+        'Base.CakeLayers',
+        'ExtendedScaffold.ScaffoldUtil',
     );
     private $inputsOnSubmit;
     private $formId;

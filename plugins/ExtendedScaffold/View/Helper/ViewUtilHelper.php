@@ -1,8 +1,8 @@
 <?php
 
-App::import('Lib', 'StuffreposBase.ExtendedFieldsParser');
-App::import('Lib', 'StuffreposBase.ModelTraverser');
-App::import('Lib', 'StuffreposBase.Basics');
+App::import('Lib', 'Base.ExtendedFieldsParser');
+App::import('Lib', 'Base.ModelTraverser');
+App::import('Lib', 'Base.Basics');
 
 class ViewUtilHelper extends AppHelper {
     const VALUE_TYPE_UNKNOWN = 'unknown';
