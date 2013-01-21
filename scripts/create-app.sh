@@ -1,37 +1,28 @@
 #!/usr/bin/env bash
 
-function exitWithError {    
-    echo "${1:-"Unknown Error"}" 1>&2
-    exit 1
-}
+set -u
+set -e
+
+source `dirname "$0"`"/script-lib.sh"
+
+checkParameterCount $# 1 "<APP_ROOT_DIRECTORY>"
 
 [ -z "$1" ] && exitWithError "Usage: $0 APP_ROOT_DIRECTORY"
 
 APP_ROOT_DIRECTORY=$1
 APP_ROOT_DIRECTORY=${APP_ROOT_DIRECTORY%/}
+APP_ROOT_DIRECTORY="`readlink -f "$APP_ROOT_DIRECTORY"`"
 
-#
-# Create app directory.
-# 
-mkdir -p "$APP_ROOT_DIRECTORY" || exitWithError "Fail to create directory \"$APP_ROOT_DIRECTORY\"."
+mkdir -p "$APP_ROOT_DIRECTORY"
 
-#
-# Check if directory is empty.
-#
-EMPTY_DIR=`ls -A "$APP_ROOT_DIRECTORY"`
-[ -z "$EMPTY_DIR" ] || exitWithError "\"$APP_ROOT_DIRECTORY\" is not a empty directory."
+if [ ! -f "$APP_ROOT_DIRECTORY/.git" ]; then
+    (cd "$APP_ROOT_DIRECTORY"; git init)
+fi
 
-#
-# Creates a git working directory, configure and update submodules.
-#
-(cd "$APP_ROOT_DIRECTORY"; git init)
-(cd "$APP_ROOT_DIRECTORY"; git submodule add 'https://code.google.com/p/stuffrepos-cakephp' stuffrepos-cakephp)
+if [ ! -e "$APP_ROOT_DIRECTORY/stuffrepos-cakephp" ]; then
+    (cd "$APP_ROOT_DIRECTORY"; git submodule add 'https://code.google.com/p/stuffrepos-cakephp' stuffrepos-cakephp)
+fi
+
 (cd "$APP_ROOT_DIRECTORY"; git submodule update --init --recursive)
 
-#
-# Builds the appĺication skeleton.
-#
-mkdir -p "$APP_ROOT_DIRECTORY/stuffrepos-cakephp/app"
-(cd "$APP_ROOT_DIRECTORY/stuffrepos-cakephp/cakephp/app"; cp . "$APP_ROOT_DIRECTORY/app" -R)
-(cd "$APP_ROOT_DIRECTORY/stuffrepos-cakephp/app"; cp . "$APP_ROOT_DIRECTORY/app" -vR)
-echo `find "$APP_ROOT_DIRECTORY/app/tmp" -type d -exec chmod og+wt '{}' \;`
+$APP_ROOT_DIRECTORY"/stuffrepos-cakephp/scripts/create-app-directory.sh" "$APP_ROOT_DIRECTORY/app"
