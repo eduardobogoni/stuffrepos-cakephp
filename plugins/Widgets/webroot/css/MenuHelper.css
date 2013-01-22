@@ -1,0 +1,54 @@
+/* Level one */
+ul.MenuHelper {
+    position: relative;
+    list-style: none;
+    text-align: left;
+}
+
+ul.MenuHelper li {
+    font-weight: bold;    
+    margin: 0px 1px 0px 0px;
+    position: relative;    
+    display: inline-block;    
+}
+
+ul.MenuHelper li a { display: block; padding: 4px 8px }
+ul.MenuHelper li:last-child a         { border-right: none; } /* Doesn't work in IE */
+ul.MenuHelper li.hover,
+ul.MenuHelper li:hover                { position: relative; }
+ul.MenuHelper li.hover a              { }
+
+/* Level two */
+ul.MenuHelper ul
+{
+    text-align: left;
+    list-style: none;
+    width: 220px;
+    visibility: hidden;
+    position: absolute;
+    top: 100%;
+    left: 0;
+}
+ul.MenuHelper ul li {
+    font-weight: normal;
+    float: none;
+    display: block;
+}
+
+/* IE 6 & 7 Needs Inline Block */
+ul.MenuHelper ul li a {
+    border-right: none;
+    width: 100%;
+    display: inline-block;
+}
+
+/*
+        LEVEL THREE
+*/
+ul.MenuHelper ul ul {
+    left: 100%;
+    top: 0;
+}
+ul.MenuHelper li:hover > ul {
+    visibility: visible;
+}

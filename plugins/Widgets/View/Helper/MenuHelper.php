@@ -4,18 +4,27 @@ App::uses('AppHelper', 'View/Helper');
 
 class MenuHelper extends AppHelper {
 
-    public $helpers = array('Base.AccessControl');
+    public $helpers = array(
+        'Base.AccessControl',
+        'Base.ScaffoldUtil',
+    );
+
+    public function __construct(\View $View, $settings = array()) {
+        parent::__construct($View, $settings);
+        
+        $this->ScaffoldUtil->addCssLink('Widgets.MenuHelper.css');
+    }
 
     public function dropdown($entries, $mainEntriesEqualsWidth = false) {
         return $mainEntriesEqualsWidth ?
-                $this->_dropDownMainEntriesEqualsWidth($entries) :
-                $this->_dropDownCommon($entries);
+            $this->_dropDownMainEntriesEqualsWidth($entries) :
+            $this->_dropDownCommon($entries);
     }
 
     private function _dropDownCommon($entries) {
         $buffer = "<ul class='MenuHelper'>";
 
-        foreach ($this->_userMenu($entries) as $name => $entry) {            
+        foreach ($this->_userMenu($entries) as $name => $entry) {
             if (is_array($entry)) {
                 $buffer .= $this->_submenu($name, $entry, null);
             } else {
