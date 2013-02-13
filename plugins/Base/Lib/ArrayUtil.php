@@ -3,19 +3,34 @@
 class ArrayUtil {
 
     public static function hasArrayIndex($array, $index) {
-        return self::arrayIndex($array, $index) !== null;
+        try {
+            self::arrayIndex($array, $index, true);            
+            return true;
+        } catch (OutOfBoundsException $ex) {
+            return false;
+        }
     }
 
-    public static function arrayIndex($array, $index) {
+    /**
+     * 
+     * @param array $array
+     * @param array $index
+     * @param boolean $required
+     * @return mixed
+     */
+    public static function arrayIndex($array, $index, $required = false) {
+        $current = $array;
         foreach ($index as $i) {
-            if (isset($array[$i])) {
-                $array = &$array[$i];
+            if (array_key_exists($i, $current)) {
+                $current = &$current[$i];
+            } else if ($required) {
+                throw new OutOfBoundsException("Index not found: " . print_r(compact('array', 'index', 'required', 'current'), true));                
             } else {
                 return null;
             }
         }
 
-        return $array;
+        return $current;
     }
 
     public static function keysAsValues($array) {
