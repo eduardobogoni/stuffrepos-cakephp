@@ -71,7 +71,7 @@ class CakeLayersHelper extends Helper {
         }
 
         if ($model instanceof Model) {
-            $model->recursive = 0;
+            $model->recursive = -1;
         }
 
         return $model;

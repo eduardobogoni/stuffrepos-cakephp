@@ -13,13 +13,15 @@ class JournalizedBehavior extends ModelBehavior {
                 'hasMany' => array(
                     'Journal' => array(
                         'className' => 'Journaling.Journal',
+                        'foreignKey' => 'journalized_id',
                         'conditions' => array(
                             'Journal.journalized_type' => $model->name
                         ),
                         'dependent' => false,
                     )
                 )
-            )
+            ),
+            false
         );
     }
 
