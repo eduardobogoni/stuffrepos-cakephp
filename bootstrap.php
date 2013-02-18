@@ -2,6 +2,6 @@
 
 App::build(
         array(
-            'Plugin' => dirname(__FILE__) . '/plugins/'
+            'Plugin' => dirname(__FILE__) . DS . 'plugins' . DS
         )
 );
