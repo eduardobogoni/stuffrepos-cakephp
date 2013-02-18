@@ -18,7 +18,7 @@ class CommonValidationBehavior extends ModelBehavior {
                                 , $contextField
                 );
 
-                if (!$contextFieldValue) {
+                if ($contextFieldValue === null) {
                     return false;
                 }                                
 
@@ -52,7 +52,7 @@ class CommonValidationBehavior extends ModelBehavior {
 
     private static function currentFieldValue(Model $model, $contextField) {
         $dataField = Basics::fieldValue($model->data, $contextField, $model->alias);
-        if ($dataField) {
+        if ($dataField !== null) {
             return $dataField;
         }
 
