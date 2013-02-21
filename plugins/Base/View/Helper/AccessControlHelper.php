@@ -1,6 +1,7 @@
 <?php
 
-App::import('Lib', 'Base.AccessControl');
+App::uses('AccessControlComponent', 'Base.Controller/Component');
+App::uses('Helper', 'View');
 
 class AccessControlHelper extends Helper {
 
@@ -10,7 +11,7 @@ class AccessControlHelper extends Helper {
     );
     
     public function hasAccess($url) {        
-        return AccessControl::sessionUserHasAccessByUrl($url);
+        return AccessControlComponent::sessionUserHasAccessByUrl($url);
     }
 
     public function output($url, $contentIfTrue, $contentIfFalse = '', $return = true) {
