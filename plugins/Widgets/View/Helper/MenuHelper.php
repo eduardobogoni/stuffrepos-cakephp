@@ -91,7 +91,7 @@ class MenuHelper extends AppHelper {
                     $userEntries[$name] = $subUserEntries;
                 }
             } else {
-                if ($this->AccessControl->hasAccess($value)) {
+                if ($this->AccessControl->hasAccessByUrl($value)) {
                     $userEntries[$name] = $value;
                 }
             }
