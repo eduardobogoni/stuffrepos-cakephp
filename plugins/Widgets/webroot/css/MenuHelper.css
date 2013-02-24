@@ -2,7 +2,7 @@
 ul.MenuHelper {
     position: relative;
     list-style: none;
-    text-align: left;
+    text-align: center;
 }
 
 ul.MenuHelper li {
@@ -33,6 +33,10 @@ ul.MenuHelper ul li {
     font-weight: normal;
     float: none;
     display: block;
+}
+
+#header ul.sub_menu li a {
+    text-align: left;
 }
 
 /* IE 6 & 7 Needs Inline Block */
