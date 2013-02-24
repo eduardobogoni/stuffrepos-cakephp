@@ -49,4 +49,16 @@ class AccessControlHelperTest extends CakeTestCase {
             );
     }
 
+    public function testByAccessMagicMethod() {
+        $this->assertEqual(
+            $this->AccessControl->hasAccessByUrl('/free')
+            , true
+        );
+
+        $this->assertEqual(
+            $this->AccessControl->hasAccessByOtherObjectType('other object')
+            , false
+        );
+    }
+
 }
