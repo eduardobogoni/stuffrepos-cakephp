@@ -11,7 +11,12 @@ class AccessControlComponent extends Component {
      * @var AccessControlFilter[] 
      */
     private static $filters = array();
-    
+
+    public function __construct(\ComponentCollection $collection, $settings = array()) {
+        parent::__construct($collection, $settings);
+        $this->settings = $settings + array('filters' => array());
+    }
+
     /**
      *
      * @var CakeRequest
@@ -20,9 +25,25 @@ class AccessControlComponent extends Component {
     
     public function startup(\Controller $controller) {
         parent::startup($controller);
+        $this->loadFilters();
         self::$request = $controller->request;
+
+        if (!self::sessionUserHasAccessByUrl(self::$request->params)) {
+            $controller->flash('Acesso negado', '/');
+        }
     }
     
+    private function loadFilters() {
+        $this->clearFilters();
+        foreach ($this->settings['filters'] as $filterName) {
+            list($plugin, $name) = pluginSplit($filterName);
+            $class = $name . 'AccessControlFilter';
+            $location = ($plugin ? $plugin . '.' : '') . 'Controller/Component/AccessControl';
+            App::uses($class, $location);
+            $this->addFilter(new $class());
+        }
+    }
+
     public static function clearFilters() {
         self::$filters = array();
     }
@@ -71,6 +92,10 @@ class AccessControlComponent extends Component {
         }
 
         trigger_error(__d('cake_dev', 'Method %1$s::%2$s does not exist', __CLASS__, $method), E_USER_ERROR);
+    }
+
+    public function __call($method, $arguments) {
+        return self::__callStatic($method, $arguments);
     }
 
 }

@@ -10,15 +10,6 @@ class AccessControlHelper extends Helper {
         'Form',
     );
 
-    /**
-     * @deprecated Utilize hasAccessByUrl() em seu lugar.
-     * @param mixed $url
-     * @return boolean
-     */
-    public function hasAccess($url) {
-        return AccessControlComponent::sessionUserHasAccess($url, 'url');
-    }
-
     public function __call($method, $params) {
         if (preg_match('/^hasAccessBy(.+)$/', $method, $matches)) {
             if (count($params) < 1) {
@@ -34,7 +25,7 @@ class AccessControlHelper extends Helper {
     }
 
     public function output($url, $contentIfTrue, $contentIfFalse = '', $return = true) {
-        $out = $this->hasAccess($url) ? $contentIfTrue : $contentIfFalse;
+        $out = $this->hasAccessByUrl($url) ? $contentIfTrue : $contentIfFalse;
         return $this->Html->output($out, $return);
     }
 
