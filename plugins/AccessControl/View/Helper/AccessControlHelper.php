@@ -4,16 +4,33 @@ App::uses('AccessControlComponent', 'AccessControl.Controller/Component');
 App::uses('Helper', 'View');
 
 class AccessControlHelper extends Helper {
-    
-    const ACCESS_CONTROL_OBJECT_TYPE_URL = 'url';
 
     public $helpers = array(
         'Html',
         'Form',
     );
-    
-    public function hasAccess($url) {        
-        return AccessControlComponent::sessionUserHasAccess($url, self::ACCESS_CONTROL_OBJECT_TYPE_URL);
+
+    /**
+     * @deprecated Utilize hasAccessByUrl() em seu lugar.
+     * @param mixed $url
+     * @return boolean
+     */
+    public function hasAccess($url) {
+        return AccessControlComponent::sessionUserHasAccess($url, 'url');
+    }
+
+    public function __call($method, $params) {
+        if (preg_match('/^hasAccessBy(.+)$/', $method, $matches)) {
+            if (count($params) < 1) {
+                trigger_error(__('Missing argument 1 for %1$s::%2$s', get_class($this), $method), E_USER_ERROR);
+            }
+
+            return AccessControlComponent::sessionUserHasAccess(
+                    $params[0], Inflector::variable($matches[1])
+            );
+        }
+
+        return parent::__call($method, $params);
     }
 
     public function output($url, $contentIfTrue, $contentIfFalse = '', $return = true) {

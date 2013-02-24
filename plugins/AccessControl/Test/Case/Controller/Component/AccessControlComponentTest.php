@@ -20,7 +20,6 @@ class AccessControlFilterTest implements AccessControlFilter {
  */
 class AccessControlComponentTest extends CakeTestCase {
 
-    public $AccessControl = null;
 
     public function setUp() {
         parent::setUp();
@@ -34,12 +33,12 @@ class AccessControlComponentTest extends CakeTestCase {
                 new CakeResponse()
             )
         );
+
+        $accessControl->clearFilters();
+        $accessControl->addFilter(new AccessControlFilterTest());
     }
 
     public function testUserHasAccess() {
-        AccessControlComponent::clearFilters();
-        AccessControlComponent::addFilter(new AccessControlFilterTest());
-
         $this->assertEqual(
             AccessControlComponent::userHasAccess(null, '/no-free', 'url')
             , false);
@@ -57,16 +56,53 @@ class AccessControlComponentTest extends CakeTestCase {
             , true);
     }
 
-    public function testSesionuserHasAccess() {
-        AccessControlComponent::clearFilters();
-        AccessControlComponent::addFilter(new AccessControlFilterTest());
-
+    public function testSessionUserHasAccess() {
         $this->assertEqual(
-            AccessControlComponent::sessionuserHasAccess('/free', 'url')
+            AccessControlComponent::sessionUserHasAccess('/free', 'url')
             , true);
 
         $this->assertEqual(
-            AccessControlComponent::sessionuserHasAccess('/no-free', 'url')
+            AccessControlComponent::sessionUserHasAccess('/no-free', 'url')
+            , false);
+    }
+
+    public function testUserHasAccessByMagicMethod() {
+        $this->assertEqual(
+            AccessControlComponent::userHasAccessByUrl(null, '/no-free')
+            , false);
+
+        $this->assertEqual(
+            AccessControlComponent::userHasAccessByUrl(null, '/free')
+            , true);
+
+        $this->assertEqual(
+            AccessControlComponent::userHasAccessByUrl(true, '/free')
+            , true);
+
+        $this->assertEqual(
+            AccessControlComponent::userHasAccessByUrl(true, '/no-free')
+            , true);
+
+        $this->assertEqual(
+            AccessControlComponent::userHasAccessByOtherObjectType(true, 'object of other type')
+            , true);
+
+        $this->assertEqual(
+            AccessControlComponent::userHasAccessByOtherObjectType(false, 'object of other type')
+            , false);
+    }
+
+    public function testSessionUserHasAccessByMagicMethod() {
+        $this->assertEqual(
+            AccessControlComponent::sessionUserHasAccessByUrl('/free')
+            , true);
+
+        $this->assertEqual(
+            AccessControlComponent::sessionUserHasAccessByUrl('/no-free')
+            , false);
+
+        $this->assertEqual(
+            AccessControlComponent::sessionUserHasAccessByOtherObjectType('object of other type')
             , false);
     }
 
