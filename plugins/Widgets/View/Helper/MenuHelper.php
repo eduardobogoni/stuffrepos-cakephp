@@ -5,7 +5,7 @@ App::uses('AppHelper', 'View/Helper');
 class MenuHelper extends AppHelper {
 
     public $helpers = array(
-        'Base.AccessControl',
+        'AccessControl.AccessControl',
         'Base.ScaffoldUtil',
     );
 

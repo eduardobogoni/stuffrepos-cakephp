@@ -2,7 +2,7 @@
 
 App::uses('Component', 'Controller');
 App::uses('AuthComponent', 'Controller/Component');
-App::uses('AccessControlFilter', 'Base.Lib');
+App::uses('AccessControlFilter', 'AccessControl.Lib');
 
 class AccessControlComponent extends Component {
 

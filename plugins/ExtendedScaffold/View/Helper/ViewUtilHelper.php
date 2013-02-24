@@ -8,7 +8,7 @@ class ViewUtilHelper extends AppHelper {
     const VALUE_TYPE_UNKNOWN = 'unknown';
     const VALUE_TYPE_BOOLEAN = 'boolean';
 
-    public $helpers = array('Html', 'AccessControl', 'CakeLayers', 'Lists');
+    public $helpers = array('Html', 'AccessControl.AccessControl', 'CakeLayers', 'Lists');
     /**
      * @var AppControler
      */

@@ -15,7 +15,7 @@ class ActionListHelper extends AppHelper {
     public $debug = false;
     public $helpers = array(
         'Html',
-        'Base.AccessControl',
+        'AccessControl.AccessControl',
         'Base.CakeLayers',
     );
 
