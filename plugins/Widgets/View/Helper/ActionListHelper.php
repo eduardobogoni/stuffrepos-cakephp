@@ -1,6 +1,6 @@
 <?php
 
-App::import('Lib', 'ArrayUtil');
+App::uses('ArrayUtil', 'Base.Lib');
 App::uses('AppHelper', 'View/Helper');
 
 /**
@@ -71,6 +71,16 @@ class ActionListHelper extends AppHelper {
         'layout' => self::LAYOUT_LIST
     );
 
+    /**
+     * @var array
+     */
+    private $settings;
+
+    public function __construct(\View $View, $settings = array()) {
+        parent::__construct($View, $settings);
+        $this->settings = $settings;
+    }
+
     public function outputModuleMenu($options = array()) {
         $this->options = $this->_mergeOptions($options);
         $this->currentController = $this->_foundCurrentController();
@@ -99,6 +109,7 @@ class ActionListHelper extends AppHelper {
             $options['controller'] = $controller;
         }
         $this->options = $this->_mergeOptions($options);
+        $this->currentController = $this->_foundCurrentController();
         $this->targetController = $this->_foundTargetController();
         $model = &$this->targetController->{
                 $this->targetController->modelClass
@@ -166,9 +177,7 @@ class ActionListHelper extends AppHelper {
         }
 
         $columns = ceil(count($actions) / $rows);
-        if ($columns > 0) {
-            $cellWidth = floor(100 / $columns) . '%';
-        }
+        $cellWidth = ($columns == 0 ? '100%' : floor(100 / $columns) . '%');
 
         $b = $this->options['tableLayoutBeforeAll'];
         $b .= '<table class="actionListHelperTableLayout">';
@@ -204,7 +213,7 @@ class ActionListHelper extends AppHelper {
     private function _mergeOptions($options) {
         foreach ($this->defaultOptions as $key => $defaultValue) {
             if (!isset($options[$key])) {
-                $options[$key] = isset($this->params['ActionList']['defaultOptions'][$key]) ? $this->params['ActionList']['defaultOptions'][$key] : $defaultValue;
+                $options[$key] = isset($this->settings[$key]) ? $this->settings[$key] : $defaultValue;
             }
         }
 
@@ -229,9 +238,14 @@ class ActionListHelper extends AppHelper {
 
     private function _buildActionLink($action) {
         $linkOptions = empty($action['linkOptions']) ? array() : $action['linkOptions'];        
+        $linkOptions['method'] = $this->_isActionPost($action) ? 'post' : 'get';
         $question = isset($action['question']) ? __($action['question'], true) : false;
         return $this->AccessControl->link(
                         $this->_getTitle($action), $this->_buildActionUrl($action), $linkOptions, $question);
+    }
+
+    private function _isActionPost($action) {
+        return !empty($action['post']);
     }
 
     private function _isNavigable($targetAction) {
@@ -251,7 +265,7 @@ class ActionListHelper extends AppHelper {
         $actionUrl = $this->_extractActionUrl($targetAction);
 
         //Acesso negado
-        if (!$this->AccessControl->hasAccess($this->_buildActionUrl($targetAction))) {
+        if (!$this->AccessControl->hasAccessByUrl($this->_buildActionUrl($targetAction))) {
             return __('Access denied.', true);
         }
 
@@ -456,8 +470,7 @@ class ActionListHelper extends AppHelper {
 
     private function _isNavigableControllerMethod($targetAction) {
         $actionUrl = $this->_extractActionUrl($targetAction);
-        $methodName = Inflector::camelize("is_navigable_" . $actionUrl['action']);
-        $methodName = '_' . strtolower(substr($methodName, 0, 1)) . substr($methodName, 1, strlen($methodName) - 1);
+        $methodName = '__' . Inflector::variable("is_navigable_" . $actionUrl['action']);
         $controller = $this->_getController($actionUrl['controller']);
 
         if (method_exists($controller, $methodName)) {
