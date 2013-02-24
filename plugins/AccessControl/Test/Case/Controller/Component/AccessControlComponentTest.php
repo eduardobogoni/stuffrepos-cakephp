@@ -1,7 +1,7 @@
 <?php
 
-App::uses('AccessControlComponent', 'Base.Controller/Component');
-App::uses('AccessControlFilter', 'Base.Lib');
+App::uses('AccessControlComponent', 'AccessControl.Controller/Component');
+App::uses('AccessControlFilter', 'AccessControl.Lib');
 
 class AccessControlFilterTest implements AccessControlFilter {
 

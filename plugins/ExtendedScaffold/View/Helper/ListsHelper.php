@@ -8,7 +8,7 @@ class ListsHelper extends AppHelper {
         'Widgets.ActionList',
         'Paginator',
         'Base.PaginatorUtil',
-        'Base.AccessControl',
+        'AccessControl.AccessControl',
         'ExtendedScaffold.ViewUtil',
         'Base.CakeLayers',
     );

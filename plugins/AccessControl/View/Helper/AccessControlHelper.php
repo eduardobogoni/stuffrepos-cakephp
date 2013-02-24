@@ -1,6 +1,6 @@
 <?php
 
-App::uses('AccessControlComponent', 'Base.Controller/Component');
+App::uses('AccessControlComponent', 'AccessControl.Controller/Component');
 App::uses('Helper', 'View');
 
 class AccessControlHelper extends Helper {
