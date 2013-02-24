@@ -4,6 +4,8 @@ App::uses('AccessControlComponent', 'AccessControl.Controller/Component');
 App::uses('Helper', 'View');
 
 class AccessControlHelper extends Helper {
+    
+    const ACCESS_CONTROL_OBJECT_TYPE_URL = 'url';
 
     public $helpers = array(
         'Html',
@@ -11,7 +13,7 @@ class AccessControlHelper extends Helper {
     );
     
     public function hasAccess($url) {        
-        return AccessControlComponent::sessionUserHasAccessByUrl($url);
+        return AccessControlComponent::sessionUserHasAccess($url, self::ACCESS_CONTROL_OBJECT_TYPE_URL);
     }
 
     public function output($url, $contentIfTrue, $contentIfFalse = '', $return = true) {

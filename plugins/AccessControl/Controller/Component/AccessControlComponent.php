@@ -12,6 +12,17 @@ class AccessControlComponent extends Component {
      */
     private static $filters = array();
     
+    /**
+     *
+     * @var CakeRequest
+     */
+    private static $request;
+    
+    public function startup(\Controller $controller) {
+        parent::startup($controller);
+        self::$request = $controller->request;
+    }
+    
     public static function clearFilters() {
         self::$filters = array();
     }
@@ -20,16 +31,17 @@ class AccessControlComponent extends Component {
         self::$filters[] = $filter;
     }
 
-    public static function sessionUserHasAccessByUrl($url) {
-        return self::userHasAccessByUrl(
+    public static function sessionUserHasAccess($object, $objectType = null) {
+        return self::userHasAccess(
                 AuthComponent::user()
-                , $url
+                , $object
+                , $objectType
         );
     }
     
-    public static function userHasAccessByUrl($user, $url) {
+    public static function userHasAccess($user, $object, $objectType = null) {
         foreach(self::$filters as $filter) {
-            if (!$filter->userHasAccessByUrl($user,$url)) {
+            if (!$filter->userHasAccess(self::$request, $user, $object, $objectType)) {
                 return false;
             }
         }
