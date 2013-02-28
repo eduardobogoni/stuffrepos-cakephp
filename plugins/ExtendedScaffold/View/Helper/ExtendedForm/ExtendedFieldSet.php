@@ -3,9 +3,6 @@
 class ExtendedFieldSet {
 
     private $fieldsetData;
-    /**     
-     * @var ExtendedFormHelper
-     */
     private $parent;
 
     public function __construct(ExtendedFormHelper $parent, $fieldsetData, $blacklist) {
@@ -61,7 +58,7 @@ class ExtendedFieldSet {
         }
 
         if ($this->parent->isVirtualField($field)) {
-            $value = $this->parent->value();
+            $value = $this->value();
             return strlen($value['value']) . 'em';
         }
 

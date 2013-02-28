@@ -25,25 +25,13 @@ class ListsHelper extends AppHelper {
     }
 
     public function rowsTable($fields, $rows, $options = array()) {
-        if (empty($options['controller'])) {
-            $this->controller = $this->CakeLayers->getController();
-        } else {
-            $this->controller = $this->CakeLayers->getController($options['controller']);
-        }
-
-        if (empty($options['model'])) {
-            $this->model = $this->CakeLayers->getControllerDefaultModel($this->controller->name);
-        } else {
-            $this->model = $this->CakeLayers->getModel($options['model']);
-        }
-
-        $this->firstColumnViewLink = isset($options['firstColumnViewLink']) ? $options['firstColumnViewLink'] : true;
-
-        $this->showActions = (isset($options['showActions']) ? $options['showActions'] : true);
-        $this->showOrderNumbers = (isset($options['showOrderNumbers']) ? $options['showOrderNumbers'] : false);
-
+        $this->_setup($options);
         $fields = $this->_extractFields($fields);
-        $b = "<table>\n";
+        $b = "<table";
+        foreach ($this->htmlAttributes as $key => $value) {
+            $b .= " $key=\"$value\"";
+        }
+        $b .= ">\n";
         $b .= "\t<tr>\n";
         if ($this->showOrderNumbers) {
             $b.= "\t\t<th>\n";
@@ -74,6 +62,34 @@ class ListsHelper extends AppHelper {
         return $b;
     }
 
+    public function rowLine($fields, $row, $rowIndex, $tableOptions = array(),$rowOptions = array()) {
+        $this->_setup($tableOptions);
+        return $this->_rowLine($this->_extractFields($fields), $row, $rowIndex,$rowOptions);
+    }
+
+    public function _setup($options) {
+        if (empty($options['controller'])) {
+            $this->controller = $this->CakeLayers->getController();
+        } else {
+            $this->controller = $this->CakeLayers->getController($options['controller']);
+        }
+
+        if (isset($options['model'])) {
+            if ($options['model']) {
+                $this->model = $this->CakeLayers->getModel($options['model']);
+            } else {
+                $this->model = false;
+            }
+        } else {
+            $this->model = $this->CakeLayers->getControllerDefaultModel($this->controller->name);
+        }
+
+        $this->firstColumnViewLink = isset($options['firstColumnViewLink']) ? $options['firstColumnViewLink'] : true;
+        $this->htmlAttributes = isset($options['htmlAttributes']) ? $options['htmlAttributes'] : array();
+        $this->showActions = (isset($options['showActions']) ? $options['showActions'] : true);
+        $this->showOrderNumbers = (isset($options['showOrderNumbers']) ? $options['showOrderNumbers'] : false);
+    }
+
     public function paginatorInfo() {
         $b = '<div class="paging">';
         if ($this->Paginator->hasPrev()) {
@@ -90,11 +106,6 @@ class ListsHelper extends AppHelper {
         $b .= $this->Paginator->counter(array(
             'format' => __('({:page}-{:pages}/{:count})', true)
                 ));
-        /*
-          $this->Paginator->counter(array(
-          'format' => __d('cake', 'Page {:page} of {:pages}, showing {:current} records out of {:count} total, starting on record {:start}, ending on {:end}')
-          )); */
-
         $b .= '</div>';
 
         return $b;
@@ -136,24 +147,32 @@ class ListsHelper extends AppHelper {
 
         $nameParts = explode('.', $name);
         if (count($nameParts) == 1) {
-            $path = array(
-                $nameParts[0]
-            );
-            $model = &$this->model;
-            assert('$model instanceof Model');
+            if ($this->model) {
+                $path = array(
+                    $this->model->alias,
+                    $nameParts[0]
+                );
+                $model = &$this->model;
+            } else {
+                $path = array($nameParts[0]);
+                $model = false;
+            }
         } else {
             $path = $nameParts;
-            if ($nameParts[0] == $this->model->alias) {
-                $model = &$this->model;
-                assert('$model instanceof Model');
-            } else {
-                $model = &$this->model->{$nameParts[0]};
-                assert('$model instanceof Model');
-            }
+            $model = &$this->model->{$nameParts[0]};
         }
 
-        $fieldSchema = ModelTraverser::schema($this->model, $path);
-        $type = $fieldSchema['type'];
+        if ($model) {
+            $modelSchema = $model->schema();
+
+            if (!empty($modelSchema[$path[1]])) {
+                $type = $modelSchema[$path[1]]['type'];
+            } else if (!empty($model->virtualFieldsSchema[$path[1]]['type'])) {
+                $type = $model->virtualFieldsSchema[$path[1]]['type'];
+            }
+        } else {
+            $type = 'string';
+        }
 
         return compact(
                         'staticValue'
@@ -175,7 +194,7 @@ class ListsHelper extends AppHelper {
         if (!empty($associations['belongsTo'])) {
             foreach ($associations['belongsTo'] as $_alias => $_details) {
                 if ($field === $_details['foreignKey']) {
-                    return ArrayUtil::mergeArrayWithKeys(array('alias' => $_alias), $_details);
+                    return $_details + array('alias' => $_alias);
                 }
             }
         }
@@ -183,13 +202,22 @@ class ListsHelper extends AppHelper {
         return null;
     }
 
-    private function _rowLine($fields, $row, $rowIndex) {
+    private function _rowLine($fields, $row, $rowIndex, $options = array()) {
 
         $class = null;
         if ($rowIndex % 2 == 0) {
             $class = ' class="altrow"';
         }
-        $b = "\n\t<tr{$class}>\n";
+        $b = "\n\t<tr{$class}";
+        
+        if (!empty($options['htmlAttributes']) && is_array($options['htmlAttributes'])) {
+            foreach ($options['htmlAttributes'] as $key => $value) {
+                $b .= " $key='$value'";
+            }
+        }
+        
+        
+        $b .= ">\n";
 
         if ($this->showOrderNumbers) {
             $b .= "\t\t<td style='text-align: center'>\n";
@@ -250,7 +278,11 @@ class ListsHelper extends AppHelper {
     }
 
     private function _modelAssociations() {
-        return $this->CakeLayers->getModelAssociations($this->model);
+        if ($this->model) {
+            return $this->CakeLayers->getModelAssociations($this->model);
+        } else {
+            return array();
+        }
     }
 
     public function _fieldLabel($field) {
@@ -261,11 +293,13 @@ class ListsHelper extends AppHelper {
 
         $key = $field['path'][count($field['path']) - 1];
 
-        if (isset($this->params['paging'][$this->model->name])) {
-            if (empty($title)) {
-                return $this->Paginator->sort($key);
-            } else {
-                return $this->Paginator->sort($title, $key);
+        if ($this->model) {
+            if (!empty($this->params['paging'][$this->model->name])) {
+                if (empty($title)) {
+                    return $this->Paginator->sort($key);
+                } else {
+                    return $this->Paginator->sort($title, $key);
+                }
             }
         } else {
             if (empty($title)) {
@@ -277,59 +311,56 @@ class ListsHelper extends AppHelper {
 
     private function _rowFieldValue($field, $row, $firstField) {
         $link = $value = null;
-        if (!empty($field['association'])) {
-            $link = array(
-                'controller' => $field['association']['controller']
-                , 'action' => 'view'
-                , ModelTraverser::lastInstancePrimaryKeyValue(
-                        $this->model
-                        , $row
-                        , $field['path']
-                )
-            );
-        } else {
-            if ($firstField && $this->firstColumnViewLink) {
-                $link = array(
-                    'controller' => Inflector::underscore($this->controller->name),
-                    'action' => 'view',
-                    ModelTraverser::lastInstancePrimaryKeyValue(
-                            $this->model
-                            , $row
-                            , $field['path']
-                    )
-                );
-            }
-        }
 
         if ($field['valueFunction']) {
             $value = $this->_formatValueByFunction($field, $row);
         } else if ($field['staticValue'] !== null) {
             $value = $field['staticValue'];
         } else {
-            if (empty($field['association'])) {
-                $value = ModelTraverser::value($this->model, $row, $field['path']);
+            if (!empty($field['association'])) {
+                $modelIndex = $field['association']['alias'];
+                $fieldIndex = $field['association']['displayField'];
+                if (!empty($row[$this->model->alias][$field['association']['foreignKey']])) {
+                    $link = array('controller' => $field['association']['controller'], 'action' => 'view',
+                        $row[$this->model->alias][$field['association']['foreignKey']]);
+                }
             } else {
-                $value = ModelTraverser::lastInstanceAssociationDisplayFieldValue(
-                                $this->model
-                                , $row
-                                , $field['path']
-                );
+                if ($this->model && $firstField && $this->firstColumnViewLink) {
+                    $link = array(
+                        'controller' => Inflector::underscore($this->controller->name),
+                        'action' => 'view',
+                        $row[$this->model->alias][$this->model->primaryKey]
+                    );
+                }
+
+                if (count($field['path']) > 1) {
+                    list($modelIndex, $fieldIndex) = $field['path'];
+                } else {
+                    $modelIndex = false;
+                    list($fieldIndex) = $field['path'];
+                }
             }
+            
+            if ($modelIndex) {
+                $value = $row[$modelIndex][$fieldIndex];
+            } else {
+                $value = $row[$fieldIndex];
+            }
+            $value = $this->CakeLayers->modelInstanceFieldByPath(
+                $this->model, $row, $field['path'], true
+            );
 
             if (is_array($value)) {
                 $value = $this->_formatValueAsList($value);
             } else {
-                if (!empty($field['mask'])) {
-                    $value = $this->ViewUtil->stringMask($value, $field['mask']);
-                } else {
-                    switch ($field['type']) {
-                        case $this->ViewUtil->VALUE_TYPE_BOOLEAN:
-                            $value = $this->ViewUtil->yesNo($value);
-                            break;
+                App::import('Helper', 'ViewUtil');
+                switch ($field['type']) {
+                    case ViewUtilHelper::VALUE_TYPE_BOOLEAN:
+                        $value = $this->ViewUtil->yesNo($value);
+                        break;
 
-                        default:
-                            $value = $this->ViewUtil->autoFormat($value);
-                    }
+                    default:
+                        $value = $this->ViewUtil->autoFormat($value);
                 }
             }
         }
@@ -364,7 +395,7 @@ class ListsHelper extends AppHelper {
     private function _currentPageFirstRowIndex() {
         if (isset($this->params['paging'][$this->model->name])) {
             $paging = $this->params['paging'][$this->model->name];
-            return ($paging['page'] - 1) * ($paging['limit']);
+            return ($paging['page'] - 1) * ($paging['options']['limit']);
         } else {
             return 0;
         }
