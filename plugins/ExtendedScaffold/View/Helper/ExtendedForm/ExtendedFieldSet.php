@@ -1,6 +1,6 @@
 <?php
 
-class ExtendedFormHelper_ExtendedFieldSet {
+class ExtendedFieldSet {
 
     private $fieldsetData;
     /**     
