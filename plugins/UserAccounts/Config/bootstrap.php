@@ -1,2 +1,2 @@
 <?php
-CakePlugin::load('UserAccounts');
+CakePlugin::load('ExtendedScaffold');

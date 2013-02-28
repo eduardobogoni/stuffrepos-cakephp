@@ -5,7 +5,7 @@ class UsersController extends AppController {
     public $scaffold;
     
     public $components = array(
-        'Base.ScaffoldUtil' => array(
+        'ExtendedScaffold.ScaffoldUtil' => array(
             'indexSetFields' => array(
                 'name',
                 'email',
