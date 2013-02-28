@@ -1,6 +1,6 @@
 <?php
 
-class ExtendedFormHelper_InputsOnSubmit {
+class InputsOnSubmit {
     
     /**
      *

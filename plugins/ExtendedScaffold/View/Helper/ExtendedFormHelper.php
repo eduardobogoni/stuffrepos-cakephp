@@ -3,10 +3,10 @@
 App::import('Helper', 'Form');
 App::import('Lib', 'Base.ExtendedFieldsParser');
 App::import('Lib', 'Base.ArrayUtil');
-require_once(dirname(__FILE__) . '/ExtendedFormHelper/ExtendedFormHelper_ExtendedFieldSet.php');
-require_once(dirname(__FILE__) . '/ExtendedFormHelper/ExtendedFormHelper_InputSearchable.php');
-require_once(dirname(__FILE__) . '/ExtendedFormHelper/ExtendedFormHelper_InputsOnSubmit.php');
-require_once(dirname(__FILE__) . '/ExtendedFormHelper/ExtendedFormHelper_ListFieldSet.php');
+App::uses('ExtendedFieldSet', 'ExtendedScaffold.View/Helper/ExtendendForm');
+App::uses('InputSearchable', 'ExtendedScaffold.View/Helper/ExtendendForm');
+App::uses('InputsOnSubmit', 'ExtendedScaffold.View/Helper/ExtendendForm');
+App::uses('ListFieldSet', 'ExtendedScaffold.View/Helper/ExtendendForm');
 
 class ExtendedFormHelper extends FormHelper {
 
@@ -24,7 +24,7 @@ class ExtendedFormHelper extends FormHelper {
 
     public function __construct(View $View, $settings = array()) {
         parent::__construct($View, $settings);
-        $this->inputsOnSubmit = new ExtendedFormHelper_InputsOnSubmit($this);
+        $this->inputsOnSubmit = new InputsOnSubmit($this);
     }
     
     public function beforeLayout($layoutFile) {
@@ -94,9 +94,9 @@ class ExtendedFormHelper extends FormHelper {
 
     private function _extendedInputsFieldset($fieldset, $blacklist) {
         if (empty($fieldset['listAssociation'])) {
-            $f = new ExtendedFormHelper_ExtendedFieldSet($this, $fieldset, $blacklist);
+            $f = new ExtendedFieldSet($this, $fieldset, $blacklist);
         } else {
-            $f = new ExtendedFormHelper_ListFieldset($this, $fieldset, $blacklist);
+            $f = new ListFieldset($this, $fieldset, $blacklist);
         }
 
         return $f->output();
@@ -257,7 +257,7 @@ class ExtendedFormHelper extends FormHelper {
 
             return $b;
         } else if (!empty($options['search'])) {
-            $input = new ExtendedFormHelper_InputSearchable($this, $fieldName, $options);
+            $input = new InputSearchable($this, $fieldName, $options);
             return $input->output();
         } else {
             return parent::text($fieldName, $options);

@@ -1,6 +1,6 @@
 <?php
 
-class ExtendedFormHelper_ListFieldset {
+class ListFieldset {
 
     /**
      *

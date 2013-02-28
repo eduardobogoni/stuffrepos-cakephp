@@ -1,6 +1,6 @@
 <?php
 
-class ExtendedFormHelper_InputSearchable {
+class InputSearchable {
 
     public function __construct(ExtendedFormHelper $parent, $fieldName, $options) {
         $this->parent = $parent;
