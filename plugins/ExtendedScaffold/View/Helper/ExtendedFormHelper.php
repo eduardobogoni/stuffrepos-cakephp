@@ -1,12 +1,14 @@
 <?php
 
-App::import('Helper', 'Form');
-App::import('Lib', 'Base.ExtendedFieldsParser');
-App::import('Lib', 'Base.ArrayUtil');
-App::uses('ExtendedFieldSet', 'ExtendedScaffold.View/Helper/ExtendendForm');
-App::uses('InputSearchable', 'ExtendedScaffold.View/Helper/ExtendendForm');
-App::uses('InputsOnSubmit', 'ExtendedScaffold.View/Helper/ExtendendForm');
-App::uses('ListFieldSet', 'ExtendedScaffold.View/Helper/ExtendendForm');
+App::uses('FormHelper', 'View/Helper');
+App::uses('ExtendedFieldsParser', 'Base.Lib');
+App::uses('ArrayUtil', 'Base.Lib');
+App::uses('Basics', 'Base.Lib');
+App::uses('ExtendedFieldSet', 'ExtendedScaffold.View/Helper/ExtendedForm');
+App::uses('InputSearchable', 'ExtendedScaffold.View/Helper/ExtendedForm');
+App::uses('InputsOnSubmit', 'ExtendedScaffold.View/Helper/ExtendedForm');
+App::uses('ListFieldSet', 'ExtendedScaffold.View/Helper/ExtendedForm');
+App::uses('InputMasked', 'ExtendedScaffold.View/Helper/ExtendedForm');
 
 class ExtendedFormHelper extends FormHelper {
 
@@ -29,12 +31,15 @@ class ExtendedFormHelper extends FormHelper {
     
     public function beforeLayout($layoutFile) {
         parent::beforeLayout($layoutFile);        
-        $this->ScaffoldUtil->addJavascriptLink('dom_helper.js');
-        $this->ScaffoldUtil->addJavascriptLink('lang.js');
-        $this->ScaffoldUtil->addJavascriptLink('collections.js');
-        $this->ScaffoldUtil->addJavascriptLink('extended_form_helper.js');
-        $this->ScaffoldUtil->addJavascriptLink('extended_form_helper__input_searchable.js');
-        $this->ScaffoldUtil->addJavascriptLink('jquery.textchange.min.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.dom_helper.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.lang.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.collections.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__input_masked.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__input_searchable.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__list_field_set.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery.textchange.min.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery.inputmask/jquery.inputmask.js');
     }
 
     public function defaultForm($fields = null) {
@@ -59,6 +64,8 @@ class ExtendedFormHelper extends FormHelper {
         if (empty($options['url']) && empty($options['action'])) {
             $options['url'] = $this->_currentUrl();
         }
+
+        $options['enctype'] = 'multipart/form-data';
 
         return $this->create($model, $options);
     }
@@ -96,7 +103,7 @@ class ExtendedFormHelper extends FormHelper {
         if (empty($fieldset['listAssociation'])) {
             $f = new ExtendedFieldSet($this, $fieldset, $blacklist);
         } else {
-            $f = new ListFieldset($this, $fieldset, $blacklist);
+            $f = new ListFieldSet($this, $fieldset, $blacklist);
         }
 
         return $f->output();
@@ -153,7 +160,7 @@ class ExtendedFormHelper extends FormHelper {
 
     public function getReadonlyListOptions($fieldName) {
         $view = & ClassRegistry::getObject('view');
-        $fieldValue = getByArray($view->data, explode('.', $fieldName));
+        $fieldValue = ArrayUtil::arrayIndex($view->data, explode('.', $fieldName));
         return array(
             $fieldValue => $view->viewVars[$this->getListVariableDefaultName($fieldName)][$fieldValue]
         );
@@ -161,14 +168,13 @@ class ExtendedFormHelper extends FormHelper {
 
     public function inputHiddenAllData() {
         $buffer = "";
-        foreach (array_keys(array2NamedParams($this->data)) as $field) {
+        foreach (array_keys(ArrayUtil::array2NamedParams($this->data)) as $field) {
             $buffer .= $this->input($field, array('type' => 'hidden'));
         }
         return $buffer;
     }
 
     public function isFixed($fieldName) {
-        App::import('Lib', 'Stuffrepos.ArrayUtil');
         return ArrayUtil::arrayIndex(
                         $this->data, array_merge(
                                 array(self::FIXED_PREFIX), explode('.', $fieldName)
@@ -235,48 +241,14 @@ class ExtendedFormHelper extends FormHelper {
 
     public function text($fieldName, $options = array()) {
         if (!empty($options['mask'])) {
-            $hiddenId = $this->createNewDomId();
-            $b = $this->hidden($fieldName, array('id' => $hiddenId));
-
-            $visibleInputName = $fieldName . '_masked';
-            $this->setEntity($visibleInputName);
-            $visibleId = $this->createNewDomId();
-            $b .= parent::text(
-                            $visibleInputName, array_merge(
-                                    $options, array(
-                                'id' => $visibleId
-                                    )
-                            )
-            );
-
-            $b .= $this->_maskedTextOnDocumentReady(
-                    $hiddenId, $visibleId, $options['mask']
-            );
-
-            $this->inputsOnSubmit->addInput('text', $visibleId, $hiddenId);
-
-            return $b;
-        } else if (!empty($options['search'])) {
-            $input = new InputSearchable($this, $fieldName, $options);
+            $input = new InputMasked($this,$fieldName,$options);
             return $input->output();
+        } else if (!empty($options['search'])) {
+            $input = new InputSearchable($this,$fieldName,$options);
+            return $input->output();            
         } else {
             return parent::text($fieldName, $options);
         }
-    }
-
-    private function _maskedTextOnDocumentReady($hiddenId, $visibleId, $mask) {
-        return $this->javascriptTag(
-                        "\$(document).ready(function(){
-   \$('#$visibleId').inputmask({'mask': '$mask', 'autoUnmask': true});
-   \$('#$visibleId').inputmask('setvalue',\$('#$hiddenId').val());            
-});");
-    }
-
-    public function checkbox($fieldName, $options = array()) {
-        if (!empty($options['readonly'])) {
-            $options['disabled'] = "disabled";
-        }
-        return parent::checkbox($fieldName, $options);
     }
 
     public function create($model = null, $options = array()) {
@@ -287,7 +259,7 @@ class ExtendedFormHelper extends FormHelper {
     }
 
     public function end($options = null) {
-        return parent::end($options) . $this->onSubmitEvent();
+        return parent::end($options) . $this->onSubmitEvent() . $this->_onReadyEvent();
     }
 
     private function onSubmitEvent() {
@@ -296,6 +268,15 @@ class ExtendedFormHelper extends FormHelper {
         $b .= "
             return true;
 });";
+        return $this->javascriptTag($b);
+    }
+    
+    private function _onReadyEvent() {
+        $b = <<<EOT
+$(document).ready(function(){
+    ExtendedFormHelper.initInputs($('#{$this->formId}'));
+    });
+EOT;
         return $this->javascriptTag($b);
     }
 
@@ -309,6 +290,14 @@ class ExtendedFormHelper extends FormHelper {
         return "id_" . str_pad($n, $maxDigits, '0', STR_PAD_LEFT);
     }
 
+    /**
+     *
+     * @return InputsOnSubmit
+     */
+    public function getInputsOnSubmit() {
+        return $this->inputsOnSubmit;
+    }
+    
     private function _currentUrl() {
         $pattern = '/^' . str_replace('/', '\/', $this->base) . '/';
         return preg_replace($pattern, '', $this->here);

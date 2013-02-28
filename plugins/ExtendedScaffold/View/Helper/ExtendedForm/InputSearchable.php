@@ -2,7 +2,7 @@
 
 class InputSearchable {
 
-    public function __construct(ExtendedFormHelper $parent, $fieldName, $options) {
+    public function __construct(ExtendedFormHelper $parent, $fieldName, $options) {        
         $this->parent = $parent;
         $this->fieldName = $fieldName;
         $this->options = $options;
@@ -13,7 +13,6 @@ class InputSearchable {
     public function output() {
         $b = $this->parent->hidden($this->fieldName, array('id' => $this->hiddenInputId));
         $b .= $this->_visibleInput();
-        $b .= $this->_onDocumentReadyJavascript();
         return $b;
     }
 
@@ -21,7 +20,12 @@ class InputSearchable {
         $visibleOptions = $this->options;
         unset($visibleOptions['search']);
         $visibleOptions['id'] = $this->visibleInputId;
-
+        $visibleOptions['initCallback'] = 'ExtendedFormHelper.InputSearchable.initCallback';
+        $visibleOptions['initOptions'] = json_encode(array(
+            'searchOptions' => $this->_searchOptions(),
+            'initialId' => $this->_hiddenInputValue(),
+            'initialLabel' => $this->_visibleInputValue(),
+                ));
         return $this->parent->text(
                         $this->fieldName . '_search', $visibleOptions
         );
@@ -56,19 +60,6 @@ class InputSearchable {
         } else {
             return $this->options['search'];
         }
-    }
-
-    private function _onDocumentReadyJavascript() {
-        return $this->parent->javascriptTag(
-                        "\$(document).ready(function(){
-new ExtendedFormHelper.InputSearchable(
-    '$this->hiddenInputId',
-    '$this->visibleInputId'," .
-                        json_encode($this->_searchOptions()) . ",
-                            '{$this->_hiddenInputValue()}',
-                            '{$this->_visibleInputValue()}'
-);
-});");
     }
 
 }
