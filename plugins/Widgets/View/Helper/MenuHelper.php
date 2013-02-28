@@ -6,7 +6,7 @@ class MenuHelper extends AppHelper {
 
     public $helpers = array(
         'AccessControl.AccessControl',
-        'Base.ScaffoldUtil',
+        'ExtendedScaffold.ScaffoldUtil',
     );
 
     public function __construct(\View $View, $settings = array()) {

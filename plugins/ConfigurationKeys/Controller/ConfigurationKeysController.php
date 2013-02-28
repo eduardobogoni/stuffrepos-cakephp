@@ -10,7 +10,7 @@ class ConfigurationKeysController extends AppController {
         'add'
     );
     public $components = array(
-        'Base.ScaffoldUtil' => array(
+        'ExtendedScaffold.ScaffoldUtil' => array(
             'editSetFields' => array(
                 'name' => array(
                     'type' => 'string',
