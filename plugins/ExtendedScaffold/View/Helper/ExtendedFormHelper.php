@@ -197,8 +197,8 @@ class ExtendedFormHelper extends FormHelper {
     public function dateTime($fieldName, $dateFormat = 'DMY', $timeFormat = '12', $selected = null, $attributes = array()) {
         $hiddenId = $this->createNewDomId();
         $hiddenAttributes = array('id' => $hiddenId);
-        if (isset($attributes['value'])) {
-            $hiddenAttributes['value'] = $attributes['value'];
+        if (isset($selected['value'])) {
+            $hiddenAttributes['value'] = $selected['value'];
         }
         $hiddenInput = $this->hidden($fieldName, $hiddenAttributes);
         $visibleInputName = $fieldName . '_masked';

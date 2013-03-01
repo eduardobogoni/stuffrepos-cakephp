@@ -19,7 +19,8 @@
  * CakePHP Bog Util. If not, see http://www.gnu.org/licenses/.
  */
 
-App::import('Lib', 'Base.ArrayUtil');
+App::uses('ArrayUtil', 'Base.Lib');
+App::uses('Basics', 'Base.Lib');
 
 class PaginatorUtilComponent extends Component {
 
@@ -139,8 +140,10 @@ class PaginatorUtilComponentFilter {
      * @return boolean 
      */
     private function hasConfig($config) {
-        return isset($this->options[$config])
-                && $this->options[$config];
+        return ArrayUtil::hasArrayIndex(
+                $this->options
+                , Basics::fieldNameToArray($config)
+        );
     }
 
     /**
@@ -150,7 +153,7 @@ class PaginatorUtilComponentFilter {
      */
     private function getConfig($config) {
         if ($this->hasConfig($config)) {
-            return $this->options[$config];
+            return ArrayUtil::arrayIndex($this->options, Basics::fieldNameToArray($config), true);
         } else {
             return null;
         }
@@ -235,7 +238,13 @@ class PaginatorUtilComponentFilter {
 
         if ($update) {
             if (isset($this->controller->params['url'][$this->getSlugedName()]) && trim($this->controller->params['url'][$this->getSlugedName()]) !== '') {
-                return trim($this->controller->params['url'][$this->getSlugedName()]);
+                $value = trim($this->controller->params['url'][$this->getSlugedName()]);                
+                if ($this->getConfig('fieldOptions.type') == 'date') {
+                    if (strtotime($value) === false) {
+                        return $default;
+                    }
+                }                
+                return $value;
             } else {
                 return $default;
             }
@@ -286,7 +295,11 @@ class PaginatorUtilComponentFilter {
         }
 
         if ($this->hasConfig('fieldOptions')) {
-            $field = array_merge($this->getConfig('fieldOptions'), $field);
+            $field = $this->getConfig('fieldOptions') + $field;
+        }
+        
+        if ($field['type'] == 'date') {
+            $field['selected'] = $field['value'];
         }
 
         return $field;
