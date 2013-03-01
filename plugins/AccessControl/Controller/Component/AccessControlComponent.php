@@ -98,4 +98,13 @@ class AccessControlComponent extends Component {
         return self::__callStatic($method, $arguments);
     }
 
+    public static function parseHasAccessByMethodName($prefix, $method) {
+        if (preg_match("/^$prefix(.+)$/", $method, $matches)) {
+            return Inflector::variable($matches[1]);
+        }
+        else {
+            return false;
+        }
+    }
+
 }

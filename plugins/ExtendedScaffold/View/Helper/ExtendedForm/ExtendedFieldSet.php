@@ -1,8 +1,15 @@
 <?php
 
+App::uses('AccessControlComponent', 'AccessControl.Controller/Component');
+
 class ExtendedFieldSet {
 
     private $fieldsetData;
+
+    /**
+     *
+     * @var ExtendedFormHelper 
+     */
     private $parent;
 
     public function __construct(ExtendedFormHelper $parent, $fieldsetData, $blacklist) {
@@ -37,12 +44,14 @@ class ExtendedFieldSet {
     private function _extendedInputsLine($line) {
         $fieldsOut = '';
         foreach ($line as $fieldData) {
-            if (!in_array($fieldData['name'], $this->blacklist)) {
-                if (($width = $this->_extendedInputWidth($fieldData['name']))) {
+            if ($this->_hasAccess($fieldData)) {
+                if (!in_array($fieldData['name'], $this->blacklist)) {
+                    if (($width = $this->_extendedInputWidth($fieldData['name']))) {
 
-                    $fieldData['options']['style'] = "width: $width";
+                        $fieldData['options']['style'] = "width: $width";
+                    }
+                    $fieldsOut .= "\t" . $this->parent->input($fieldData['name'], $fieldData['options']) . "\n";
                 }
-                $fieldsOut .= "\t" . $this->parent->input($fieldData['name'], $fieldData['options']) . "\n";
             }
         }
         if (!empty($fieldsOut)) {
@@ -50,6 +59,17 @@ class ExtendedFieldSet {
         } else {
             return '';
         }
+    }
+
+    private function _hasAccess($fieldData) {        
+        foreach ($fieldData['options'] as $key => $value) {
+            if (($accessObjectType = AccessControlComponent::parseHasAccessByMethodName('hasAccessBy', $key)) !== false) {                
+                if (!$this->parent->AccessControl->{'hasAccessBy' . Inflector::camelize($accessObjectType)}($value)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private function _extendedInputWidth($field) {

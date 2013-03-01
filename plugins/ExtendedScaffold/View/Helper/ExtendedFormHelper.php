@@ -16,6 +16,7 @@ class ExtendedFormHelper extends FormHelper {
     const MASKED_SUFFIX = '_masked';
 
     public $helpers = array(
+        'AccessControl.AccessControl',
         'Html',
         'ExtendedScaffold.Lists',
         'Base.CakeLayers',
