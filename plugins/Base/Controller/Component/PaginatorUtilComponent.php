@@ -186,7 +186,7 @@ class PaginatorUtilComponentFilter {
                             array_keys($this->getConfig('conditionsPerValue'))
             );
         } else if ($this->hasConfig('conditionsFunction')) {
-            return ArrayUtil::keysAsValues(
+            return array_keys(
                             $this->controller->{$this->getConfig('conditionsFunction')}()
             );
         } else {
