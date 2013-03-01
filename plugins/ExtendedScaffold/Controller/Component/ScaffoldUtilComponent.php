@@ -19,6 +19,8 @@
  * CakePHP Bog Util. If not, see http://www.gnu.org/licenses/.
  */
 
+App::uses('Component', 'Controller');
+
 /**
  * 
  */
@@ -62,9 +64,10 @@ class ScaffoldUtilComponent extends Component {
             if (empty($scaffoldFields['_extended'])) {
                 if ($this->_getActionOption('unsetFields')) {
                     $tempFields = array();
-                    foreach ($scaffoldFields as $field) {
+                    foreach ($scaffoldFields as $key => $value) {
+                        $field = is_array($value) ? $key : $value;
                         if (!in_array($field, $this->_getActionOption('unsetFields'))) {
-                            $tempFields[] = $field;
+                            $tempFields[$key] = $value;
                         }
                     }
                     $scaffoldFields = $tempFields;
