@@ -1,7 +1,7 @@
 <?php
 
 App::uses('FormHelper', 'View/Helper');
-App::uses('ExtendedFieldsParser', 'Base.Lib');
+App::uses('ExtendedFieldsParser', 'ExtendedScaffold.Lib');
 App::uses('ArrayUtil', 'Base.Lib');
 App::uses('Basics', 'Base.Lib');
 App::uses('ExtendedFieldSet', 'ExtendedScaffold.View/Helper/ExtendedForm');

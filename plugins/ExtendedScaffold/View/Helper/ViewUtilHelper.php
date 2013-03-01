@@ -1,6 +1,6 @@
 <?php
 
-App::import('Lib', 'Base.ExtendedFieldsParser');
+App::uses('ExtendedFieldsParser', 'ExtendedScaffold.Lib');
 App::import('Lib', 'Base.ModelTraverser');
 App::import('Lib', 'Base.Basics');
 
