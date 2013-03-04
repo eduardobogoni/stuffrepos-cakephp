@@ -37,10 +37,8 @@ abstract class LdapAppModel extends AppModel {
             'ldapFields' => 'fields',
         );
 
-        $databaseConfig = new DATABASE_CONFIG();
-
         foreach ($parameters as $parameterToModel => $parameterFromDatabase) {
-            if (empty($databaseConfig->{$this->useDbConfig}['models'][get_class($this)][$parameterFromDatabase])) {
+            if (empty($this->getDataSource()->config['models'][get_class($this)][$parameterFromDatabase])) {
                 throw new Exception('Valor não informado para DATABASE_CONFIG::'
                         . $this->useDbConfig
                         . '[models]['
@@ -50,7 +48,7 @@ abstract class LdapAppModel extends AppModel {
                         . ']');
             }                        
             
-            $this->{$parameterToModel} = $databaseConfig->{$this->useDbConfig}['models'][get_class($this)][$parameterFromDatabase];
+            $this->{$parameterToModel} = $this->getDataSource()->config['models'][get_class($this)][$parameterFromDatabase];
         }
         
         $this->schema(true);
