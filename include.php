@@ -44,8 +44,11 @@ function checkTemporaryDirectory($tmpSkeletonRootPath, DirectoryIterator $tmpSke
     }
 }
 
-$tmpSkeletonRoot = new DirectoryIterator(dirname(__FILE__) . DS . 'cakephp' . DS . 'app' . DS . 'tmp');
-checkTemporaryDirectory($tmpSkeletonRoot->getRealPath(), $tmpSkeletonRoot);
+$tmpSkeletonRootPath = realpath(dirname(__FILE__) . DS . 'cakephp' . DS . 'app' . DS . 'tmp');
+checkTemporaryDirectory(
+    $tmpSkeletonRootPath
+    , new DirectoryIterator($tmpSkeletonRootPath)
+);
 
 unset($userConfig);
 unset($cakephpTmpRoot);
