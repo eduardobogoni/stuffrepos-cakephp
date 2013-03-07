@@ -1,0 +1,35 @@
+<?php
+
+class DATABASE_CONFIG {
+
+    public $openLdapTest = array(
+        'datasource' => 'Ldap.Ldap',
+        'login' => 'cn=admin,dc=nodomain',
+        'password' => 'admin',
+        'host' => 'localhost',
+        'database' => 'ou=test,dc=nodomain',
+        'encoding' => 'utf8',
+        'models' => array(
+            'LdapSimpleUserAccountTest' => array(
+                'relativeBaseDn' => 'ou=users',
+                'dnAttribute' => 'uid',
+                'objectClass' => array('account', 'simpleSecurityObject'),
+            ),
+        )
+    );
+
+    public function __openLdapTestLdapSimpleUserAccountTestToLdap($data) {
+        $ldapData = array();
+
+        if (isset($data['username'])) {
+            $ldapData['uid'] = $data['username'];
+        }
+
+        if (isset($data['password'])) {
+            $ldapData['userPassword'] = '{MD5}' . base64_encode(pack('H*', md5($data['password'])));
+        }
+
+        return $ldapData;
+    }
+
+}

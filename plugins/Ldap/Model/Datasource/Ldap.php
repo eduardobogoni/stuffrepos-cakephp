@@ -7,6 +7,7 @@
  * @license GPL
  */
 class Ldap extends DataSource {
+    private $connection = null;
     var $description = "Ldap Data Source";
 
 
@@ -15,9 +16,13 @@ class Ldap extends DataSource {
 
     var $cacheSources = true;
 
-    var $_baseConfig = array (
-    'host' => 'localhost',    
-    'version' => 3
+    protected $_baseConfig = array(
+        'host' => 'localhost',
+        'version' => 3
+    );
+    
+    private $_modelBaseConfig = array(
+        'relativeBaseDn' => '',
     );
     
     private $affected;
@@ -113,52 +118,24 @@ class Ldap extends DataSource {
 	return $this->connect();
     }
 
-    // CRUD --------------------------------------------------------------
-    /**
-     * The "C" in CRUD
-     *
-     * @param Model $model
-     * @param array $fields containing the field names
-     * @param array $values containing the fields' values
-     * @return true on success, false on error
-     */
-    function create( &$model, $fields = null, $values = null ) {	
-	$fieldsData = array();
-	$id = null;
-	$objectclasses = null;
+    public function create(\Model $model, $fields = null, $values = null) {
+        if ($fields == null) {
+            unset($fields, $values);
+            $fields = array_keys($model->data);
+            $values = array_values($model->data);
+        }
 
-	if ($fields == null) {
-	    unset($fields, $values);
-	    $fields = array_keys($model->data);
-	    $values = array_values($model->data);
-	}
+        $ldapData = $this->_toLdapData($model, $fields, $values);
+        $dn = $this->_buildNewDn($model, $ldapData);
 
-	$count = count($fields);
-
-	for ($i = 0; $i < $count; $i++) {
-	    if ($fields[$i] == '_DN_') {
-		$id = $values[$i];
-	    } else {
-		$fieldsData[$fields[$i]] = $values[$i];
-	    }
-	}
-
-	if( !$id ) {
-	    if ($this->debug) {
-		debug(__("No ID informed",true));
-	    }
-	    $model->onError();
-	    return false;
-	}
-
-	// Add the entry	
-	if( ldap_add( $this->connection, $id, $fieldsData ) ) {
-	    return true;
-	} else {
-	    $model->onError();
-        throw new Exception(ldap_error($this->connection).' / '.print_r(compact('id','fieldsData'),true));            
-	    return false;
-	}
+        if (@ldap_add($this->getConnection(), $dn, $ldapData)) {
+            $model->id = $dn;
+            return true;
+        } else {
+            //$model->onError();
+            //return false;
+            $this->_throwPhysicalConnectionException(print_r(compact('dn', 'ldapData'), true));
+        }
     }
 
     /**
@@ -482,47 +459,12 @@ class Ldap extends DataSource {
 	return $unix_timestamp;
     }// convertTimestamp_ADToUnix
 
-    /**
-     * Returns an array of the attribute types defined in LDAP.
-     *
-     * @param object $model Not really used in this case ...
-     * @return array Attribute types in LDAP. Keys are the name of the field as defined in LDAP
-     */
-    function describe(&$model) {
-	$cache = null;
-	if ($this->cacheSources !== false) {
-	    if (isset($this->__descriptions['ldap_attributetypes'])) {
-		$cache = $this->__descriptions['ldap_attributetypes'];
-	    } else {
-		$cache = $this->__cacheDescription('attributetypes');
-	    }
-	}
-
-	if ($cache != null) {
-	    return $cache;
-	}
-
-	// If we get this far, then we haven't cached the attribute types, yet!
-	$attrs = Set::combine( $this->__getLDAPschema(), 'attributetypes.{n}.name', 'attributetypes.{n}.description' );
-	$attrs['_DN_'] = 'Distinguished Name';
-
-	$fields = array();
-
-        foreach ($attrs as $attr => $description) {
-            $fields[$attr] = array(
-                'type' => 'text',
-                'null' => false,
-                'default' => null,
-                'length' => null,
-                'key' => null,
-                'description' => $description
-            );
+    public function describe($model) {
+        if (empty($model->schema)) {
+            throw new Exception("{$model->name} has no attribute '\$schema' defined");
         }
 
-        // Cache away
-        $this->__cacheDescription('attributetypes', $fields);
-
-	return $fields;
+        return $model->schema;
     }
 
     /* The following was kindly "borrowed" from the excellent phpldapadmin project */
@@ -1194,6 +1136,84 @@ class Ldap extends DataSource {
         }
 
         return $cache;
+    }
+    
+    private function _toLdapData(Model $model, $fields, $values) {
+        $databaseToLdapMethod = '__' . $model->useDbConfig . $model->name . 'ToLdap';
+
+        if (!method_exists(ConnectionManager::$config, $databaseToLdapMethod)) {
+            throw new Exception("Class \"" . get_class(ConnectionManager::$config) . "\" has no method \"$databaseToLdapMethod\"");
+        }
+
+        $fields = $fields ? $fields : array();
+        $values = $values ? $values : array();
+
+        $modelData = array();
+        for ($i = 0; $i < count($fields); $i++) {
+            $modelData[$fields[$i]] = $values[$i];
+        }
+
+        return array(
+            'objectClass' => $this->_getModelConfig($model, 'objectClass')
+            ) + ConnectionManager::$config->{$databaseToLdapMethod}($modelData);
+    }
+
+    private function _buildNewDn(Model $model, $ldapData) {
+        $dnAttribute = $this->_getModelConfig($model, 'dnAttribute');
+
+        if (empty($ldapData[$dnAttribute])) {
+            throw new Exception("Ldap data has no DN attribute \"$dnAttribute\"");
+        }
+
+        $modelDn = $this->_getModelBaseDn($model);
+        return "$dnAttribute={$ldapData[$dnAttribute]}" . ($modelDn ? ',' . $modelDn : '');
+    }
+
+    private function getConnection() {
+        if ($this->connection == null) {
+
+            $this->connected = false;
+            if (empty($this->config['port'])) {
+                $this->connection = ldap_connect($this->config['host']);
+            } else {
+                $this->connection = ldap_connect($this->config['host'], $this->config['port']);
+            }
+            ldap_set_option($this->connection, LDAP_OPT_PROTOCOL_VERSION, $this->config['version']);
+            if (!ldap_bind($this->connection, $this->config['login'], $this->config['password'])) {
+                throw new Exception("Datasource not connected");
+            }
+        }
+
+        return $this->connection;
+    }
+
+    private function _getModelBaseDn(Model $model) {
+        $modelDn = $this->_getModelConfig($model, 'relativeBaseDn');
+        $dataSourceDn = $this->config['database'] ? $this->config['database'] : '';
+
+        if ($modelDn && $dataSourceDn) {
+            return $modelDn . ',' . $dataSourceDn;
+        } else {
+            return $modelDn . $dataSourceDn;
+        }
+    }
+
+    private function _getModelConfig(Model $model, $key) {
+        if (isset($this->config['models'][$model->name][$key])) {
+            return $this->config['models'][$model->name][$key];
+        } else if ($this->_modelBaseConfig[$key]) {
+            return $this->_modelBaseConfig[$key];
+        } else {
+            throw new Exception("No config '$key' defined for model \"{$model->name}\"");
+        }
+    }
+
+    private function _throwPhysicalConnectionException($message) {
+        $errorCode = ldap_errno($this->getConnection());
+        throw new Exception(
+            ldap_err2str($errorCode) . " (Code: $errorCode)" .
+            ($message ? "\n$message" : '')
+        );
     }
 
 } // LdapSource
