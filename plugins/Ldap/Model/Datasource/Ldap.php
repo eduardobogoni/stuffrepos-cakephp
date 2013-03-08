@@ -1,12 +1,11 @@
 <?php
-/**
- * LdapSource
- * @author euphrate_ylb (base class + "R" in CRUD)
- * @author gservat (aka znoG) ("C", "U", "D" in CRUD)
- * @date 07/2007 (updated 04/2008)
- * @license GPL
- */
+
+App::uses('Basics', 'Base.Lib');
+
 class Ldap extends DataSource {
+
+    const LDAP_ERROR_NO_SUCH_OBJECT = 32;
+
     private $connection = null;
     var $description = "Ldap Data Source";
 
@@ -57,7 +56,11 @@ class Ldap extends DataSource {
 
     // I know this looks funny, and for other data sources this is necessary but for LDAP, we just return the name of the field we're passed as an argument
     function name( $field ) {
-	return $field;
+        return $this->column($field);
+    }
+    
+    function column($real) {
+        return $real;
     }
 
     // Connection --------------------------------------------------------------
@@ -125,10 +128,17 @@ class Ldap extends DataSource {
             $values = array_values($model->data);
         }
 
-        $ldapData = $this->_toLdapData($model, $fields, $values);
-        $dn = $this->_buildNewDn($model, $ldapData);
+        $modelData = array();
+        for ($i = 0; $i < count($fields); $i++) {
+            $modelData[$fields[$i]] = $values[$i];
+        }
 
-        if (@ldap_add($this->getConnection(), $dn, $ldapData)) {
+        $ldapData = array(
+            'objectClass' => $this->_getModelConfig($model, 'objectClass')
+            ) + $this->_toLdapData($model, $modelData);
+        $dn = $this->buildDnByData($model, $modelData);        
+
+        if (@ldap_add($this->_getConnection(), $dn, $ldapData)) {
             $model->id = $dn;
             return true;
         } else {
@@ -137,6 +147,97 @@ class Ldap extends DataSource {
             $this->_throwPhysicalConnectionException(print_r(compact('dn', 'ldapData'), true));
         }
     }
+    
+    /**
+     * Used to read records from the Datasource. The "R" in CRUD
+     *     
+     *
+     * @param Model $model The model being read.
+     * @param array $queryData An array of query data used to find the data you want
+     * @param integer $recursive Number of levels of association
+     * @return mixed
+     */
+    function read(\Model $model, $queryData = array(), $recursive = null) {                
+        $queryData = $this->__scrubQueryData($queryData);
+        $search = $this->_searchParameters($model, $queryData);
+        
+        $searchResult = @ldap_search(
+                        $this->_getConnection()
+                        , $search['baseDn']
+                        , $search['filter']                
+                        , $search['attributes']
+                        , $search['attributesOnly']
+                        , $search['sizeLimit']
+                        , $search['timeLimit']
+                        , $search['deref']
+        );
+        
+        if ($searchResult === false) {
+            if (ldap_errno($this->_getConnection()) == self::LDAP_ERROR_NO_SUCH_OBJECT) {
+                return array();
+            }
+            
+            $this->_throwPhysicalConnectionException(print_r($search,true));            
+            $model->onError();
+            return false;
+        }
+                
+        $info = ldap_get_entries($this->_getConnection(), $searchResult);
+        
+        $isCount = $this->_isQueryCount($queryData);
+        //debug(compact('queryData','searchResult','search','info', 'isCount'));
+        
+        if ($this->_isQueryCount($queryData)) {      
+            $result[0][$model->alias]['count'] =  $info['count'];
+            return $result;            
+        }
+        
+        unset($info['count']);        
+        
+        $modelInstances = array();                
+        
+        foreach($info as $ldapInstance) {
+            $modelInstances[][$model->alias] = $this->_fromLdapData(
+                $model
+                , $ldapInstance);
+        }                
+        
+        return $modelInstances;
+    }
+    
+    private function _searchParameters(Model $model, $queryData) {
+        if (is_string($queryData['conditions'])) {
+            throw new NotImplementedException("Query data conditions as string");
+        }
+        if (array_key_exists("{$model->alias}.{$model->primaryKey}", $queryData['conditions'])) {
+            $baseDn = $queryData['conditions']["{$model->alias}.{$model->primaryKey}"];
+            $filter = '(objectclass=*)';
+        } else {
+            $baseDn = $this->_getModelBaseDn($model);
+            $filter = $this->_conditions($model, $queryData['conditions']);
+        }
+
+        $attributes = array();
+        $attributesOnly = null;
+        $sizeLimit = null;
+        $timeLimit = null;
+        $deref = null;
+
+        return compact(
+                        'baseDn'
+                        , 'filter'
+                        , 'attributes'
+                        , 'attributesOnly'
+                        , 'sizeLimit'
+                        , 'timeLimit'
+                        , 'deref'
+        );
+    }
+    
+    private function _isQueryCount($queryData) {
+        return is_string($queryData['fields']) &&
+                $queryData['fields'] == 'COUNT(*) AS ' . $this->name('count');
+    }        
 
     /**
      * The "R" in CRUD
@@ -146,7 +247,7 @@ class Ldap extends DataSource {
      * @param integer $recursive Number of levels of association
      * @return unknown
      */
-    function read( &$model, $queryData = array(), $recursive = null ) {        
+    function _read( &$model, $queryData = array(), $recursive = null ) {        
 	$this->__scrubQueryData($queryData);        
 	$this->__checkQueryDataDnCondition($model,$queryData);
 
@@ -279,12 +380,39 @@ class Ldap extends DataSource {
 	// If we get this far, something went horribly wrong ..
 	$model->onError();
 	return false;
+    }        
+    
+    
+    public function delete(\Model $model, $id = null) {
+        if (!$id) {
+            $id = array(
+                "{$model->alias}.{$model->primaryKey}"=> $this->id
+            );            
+        }        
+        
+        $instances = $model->find(
+                'all', array(
+            'conditions' => $id
+                )
+        );
+               
+        if (empty($instances)) {
+            return false;
+        }                
+        
+        foreach($instances as $instance) {            
+            if (!@ldap_delete($this->_getConnection(), $instance[$model->alias][$model->primaryKey])) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     /**
      * The "D" in CRUD
      */
-    function delete( &$model ) {
+    function _delete( &$model ) {
     // Boolean to determine if we want to recursively delete or not
 	$recursive = true;
 
@@ -463,8 +591,17 @@ class Ldap extends DataSource {
         if (empty($model->schema)) {
             throw new Exception("{$model->name} has no attribute '\$schema' defined");
         }
+        
+        $schema = array($model->primaryKey => array('type' => 'string')) + $model->schema;
+        
+        foreach(array_keys($schema) as $field) {
+            $schema[$field] += array(
+                'length' => null,
+                'null' => false
+            );
+        }
 
-        return $model->schema;
+        return $schema;
     }
 
     /* The following was kindly "borrowed" from the excellent phpldapadmin project */
@@ -743,79 +880,44 @@ class Ldap extends DataSource {
     }
 
     // _ private --------------------------------------------------------------
-    function _conditions($conditions, $model) {
-	$res = '';
-	$key = $model->primaryKey;
-	$name = $model->name;
-	if (is_array($conditions)) {
-	// Conditions expressed as an array
-	    if (empty($conditions))
-		$conditions = array ('equals'=>array($key => null));
-
-	    $res = $this->__conditionsArrayToString($conditions);
-	} else {
-	// "valid" ldap search expression
-	    if (!strpos ($conditions, '='))
-		$conditions = $key . '=' . trim($conditions);
-
-	    $res = str_replace ( array("$name.$key"," = "), array($key,"="), $conditions );
-	}
-	return $res;
-    }
+    public function _conditions(Model $model, $modelConditions) {
+        $modelData = array();
+        
+        foreach($modelConditions as $modelField => $value) {
+            list($alias,$field) = Basics::fieldNameToArray($modelField);
+            if ($alias != $model->alias) {
+                throw new NotImplementedException("Conditions with alias then self model: {$modelField} in {$model->alias}");
+            }
+            $modelData[$field] = $value;                        
+        }
+        
+        $ldapData = array(
+            'objectClass' => '*'
+        ) + $this->_toLdapData($model, $modelData);
+                
+        return $this->_conditionsArrayToString($ldapData);        
+    }        
     /**
      * Convert an array into a ldap condition string
      *
      * @param array $conditions condition
      * @return string
      */
-    function __conditionsArrayToString($conditions) {
-	$ops_rec = array ( 'and' => array('prefix'=>'&'), 'or' => array('prefix'=>'|'));
-	$ops_neg = array ( 'and not' => array() , 'or not' => array(), 'not equals' => array());
-	$ops_ter = array ( 'equals' => array('null'=>'*'));
-
-	$ops = array_merge($ops_rec,$ops_neg, $ops_ter);
-
-	if (is_array($conditions)) {
-
-	    $operand = array_keys($conditions);
-	    $operand = $operand[0];
-
-	    if (!in_array($operand,array_keys($ops)) )
-		return null;
-
-	    $children = $conditions[$operand];
-
-	    if (in_array($operand, array_keys($ops_rec)) ) {
-		if (!is_array($children))
-		    return null;
-
-		$tmp = '('.$ops_rec[$operand]['prefix'];
-		foreach ($children as $key => $value) {
-		    $child = array ($key => $value);
-		    $tmp .= $this->__conditionsArrayToString($child);
-		}
-		return $tmp.')';
-
-	    } else if (in_array($operand, array_keys($ops_neg)) ) {
-		    if (!is_array($children))
-			return null;
-
-		    $next_operand = trim(str_replace('not', '', $operand));
-
-		    return '(!'.$this->__conditionsArrayToString(array ($next_operand => $children)).')';
-
-		} else if (in_array($operand,  array_keys($ops_ter)) ) {
-			$tmp = '';
-			foreach ($children as $key => $value) {
-			    if ( !is_array($value) )
-				$tmp .= '('.$key .'='.((is_null($value))?$ops_ter['equals']['null']:$value).')';
-			    else
-				foreach ($value as $subvalue)
-				    $tmp .= $this->__conditionsArrayToString(array('equals' => array($key => $subvalue)));
-			}
-			return $tmp;
-		    }
-	}
+    function _conditionsArrayToString($conditions) {
+        if (empty($conditions)) {
+            return null;
+        }
+        else {
+            reset($conditions);
+            $attribute = key($conditions);
+            $value = $conditions[$attribute];
+            unset($conditions[$attribute]);
+            
+            $currentCondition = "($attribute=$value)";
+            $leftConditions = $this->_conditionsArrayToString($conditions);
+            
+            return $leftConditions ? '(&' . $currentCondition . $leftConditions . ')' : "$currentCondition";
+        }
     }
 
     function _executeQuery($queryData = array (), $cache = true) {
@@ -969,26 +1071,28 @@ class Ldap extends DataSource {
     /**
      * Private helper method to remove query metadata in given data array.
      *
-     * @param array $data
+     * @param array $queryData
      */
-    function __scrubQueryData(& $data) {	
-	if (!isset ($data['type']))
-	    $data['type'] = 'default';
+    function __scrubQueryData($queryData) {	
+	if (!isset ($queryData['type']))
+	    $queryData['type'] = 'default';
 
-	if (!isset ($data['conditions']))
-	    $data['conditions'] = array();
+	if (!isset ($queryData['conditions']))
+	    $queryData['conditions'] = array();
 
-	if (!isset ($data['targetDn']))
-	    $data['targetDn'] = null;
+	if (!isset ($queryData['targetDn']))
+	    $queryData['targetDn'] = null;
 
-	if (!isset ($data['fields']) && empty($data['fields']))
-	    $data['fields'] = array ();
+	if (!isset ($queryData['fields']) && empty($queryData['fields']))
+	    $queryData['fields'] = array ();
 
-	if (!isset ($data['order']) && empty($data['order']))
-	    $data['order'] = array ();
+	if (!isset ($queryData['order']) && empty($queryData['order']))
+	    $queryData['order'] = array ();
 
-	if (!isset ($data['limit']))
-	    $data['limit'] = null;
+	if (!isset ($queryData['limit']))
+	    $queryData['limit'] = null;
+        
+        return $queryData;
     }
 
     function __checkQueryDataDnCondition(&$model,&$data) {	
@@ -1138,27 +1242,56 @@ class Ldap extends DataSource {
         return $cache;
     }
     
-    private function _toLdapData(Model $model, $fields, $values) {
+    private function _toLdapData(Model $model, $modelData) {
         $databaseToLdapMethod = '__' . $model->useDbConfig . $model->name . 'ToLdap';
 
         if (!method_exists(ConnectionManager::$config, $databaseToLdapMethod)) {
             throw new Exception("Class \"" . get_class(ConnectionManager::$config) . "\" has no method \"$databaseToLdapMethod\"");
         }
-
-        $fields = $fields ? $fields : array();
-        $values = $values ? $values : array();
-
-        $modelData = array();
-        for ($i = 0; $i < count($fields); $i++) {
-            $modelData[$fields[$i]] = $values[$i];
+        
+        $ldapData = array();
+        
+        if (!empty($modelData[$model->primaryKey])) {
+            $ldapData['dn'] = $modelData[$model->primaryKey];
         }
 
-        return array(
-            'objectClass' => $this->_getModelConfig($model, 'objectClass')
-            ) + ConnectionManager::$config->{$databaseToLdapMethod}($modelData);
+        $ldapData += ConnectionManager::$config->{$databaseToLdapMethod}($modelData);
+
+        return $ldapData;
+    }
+    
+    private function _fromLdapData(Model $model, $ldapData) {
+        unset($ldapData['objectclass']);
+        unset($ldapData['count']);
+        
+        foreach ($ldapData as $key => $value) {
+            if (is_numeric($key)) {
+                unset($ldapData[$key]);
+            } else if (is_array($value)) {
+                $ldapData[$key] = array_key_exists(0, $value) ?
+                    $value[0] :
+                    null;
+            }
+        }
+
+        $databaseToLdapMethod = '__' . $model->useDbConfig . $model->name . 'FromLdap';
+
+        if (!method_exists(ConnectionManager::$config, $databaseToLdapMethod)) {
+            throw new Exception("Class \"" . get_class(ConnectionManager::$config) . "\" has no method \"$databaseToLdapMethod\"");
+        }
+        
+        $modelData = ConnectionManager::$config->{$databaseToLdapMethod}($ldapData);
+        
+        if (!empty($ldapData['dn'])) {
+            $modelData[$model->primaryKey] = $ldapData['dn'];
+        }        
+
+
+        return $modelData;
     }
 
-    private function _buildNewDn(Model $model, $ldapData) {
+    public function buildDnByData(Model $model, $modelData) {
+        $ldapData = $this->_toLdapData($model, $modelData);
         $dnAttribute = $this->_getModelConfig($model, 'dnAttribute');
 
         if (empty($ldapData[$dnAttribute])) {
@@ -1169,7 +1302,7 @@ class Ldap extends DataSource {
         return "$dnAttribute={$ldapData[$dnAttribute]}" . ($modelDn ? ',' . $modelDn : '');
     }
 
-    private function getConnection() {
+    private function _getConnection() {
         if ($this->connection == null) {
 
             $this->connected = false;
@@ -1209,7 +1342,7 @@ class Ldap extends DataSource {
     }
 
     private function _throwPhysicalConnectionException($message) {
-        $errorCode = ldap_errno($this->getConnection());
+        $errorCode = ldap_errno($this->_getConnection());
         throw new Exception(
             ldap_err2str($errorCode) . " (Code: $errorCode)" .
             ($message ? "\n$message" : '')
