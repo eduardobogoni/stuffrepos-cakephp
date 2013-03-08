@@ -185,7 +185,6 @@ class Ldap extends DataSource {
         $info = ldap_get_entries($this->_getConnection(), $searchResult);
         
         $isCount = $this->_isQueryCount($queryData);
-        //debug(compact('queryData','searchResult','search','info', 'isCount'));
         
         if ($this->_isQueryCount($queryData)) {      
             $result[0][$model->alias]['count'] =  $info['count'];
@@ -238,105 +237,6 @@ class Ldap extends DataSource {
         return is_string($queryData['fields']) &&
                 $queryData['fields'] == 'COUNT(*) AS ' . $this->name('count');
     }        
-
-    /**
-     * The "R" in CRUD
-     *
-     * @param Model $model
-     * @param array $queryData
-     * @param integer $recursive Number of levels of association
-     * @return unknown
-     */
-    function _read( &$model, $queryData = array(), $recursive = null ) {        
-	$this->__scrubQueryData($queryData);        
-	$this->__checkQueryDataDnCondition($model,$queryData);
-
-	if (!is_null($recursive)) {
-	    $_recursive = $model->recursive;
-	    $model->recursive = $recursive;
-	}	
-
-	// Check if we are doing a 'count' .. this is kinda ugly but i couldn't find a better way to do this, yet
-	if ( is_string( $queryData['fields'] ) && $queryData['fields'] == 'COUNT(*) AS ' . $this->name( 'count' ) ) {
-	// Check if we should also add a default object class to search under
-	    if( $model->defaultObjectClass ) {
-		$queryData['conditions'] = sprintf( '(&(objectclass=%s)(%s=%s))', $model->defaultObjectClass, $model->primaryKey, array_shift( array_values( $queryData['conditions'] ) ) );
-	    } else {
-		$queryData['conditions'] = sprintf( '%s=%s', $model->primaryKey, array_shift( array_values( $queryData['conditions'] ) ) );
-	    }
-	    $queryData['fields'] = array();
-	}
-
-	// Prepare query data ------------------------
-	$queryData['conditions'] = $this->_conditions( $queryData['conditions'], $model);
-	$queryData['type'] = 'search';
-
-	if (empty($queryData['order']))
-	    $queryData['order'] = array($model->primaryKey);
-
-	// Associations links --------------------------        
-	foreach ($model->associations() as $type) {
-	    foreach ($model->{$type} as $assoc => $assocData) {
-		if ($model->recursive > -1) {
-		    $linkModel = & $model->{$assoc};
-		    $linkedModels[] = $type . '/' . $assoc;
-		}
-	    }
-	}
-
-	// Execute search query ------------------------
-	$res = $this->_executeQuery($queryData);
-	if ($this->lastNumRows()==0)
-	    return false;        
-
-
-
-	// Format results  -----------------------------
-        if (is_array($queryData['order'][0])) {
-            foreach($queryData['order'][0] as $attribute) {
-                ldap_sort($this->connection, $res, $attribute);
-            }
-        }
-        else {
-            ldap_sort($this->connection, $res, $queryData['order'][0]);
-        }
-	
-	$resultSet = ldap_get_entries($this->connection, $res);
-	$resultSet = $this->_ldapFormat($model, $resultSet);
-
-	// Query on linked models  ----------------------
-	if ($model->recursive > 0) {
-	    foreach ($model->associations() as $type) {
-
-		foreach ($model->{$type} as $assoc => $assocData) {
-		    $db = null;
-		    $linkModel = & $model->{$assoc};
-
-		    if ($model->useDbConfig == $linkModel->useDbConfig) {
-			$db = & $this;
-		    } else {
-			$db = & ConnectionManager :: getDataSource($linkModel->useDbConfig);
-		    }
-
-		    if (isset ($db) && $db != null) {
-			$stack = array ($assoc);
-			$array = array ();
-			$db->queryAssociation($model, $linkModel, $type, $assoc, $assocData, $array, true, $resultSet, $model->recursive - 1, $stack);
-			unset ($db);
-		    }
-		}
-	    }
-	}
-
-	if (!is_null($recursive)) {
-	    $model->recursive = $_recursive;
-	}
-
-	// Add the count field to the resultSet (needed by find() to work out how many entries we got back .. used when $model->exists() is called)
-	$resultSet[0][$model->alias]['count'] = $this->lastNumRows();
-
-	return $resultSet;
-    }
 
     /**
      * The "U" in CRUD
