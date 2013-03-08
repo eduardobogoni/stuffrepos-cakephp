@@ -19,6 +19,11 @@ class LdapSimpleUserAccountTest extends Model {
 
 class LdapTest extends CakeTestCase {
 
+    private $sampleData = array(
+        'username' => 'myusername',
+        'password' => 'secret',
+    );
+
     /**
      *
      * @var LdapUserTest
@@ -27,7 +32,24 @@ class LdapTest extends CakeTestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->LdapUser = new LdapSimpleUserAccountTest();        
+        $this->LdapUser = new LdapSimpleUserAccountTest();
+        $this->LdapUser->alias = 'LdapUser';
+
+        $this->LdapUser->delete(
+            $this->LdapUser->getDataSource()->buildDnByData(
+                $this->LdapUser, $this->sampleData
+            )
+        );
+    }
+
+    public function tearDown() {
+        $this->LdapUser->delete(
+            $this->LdapUser->getDataSource()->buildDnByData(
+                $this->LdapUser, $this->sampleData
+            )
+        );
+
+        parent::tearDown();
     }
 
     public function testSchema() {
@@ -35,16 +57,31 @@ class LdapTest extends CakeTestCase {
     }
 
     public function testCreate() {
+        $this->LdapUser->create();
+
         $result = $this->LdapUser->save(
             array(
-                'LdapUser' => array(
-                    'username' => 'joao.silva',
-                    'password' => 'secret',
-                )
+                'LdapUser' => $this->sampleData
             )
         );                
         
         $this->assertNotEqual($result, false);
+    }
+
+    public function testDelete() {
+        $this->LdapUser->create();
+
+        $result = $this->LdapUser->save(
+            array(
+                'LdapUser' => $this->sampleData
+            )
+        );
+
+        $this->assertNotEqual($result, false);
+
+        $this->assertEqual(
+            $this->LdapUser->delete($this->LdapUser->id)
+            , true);
     }
 
 }
