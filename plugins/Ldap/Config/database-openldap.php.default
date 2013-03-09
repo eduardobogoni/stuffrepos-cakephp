@@ -10,26 +10,42 @@ class DATABASE_CONFIG {
         'database' => 'ou=test,dc=nodomain',
         'encoding' => 'utf8',
         'models' => array(
-            'LdapSimpleUserAccountTest' => array(
+            'LdapPersonTest' => array(
                 'relativeBaseDn' => 'ou=users',
-                'dnAttribute' => 'uid',
-                'objectClass' => array('account', 'simpleSecurityObject'),
+                'dnAttribute' => 'cn',
+                'objectClass' => array('inetOrgPerson'),
             ),
         )
     );
 
-    public function __openLdapTestLdapSimpleUserAccountTestToLdap($data) {
+    public function __ldapTestLdapPersonTestToLdap($modelData) {
         $ldapData = array();
 
-        if (isset($data['username'])) {
-            $ldapData['uid'] = $data['username'];
+        if (isset($modelData['first_name'])) {
+            $ldapData['cn'] = $modelData['first_name'];
         }
 
-        if (isset($data['password'])) {
-            $ldapData['userPassword'] = '{MD5}' . base64_encode(pack('H*', md5($data['password'])));
+        if (isset($modelData['last_name'])) {
+            $ldapData['sn'] = $modelData['last_name'];
         }
 
         return $ldapData;
+    }
+
+    public function __ldapTestLdapPersonTestFromLdap($ldapData) {
+
+        $modelData = array();
+
+        if (isset($ldapData['cn'])) {
+            $modelData['first_name'] = $ldapData['cn'];
+        }
+
+        if (isset($ldapData['sn'])) {
+            $modelData['last_name'] = $ldapData['sn'];
+        }
+
+
+        return $modelData;
     }
 
 }
