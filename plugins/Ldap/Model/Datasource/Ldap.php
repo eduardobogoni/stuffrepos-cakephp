@@ -1,6 +1,7 @@
 <?php
 
 App::uses('Basics', 'Base.Lib');
+App::uses('LdapUtils', 'Ldap.Lib');
 
 class Ldap extends DataSource {
 
@@ -212,6 +213,11 @@ class Ldap extends DataSource {
         $rdnAttribute = $this->_rdnAttribute($dn);        
         if (isset($ldapData[$rdnAttribute])) {            
             $dn = $this->_renameRdn($dn, $ldapData[$rdnAttribute]);
+            unset($ldapData[$rdnAttribute]);
+            if (empty($ldapData)) {
+                $model->id = $dn;
+                return true;
+            }
         }
 
         if (@ldap_modify($this->_getConnection(), $dn, $ldapData)) {
@@ -415,7 +421,7 @@ class Ldap extends DataSource {
         $modelData = ConnectionManager::$config->{$databaseToLdapMethod}($ldapData);
         
         if (!empty($ldapData['dn'])) {
-            $modelData[$model->primaryKey] = $ldapData['dn'];
+            $modelData[$model->primaryKey] = LdapUtils::normalizeDn($ldapData['dn']);
         }        
 
 
@@ -431,7 +437,7 @@ class Ldap extends DataSource {
         }
 
         $modelDn = $this->_getModelBaseDn($model);
-        return "$dnAttribute={$ldapData[$dnAttribute]}" . ($modelDn ? ',' . $modelDn : '');
+        return LdapUtils::normalizeDn("$dnAttribute={$ldapData[$dnAttribute]}" . ($modelDn ? ',' . $modelDn : ''));
     }
 
     private function _getConnection() {
@@ -457,9 +463,9 @@ class Ldap extends DataSource {
         $dataSourceDn = $this->config['database'] ? $this->config['database'] : '';
 
         if ($modelDn && $dataSourceDn) {
-            return $modelDn . ',' . $dataSourceDn;
+            return LdapUtils::normalizeDn($modelDn . ',' . $dataSourceDn);
         } else {
-            return $modelDn . $dataSourceDn;
+            return LdapUtils::normalizeDn($modelDn . $dataSourceDn);
         }
     }
 

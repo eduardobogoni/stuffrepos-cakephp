@@ -1,0 +1,51 @@
+<?php
+
+class DATABASE_CONFIG {
+
+    public $ldapTest = array(
+        'datasource' => 'Ldap.Ldap',
+        'login' => 'CN=Administrator,DC=nodomain',
+        'password' => 'admin',
+        'host' => 'ldaps://localhost',
+        'database' => 'OU=Test,DC=nodomain',
+        'encoding' => 'utf8',
+        'models' => array(
+            'LdapPersonTest' => array(
+                'relativeBaseDn' => 'OU=Users',
+                'dnAttribute' => 'cn',
+                'objectClass' => array('inetOrgPerson'),
+            ),
+        )
+    );
+
+    public function __ldapTestLdapPersonTestToLdap($modelData) {
+        $ldapData = array();
+
+        if (isset($modelData['first_name'])) {
+            $ldapData['cn'] = $modelData['first_name'];
+        }
+
+        if (isset($modelData['last_name'])) {
+            $ldapData['sn'] = $modelData['last_name'];
+        }
+
+        return $ldapData;
+    }
+
+    public function __ldapTestLdapPersonTestFromLdap($ldapData) {
+
+        $modelData = array();
+
+        if (isset($ldapData['cn'])) {
+            $modelData['first_name'] = $ldapData['cn'];
+        }
+
+        if (isset($ldapData['sn'])) {
+            $modelData['last_name'] = $ldapData['sn'];
+        }
+
+
+        return $modelData;
+    }
+
+}
