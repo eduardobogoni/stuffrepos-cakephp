@@ -2,17 +2,14 @@
 
 App::uses('Model', 'Model');
 
-class LdapSimpleUserAccountTest extends Model {
+class LdapPersonTest extends Model {
 
-    public $useDbConfig = 'ldapTest';
-    public $alias = 'LdapUser';
+    public $useDbConfig = 'ldapTest';    
     public $schema = array(
-        'username' => array(
-            'type' => 'string',
-        ),
-        'password' => array(
-            'type' => 'string',
-        ),
+        'first_name' => array(),
+        'last_name' => array(),
+    );
+    public $validate = array(
     );
 
 }
@@ -20,32 +17,48 @@ class LdapSimpleUserAccountTest extends Model {
 class LdapTest extends CakeTestCase {
 
     private $sampleData = array(
-        'username' => 'myusername',
-        'password' => 'secret',
+        'first_name' => 'My First Name',
+        'last_name' => 'My Last Name',
+    );
+    
+    private $sampleDataModified = array(
+        'first_name' => 'My First Name (Modified)',
+        'last_name' => 'My Last Name (Modified)',
     );
 
     /**
      *
-     * @var LdapUserTest
+     * @var LdapPersonTest
      */
-    private $LdapUser;
+    private $LdapPerson;
 
     public function setUp() {
         parent::setUp();
-        $this->LdapUser = new LdapSimpleUserAccountTest();
-        $this->LdapUser->alias = 'LdapUser';
+        $this->LdapPerson = new LdapPersonTest();
 
-        $this->LdapUser->delete(
-            $this->LdapUser->getDataSource()->buildDnByData(
-                $this->LdapUser, $this->sampleData
+        $this->LdapPerson->delete(
+            $this->LdapPerson->getDataSource()->buildDnByData(
+                $this->LdapPerson, $this->sampleData
+            )
+        );
+        
+        $this->LdapPerson->delete(
+            $this->LdapPerson->getDataSource()->buildDnByData(
+                $this->LdapPerson, $this->sampleDataModified
             )
         );
     }
 
     public function tearDown() {
-        $this->LdapUser->delete(
-            $this->LdapUser->getDataSource()->buildDnByData(
-                $this->LdapUser, $this->sampleData
+        $this->LdapPerson->delete(
+            $this->LdapPerson->getDataSource()->buildDnByData(
+                $this->LdapPerson, $this->sampleData
+            )
+        );
+        
+        $this->LdapPerson->delete(
+            $this->LdapPerson->getDataSource()->buildDnByData(
+                $this->LdapPerson, $this->sampleDataModified
             )
         );
 
@@ -53,15 +66,31 @@ class LdapTest extends CakeTestCase {
     }
 
     public function testSchema() {
-        $this->assertNotEqual($this->LdapUser->schema(), null);
+        $this->assertEqual($this->LdapPerson->schema(), array(
+            $this->LdapPerson->primaryKey => array(
+                'type' => 'string',
+                'length' => null,
+                'null' => false,
+            ),
+            'first_name' => array(
+                'type' => 'string',
+                'length' => null,
+                'null' => false,
+            ),
+            'last_name' => array(
+                'type' => 'string',
+                'length' => null,
+                'null' => false,
+            ),
+        ));
     }
 
-    public function testCreate() {
-        $this->LdapUser->create();
+    public function testCreate() {        
+        $this->LdapPerson->create();
 
-        $result = $this->LdapUser->save(
+        $result = $this->LdapPerson->save(
             array(
-                'LdapUser' => $this->sampleData
+                $this->LdapPerson->alias => $this->sampleData
             )
         );                
         
@@ -69,99 +98,138 @@ class LdapTest extends CakeTestCase {
     }
 
     public function testDelete() {
-        $this->LdapUser->create();
+        $this->LdapPerson->create();
 
-        $result = $this->LdapUser->save(
+        $result = $this->LdapPerson->save(
             array(
-                'LdapUser' => $this->sampleData
+                $this->LdapPerson->alias => $this->sampleData
             )
         );
 
         $this->assertNotEqual($result, false);
 
         $this->assertEqual(
-            $this->LdapUser->delete($this->LdapUser->id)
+            $this->LdapPerson->delete($this->LdapPerson->id)
             , true);
     }
 
     public function testFindFirst() {
-        $this->assertEqual($this->LdapUser->find('first', array(
+        $this->assertEqual($this->LdapPerson->find('first', array(
                 'conditions' => array(
-                    'LdapUser.username' => $this->sampleData['username']
+                    $this->LdapPerson->alias . '.first_name' => $this->sampleData['first_name']
                 )
             )), array());
 
-        $this->LdapUser->create();
+        $this->LdapPerson->create();
 
-        $this->LdapUser->save(
+        $this->LdapPerson->save(
             array(
-                'LdapUser' => $this->sampleData
+                $this->LdapPerson->alias => $this->sampleData
             )
         );
 
-        $result = $this->LdapUser->find('first', array(
-            'conditions' => array(
-                'LdapUser.username' => $this->sampleData['username']
-            )
-            ));
-
-        $this->assertNotEqual($result, false);
-        $this->assertNotEqual($result, array());
-        $this->assertEqual(empty($result[$this->LdapUser->alias]['username']), false);        
-        $this->assertEqual($result[$this->LdapUser->alias]['username'], $this->sampleData['username']);
+        $this->assertEqual($this->LdapPerson->find('first', array(
+                'conditions' => array(
+                    $this->LdapPerson->alias . '.first_name' => $this->sampleData['first_name']
+                )
+            )), array(
+            $this->LdapPerson->alias => $this->sampleData + array($this->LdapPerson->primaryKey => $this->LdapPerson->id)
+        ));
     }
 
     public function testFindAll() {
-
-        $this->assertEqual($this->LdapUser->find('all', array(
+        $this->assertEqual($this->LdapPerson->find('all', array(
                 'conditions' => array(
-                    'LdapUser.username' => $this->sampleData['username']
+                    $this->LdapPerson->alias . '.first_name' => $this->sampleData['first_name']
                 )
             )), array());
 
-        $this->LdapUser->create();
+        $this->LdapPerson->create();
 
-        $this->LdapUser->save(
+        $this->LdapPerson->save(
             array(
-                'LdapUser' => $this->sampleData
+                $this->LdapPerson->alias => $this->sampleData
             )
         );
 
-        $result = $this->LdapUser->find('all', array(
-            'conditions' => array(
-                'LdapUser.username' => $this->sampleData['username']
-            )
-            ));
-
-        $this->assertNotEqual($result, false);
-        $this->assertNotEqual($result, array());
-        $this->assertEqual(count($result), 1);
-        $this->assertEqual(empty($result[0][$this->LdapUser->alias]), false);
-        $this->assertEqual($result[0][$this->LdapUser->alias]['username'], $this->sampleData['username']);
+        $this->assertEqual($this->LdapPerson->find('all', array(
+                'conditions' => array(
+                    $this->LdapPerson->alias . '.first_name' => $this->sampleData['first_name']
+                )
+            )), array(
+            0 => array(
+                $this->LdapPerson->alias => $this->sampleData + array($this->LdapPerson->primaryKey => $this->LdapPerson->id)
+            ))
+        );
     }
 
     public function testFindCount() {
-        $this->assertEqual($this->LdapUser->find('count', array(
+        $this->assertEqual($this->LdapPerson->find('count', array(
                 'conditions' => array(
-                    'LdapUser.username' => $this->sampleData['username']
+                    $this->LdapPerson->alias . '.first_name' => $this->sampleData['first_name']
                 )
             )), 0);
 
-        $this->LdapUser->create();
+        $this->LdapPerson->create();
 
-        $this->LdapUser->save(
+        $this->LdapPerson->save(
             array(
-                'LdapUser' => $this->sampleData
+                $this->LdapPerson->alias => $this->sampleData
             )
         );
 
-        $result = $this->LdapUser->find('count', array(
+        $result = $this->LdapPerson->find('count', array(
             'conditions' => array(
-                'LdapUser.username' => $this->sampleData['username']
+                $this->LdapPerson->alias . '.first_name' => $this->sampleData['first_name']
             )
             ));
 
         $this->assertEqual($result, 1);
+    }
+    
+    public function testUpdate() {
+        $this->LdapPerson->create();
+
+        $this->LdapPerson->save(
+            array(
+                $this->LdapPerson->alias => $this->sampleData
+            )
+        );
+        
+         $findInstance = $this->LdapPerson->find('first', array(
+            'conditions' => array(
+                $this->LdapPerson->alias . '.first_name' => $this->sampleData['first_name']
+            )
+            ));
+         
+         $this->assertEqual(empty($findInstance[$this->LdapPerson->alias]), false);                  
+         
+         foreach(array_keys($this->LdapPerson->schema()) as $field) {         
+             if ($field != $this->LdapPerson->primaryKey) {
+                 $savedInstance = $findInstance;
+                 $savedInstance[$this->LdapPerson->alias][$field] = $this->sampleDataModified[$field];
+                 $instance = array(
+                     $this->LdapPerson->alias => array(
+                         $this->LdapPerson->primaryKey => $findInstance[$this->LdapPerson->alias][$this->LdapPerson->primaryKey],
+                         $field => $this->sampleDataModified[$field]
+                     )
+                 );                 
+                 
+                 $this->assertNotEqual(
+                     $this->LdapPerson->save($instance)
+                     , false);
+                 
+                 $findInstance = $this->LdapPerson->find('first', array(
+                    'conditions' => array(
+                        $this->LdapPerson->alias . '.first_name' => $savedInstance[$this->LdapPerson->alias]['first_name']
+                    )
+                    ));
+                 
+                 $savedInstance[$this->LdapPerson->alias][$this->LdapPerson->primaryKey] = 
+                     $findInstance[$this->LdapPerson->alias][$this->LdapPerson->primaryKey];
+                 $this->assertEqual($findInstance, $savedInstance);
+             }
+         }
     }
 
 }
