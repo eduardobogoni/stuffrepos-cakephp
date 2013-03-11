@@ -232,4 +232,23 @@ class LdapTest extends CakeTestCase {
          }
     }
 
+    public function testMagicFindMethod() {
+        $this->assertEqual(
+                $this->LdapPerson->findByFirstName($this->sampleData['first_name'])
+                , array()
+        );
+
+        $this->LdapPerson->create();
+        $this->LdapPerson->save(
+                array(
+                    $this->LdapPerson->alias => $this->sampleData
+                )
+        );
+
+        $this->assertEqual(
+                $this->LdapPerson->findByFirstName($this->sampleData['first_name']), array(
+            $this->LdapPerson->alias => $this->sampleData + array($this->LdapPerson->primaryKey => $this->LdapPerson->id)
+        ));
+    }
+
 }

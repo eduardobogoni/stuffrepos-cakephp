@@ -278,6 +278,93 @@ class Ldap extends DataSource {
         return true;
     }
 
+    public function query() {
+        $args = func_get_args();
+        $fields = null;
+        $order = null;
+        $limit = null;
+        $page = null;
+        $recursive = null;
+
+        if (count($args) === 1) {
+            return $this->fetchAll($args[0]);
+        } elseif (count($args) > 1 && (strpos($args[0], 'findBy') === 0 || strpos($args[0], 'findAllBy') === 0)) {
+            $params = $args[1];
+
+            if (substr($args[0], 0, 6) === 'findBy') {
+                $all = false;
+                $field = Inflector::underscore(substr($args[0], 6));
+            } else {
+                $all = true;
+                $field = Inflector::underscore(substr($args[0], 9));
+            }
+
+            $or = (strpos($field, '_or_') !== false);
+            if ($or) {
+                $field = explode('_or_', $field);
+            } else {
+                $field = explode('_and_', $field);
+            }
+            $off = count($field) - 1;
+
+            if (isset($params[1 + $off])) {
+                $fields = $params[1 + $off];
+            }
+
+            if (isset($params[2 + $off])) {
+                $order = $params[2 + $off];
+            }
+
+            if (!array_key_exists(0, $params)) {
+                return false;
+            }
+
+            $c = 0;
+            $conditions = array();
+
+            foreach ($field as $f) {
+                $conditions[$args[2]->alias . '.' . $f] = $params[$c++];
+            }
+
+            if ($or) {
+                $conditions = array('OR' => $conditions);
+            }
+
+            if ($all) {
+                if (isset($params[3 + $off])) {
+                    $limit = $params[3 + $off];
+                }
+
+                if (isset($params[4 + $off])) {
+                    $page = $params[4 + $off];
+                }
+
+                if (isset($params[5 + $off])) {
+                    $recursive = $params[5 + $off];
+                }
+                return $args[2]->find('all', compact('conditions', 'fields', 'order', 'limit', 'page', 'recursive'));
+            } else {
+                if (isset($params[3 + $off])) {
+                    $recursive = $params[3 + $off];
+                }
+                return $args[2]->find('first', compact('conditions', 'fields', 'order', 'recursive'));
+            }
+        } else {
+            if (isset($args[1]) && $args[1] === true) {
+                return $this->fetchAll($args[0], true);
+            } elseif (isset($args[1]) && !is_array($args[1])) {
+                return $this->fetchAll($args[0], false);
+            } elseif (isset($args[1]) && is_array($args[1])) {
+                if (isset($args[2])) {
+                    $cache = $args[2];
+                } else {
+                    $cache = true;
+                }
+                return $this->fetchAll($args[0], $args[1], array('cache' => $cache));
+            }
+        }
+    }
+    
     public function describe($model) {
         if (empty($model->schema)) {
             throw new Exception("{$model->name} has no attribute '\$schema' defined");
@@ -365,9 +452,6 @@ class Ldap extends DataSource {
 	if (!isset ($queryData['conditions']))
 	    $queryData['conditions'] = array();
 
-	if (!isset ($queryData['targetDn']))
-	    $queryData['targetDn'] = null;
-
 	if (!isset ($queryData['fields']) && empty($queryData['fields']))
 	    $queryData['fields'] = array ();
 
@@ -381,19 +465,36 @@ class Ldap extends DataSource {
     }
     
     private function _toLdapData(Model $model, $modelData) {
-        $databaseToLdapMethod = '__' . $model->useDbConfig . $model->name . 'ToLdap';
+        $method = $this->_getDatabaseMethod($model, 'ToLdap');
+        if ($method->getNumberOfParameters() > 1) {
+            if (empty($modelData[$model->primaryKey])) {
+                $previousData = false;
+            } else {
+                $previousData = $model->find(
+                    'first', array(
+                    'conditions' => array(
+                        "{$model->alias}.{$model->primaryKey}" => $modelData[$model->primaryKey]
+                    )
+                    ));
 
-        if (!method_exists(ConnectionManager::$config, $databaseToLdapMethod)) {
-            throw new Exception("Class \"" . get_class(ConnectionManager::$config) . "\" has no method \"$databaseToLdapMethod\"");
+                $previousData = $previousData[$model->alias];
+            }
+
+            $ldapData = $method->invoke(
+                ConnectionManager::$config
+                , $modelData
+                , $previousData
+            );
+        } else {
+            $ldapData = $method->invoke(
+                ConnectionManager::$config
+                , $modelData);
         }
-        
-        $ldapData = array();
-        
+
+        unset($ldapData['dn']);
         if (!empty($modelData[$model->primaryKey])) {
             $ldapData['dn'] = $modelData[$model->primaryKey];
         }
-
-        $ldapData += ConnectionManager::$config->{$databaseToLdapMethod}($modelData);
 
         return $ldapData;
     }
@@ -412,20 +513,42 @@ class Ldap extends DataSource {
             }
         }
 
-        $databaseToLdapMethod = '__' . $model->useDbConfig . $model->name . 'FromLdap';
+        $modelData = $this->_getDatabaseMethod($model, 'FromLdap')->invoke(
+            ConnectionManager::$config
+            , $ldapData);
 
-        if (!method_exists(ConnectionManager::$config, $databaseToLdapMethod)) {
-            throw new Exception("Class \"" . get_class(ConnectionManager::$config) . "\" has no method \"$databaseToLdapMethod\"");
-        }
-        
-        $modelData = ConnectionManager::$config->{$databaseToLdapMethod}($ldapData);
-        
         if (!empty($ldapData['dn'])) {
             $modelData[$model->primaryKey] = LdapUtils::normalizeDn($ldapData['dn']);
         }        
 
 
         return $modelData;
+    }
+
+    /**
+     * 
+     * @param type $model
+     * @param type $suffix
+     * @return \ReflectionMethod
+     * @throws Exception
+     */
+    private function _getDatabaseMethod($model, $suffix) {
+        $class = new ReflectionClass($model);
+
+        $methods = array();
+
+        while ($class) {
+            $databaseToLdapMethod = '__' . $model->useDbConfig . $class->getName() . $suffix;
+
+            if (method_exists(ConnectionManager::$config, $databaseToLdapMethod)) {
+                return new ReflectionMethod(ConnectionManager::$config, $databaseToLdapMethod);
+            }
+
+            $class = $class->getParentClass();
+            $methods[] = $databaseToLdapMethod;
+        }
+
+        throw new Exception("Class \"" . get_class(ConnectionManager::$config) . "\" has no method " . print_r($methods, true));
     }
 
     public function buildDnByData(Model $model, $modelData) {
@@ -470,13 +593,21 @@ class Ldap extends DataSource {
     }
 
     private function _getModelConfig(Model $model, $key) {
-        if (isset($this->config['models'][$model->name][$key])) {
-            return $this->config['models'][$model->name][$key];
-        } else if (!empty($this->_modelBaseConfig[$key])) {
-            return $this->_modelBaseConfig[$key];
-        } else {
-            throw new Exception("No config '$key' defined for model \"{$model->name}\"");
+        $class = new ReflectionClass($model);
+
+        while ($class) {
+            if (isset($this->config['models'][$class->getName()][$key])) {
+                return $this->config['models'][$class->getName()][$key];
+            }
+
+            $class = $class->getParentClass();
         }
+
+        if (!empty($this->_modelBaseConfig[$key])) {
+            return $this->_modelBaseConfig[$key];
+        }
+
+        throw new Exception("No config '$key' defined for model \"{$model->name}\"");
     }
 
     private function _throwPhysicalConnectionException($message) {
