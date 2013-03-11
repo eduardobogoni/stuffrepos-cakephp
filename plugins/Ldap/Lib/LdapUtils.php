@@ -54,5 +54,18 @@ class LdapUtils {
 
         return implode(',', $rdns);
     }
+    
+    public static function firstRdn($dn, $field = null) {
+        $explodedDn = self::explodeDn($dn);
 
+        switch ($field) {
+            case 'attribute':
+            case 'value':
+                $rdn = self::explodeRdn($explodedDn[0]);
+                return $rdn[$field];
+
+            default:
+                return $explodedDn[0];
+        }
+    }
 }

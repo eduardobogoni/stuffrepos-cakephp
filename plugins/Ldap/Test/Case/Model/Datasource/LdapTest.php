@@ -251,4 +251,45 @@ class LdapTest extends CakeTestCase {
         ));
     }
 
+    public function testUpdatePartialFields() {
+        $this->LdapPerson->create();
+
+        $this->LdapPerson->save(
+            array(
+                $this->LdapPerson->alias => $this->sampleData
+            )
+        );
+        
+         $findInstance = $this->LdapPerson->find('first', array(
+            'conditions' => array(
+                $this->LdapPerson->alias . '.first_name' => $this->sampleData['first_name']
+            )
+            ));
+         
+         $this->assertEqual(empty($findInstance[$this->LdapPerson->alias]), false);                  
+         
+         foreach(array_keys($this->LdapPerson->schema()) as $field) {         
+             if ($field != $this->LdapPerson->primaryKey) {
+                 $savedInstance = $findInstance;
+                 $savedInstance[$this->LdapPerson->alias][$field] = $this->sampleDataModified[$field];        
+                 
+                 $this->assertNotEqual(
+                     $this->LdapPerson->save(array(
+                         $this->LdapPerson->alias => array($field => $this->sampleDataModified[$field])
+                     ))
+                     , false);
+                 
+                 $findInstance = $this->LdapPerson->find('first', array(
+                    'conditions' => array(
+                        $this->LdapPerson->alias . '.first_name' => $savedInstance[$this->LdapPerson->alias]['first_name']
+                    )
+                    ));
+                 
+                 $savedInstance[$this->LdapPerson->alias][$this->LdapPerson->primaryKey] = 
+                     $findInstance[$this->LdapPerson->alias][$this->LdapPerson->primaryKey];
+                 $this->assertEqual($findInstance, $savedInstance);
+             }
+         }
+    }
+
 }
