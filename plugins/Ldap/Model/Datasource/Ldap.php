@@ -20,15 +20,26 @@ class Ldap extends DataSource {
 
     public function __construct($config = null) {
         parent::__construct($config);
-        $this->connected = false;
-        if (empty($this->config['port'])) {
-            $this->connection = ldap_connect($this->config['host']);
-        } else {
-            $this->connection = ldap_connect($this->config['host'], $this->config['port']);
+        $this->connection = $this->_buildConnection();                
+        if (!@ldap_bind($this->connection, $this->config['login'], $this->config['password'])) {
+            $this->_throwPhysicalConnectionException("Datasource not connected");            
         }
-        ldap_set_option($this->connection, LDAP_OPT_PROTOCOL_VERSION, $this->config['version']);
-        if (ldap_bind($this->connection, $this->config['login'], $this->config['password']))
-            $this->connected = true;
+    }
+    
+    private function _buildConnection() {
+        if (empty($this->config['port'])) {
+            $connection = ldap_connect($this->config['host']);
+        } else {
+            $connection = ldap_connect($this->config['host'], $this->config['port']);
+        }
+        
+        if (!$connection) {
+            throw new Exception("Not connected");
+        }
+        
+        ldap_set_option($connection, LDAP_OPT_PROTOCOL_VERSION, $this->config['version']);
+        
+        return $connection;
     }
 
     public function column($real) {
@@ -54,7 +65,7 @@ class Ldap extends DataSource {
         
         unset($ldapData['dn']);
 
-        if (@ldap_add($this->_getConnection(), $dn, $ldapData)) {
+        if (@ldap_add($this->connection, $dn, $ldapData)) {
             $model->id = $dn;
             return true;
         } else {
@@ -78,7 +89,7 @@ class Ldap extends DataSource {
         $search = $this->_searchParameters($model, $queryData);
         
         $searchResult = @ldap_search(
-                        $this->_getConnection()
+                        $this->connection
                         , $search['baseDn']
                         , $search['filter']                
                         , $search['attributes']
@@ -89,7 +100,7 @@ class Ldap extends DataSource {
         );
         
         if ($searchResult === false) {
-            if (ldap_errno($this->_getConnection()) == self::LDAP_ERROR_NO_SUCH_OBJECT) {
+            if (ldap_errno($this->connection) == self::LDAP_ERROR_NO_SUCH_OBJECT) {
                 return array();
             }
             
@@ -98,7 +109,7 @@ class Ldap extends DataSource {
             return false;
         }
                 
-        $info = ldap_get_entries($this->_getConnection(), $searchResult);
+        $info = ldap_get_entries($this->connection, $searchResult);
         
         
         
@@ -212,7 +223,9 @@ class Ldap extends DataSource {
                 
         $rdnAttribute = $this->_rdnAttribute($dn);        
         if (isset($ldapData[$rdnAttribute])) {            
-            $dn = $this->_renameRdn($dn, $ldapData[$rdnAttribute]);
+            if ($ldapData[$rdnAttribute] != LdapUtils::firstRdn($dn, 'value')) {
+                $dn = $this->_renameRdn($dn, $ldapData[$rdnAttribute]);
+            }
             unset($ldapData[$rdnAttribute]);
             if (empty($ldapData)) {
                 $model->id = $dn;
@@ -220,7 +233,7 @@ class Ldap extends DataSource {
             }
         }
 
-        if (@ldap_modify($this->_getConnection(), $dn, $ldapData)) {
+        if (@ldap_modify($this->connection, $dn, $ldapData)) {
             $model->id = $dn;
             return true;
         } else {
@@ -270,7 +283,7 @@ class Ldap extends DataSource {
         }                
         
         foreach($instances as $instance) {            
-            if (!@ldap_delete($this->_getConnection(), $instance[$model->alias][$model->primaryKey])) {
+            if (!@ldap_delete($this->connection, $instance[$model->alias][$model->primaryKey])) {
                 return false;
             }
         }
@@ -287,7 +300,7 @@ class Ldap extends DataSource {
         $recursive = null;
 
         if (count($args) === 1) {
-            return $this->fetchAll($args[0]);
+            throw new Exception('count($args) === 1');
         } elseif (count($args) > 1 && (strpos($args[0], 'findBy') === 0 || strpos($args[0], 'findAllBy') === 0)) {
             $params = $args[1];
 
@@ -350,19 +363,16 @@ class Ldap extends DataSource {
                 return $args[2]->find('first', compact('conditions', 'fields', 'order', 'recursive'));
             }
         } else {
-            if (isset($args[1]) && $args[1] === true) {
-                return $this->fetchAll($args[0], true);
-            } elseif (isset($args[1]) && !is_array($args[1])) {
-                return $this->fetchAll($args[0], false);
-            } elseif (isset($args[1]) && is_array($args[1])) {
-                if (isset($args[2])) {
-                    $cache = $args[2];
-                } else {
-                    $cache = true;
-                }
-                return $this->fetchAll($args[0], $args[1], array('cache' => $cache));
-            }
+            throw new Exception("Method not found: {$args[0]}");
         }
+    }
+    
+    public function bind($dn, $password) {        
+        return @ldap_bind(
+                        $this->_buildConnection()
+                        , $dn
+                        , $password
+        );
     }
     
     public function describe($model) {
@@ -467,17 +477,27 @@ class Ldap extends DataSource {
     private function _toLdapData(Model $model, $modelData) {
         $method = $this->_getDatabaseMethod($model, 'ToLdap');
         if ($method->getNumberOfParameters() > 1) {
-            if (empty($modelData[$model->primaryKey])) {
-                $previousData = false;
-            } else {
+            if (!empty($modelData[$model->primaryKey])) {
+                $id = $modelData[$model->primaryKey];
+            }
+            else if (!empty($model->id)) {
+                $id = $model->id;
+            }            
+            
+            if (!empty($id)) {
                 $previousData = $model->find(
                     'first', array(
                     'conditions' => array(
-                        "{$model->alias}.{$model->primaryKey}" => $modelData[$model->primaryKey]
+                        "{$model->alias}.{$model->primaryKey}" => $id
                     )
                     ));
-
-                $previousData = $previousData[$model->alias];
+                        
+                $previousData = empty($previousData) ? 
+                        false :
+                        $previousData[$model->alias];
+            }
+            else {
+                $previousData = false;
             }
 
             $ldapData = $method->invoke(
@@ -563,24 +583,6 @@ class Ldap extends DataSource {
         return LdapUtils::normalizeDn("$dnAttribute={$ldapData[$dnAttribute]}" . ($modelDn ? ',' . $modelDn : ''));
     }
 
-    private function _getConnection() {
-        if ($this->connection == null) {
-
-            $this->connected = false;
-            if (empty($this->config['port'])) {
-                $this->connection = ldap_connect($this->config['host']);
-            } else {
-                $this->connection = ldap_connect($this->config['host'], $this->config['port']);
-            }
-            ldap_set_option($this->connection, LDAP_OPT_PROTOCOL_VERSION, $this->config['version']);
-            if (!ldap_bind($this->connection, $this->config['login'], $this->config['password'])) {
-                throw new Exception("Datasource not connected");
-            }
-        }
-
-        return $this->connection;
-    }
-
     private function _getModelBaseDn(Model $model) {
         $modelDn = $this->_getModelConfig($model, 'relativeBaseDn');
         $dataSourceDn = $this->config['database'] ? $this->config['database'] : '';
@@ -611,7 +613,7 @@ class Ldap extends DataSource {
     }
 
     private function _throwPhysicalConnectionException($message) {
-        $errorCode = ldap_errno($this->_getConnection());
+        $errorCode = ldap_errno($this->connection);
         throw new Exception(
             ldap_err2str($errorCode) . " (Code: $errorCode)" .
             ($message ? "\n$message" : '')
@@ -638,7 +640,7 @@ class Ldap extends DataSource {
         //$newDn = $this->_getRenamedDn($dn, $rdn)
         //$this->_throwPhysicalConnectionException(print_r(compact('dn','rdnValue','rdn', 'newDn'),true));
         if (ldap_rename(
-                $this->_getConnection()
+                $this->connection
                 , $dn
                 , $rdn
                 , $parentDn
