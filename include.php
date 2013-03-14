@@ -53,4 +53,4 @@ checkTemporaryDirectory(
 unset($userConfig);
 unset($cakephpTmpRoot);
 unset($appName);
-unset($tmpSkeletonRoot);
+unset($tmpSkeletonRootPath);
