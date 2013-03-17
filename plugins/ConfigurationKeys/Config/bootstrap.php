@@ -1,3 +1,5 @@
 <?php
 
-CakePlugin::load('ExtendedScaffold');
+PluginManager::init('ConfigurationKeys', array(
+    'ExtendedScaffold',
+));

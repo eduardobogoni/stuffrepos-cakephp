@@ -1,3 +1,5 @@
 <?php
 
-// Empty
+PluginManager::init('Base', array(
+    'Migrations',
+));

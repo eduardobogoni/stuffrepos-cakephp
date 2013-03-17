@@ -1,3 +1,3 @@
 <?php
 
-// Empty
+PluginManager::init('Ldap', array());

@@ -1,4 +1,6 @@
 <?php
 
-CakePlugin::load('Base');
-CakePlugin::load('Widgets');
+PluginManager::init('ExtendedScaffold', array(
+    'Base',
+    'Widgets',
+));

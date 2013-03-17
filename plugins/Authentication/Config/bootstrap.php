@@ -1,2 +1,4 @@
 <?php
-CakePlugin::load('Base');
+PluginManager::init('Authentication', array(
+    'Base',
+));
