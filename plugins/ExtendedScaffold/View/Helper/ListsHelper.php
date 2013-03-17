@@ -341,11 +341,6 @@ class ListsHelper extends AppHelper {
                 }
             }
             
-            if ($modelIndex) {
-                $value = $row[$modelIndex][$fieldIndex];
-            } else {
-                $value = $row[$fieldIndex];
-            }
             $value = $this->CakeLayers->modelInstanceFieldByPath(
                 $this->model, $row, $field['path'], true
             );
