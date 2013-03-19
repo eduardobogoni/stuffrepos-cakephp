@@ -34,8 +34,14 @@ class ModelTraverserTest extends CakeTestCase {
             $author = $this->Author->findById(
                     $article[$this->Article->alias]['author_id']
             );
-            $this->assertNotEqual($author, false);
 
+            if ($article[$this->Article->alias]['author_id']) {                
+                $this->assertNotEqual($author, false);
+                $this->assertNotEqual($author, array());
+            }
+            else {
+                $this->assertEqual($author, array());
+            }
 
             foreach (array_keys($this->Author->schema()) as $authorField) {
                 $this->assertEquals(
@@ -44,7 +50,7 @@ class ModelTraverserTest extends CakeTestCase {
                                 , $article
                                 , $this->Article->Author->alias . '.' . $authorField
                         )
-                        , $author[$this->Author->alias][$authorField]
+                        , isset($author[$this->Author->alias][$authorField]) ? $author[$this->Author->alias][$authorField] : null
                 );
             }
         }
@@ -65,7 +71,7 @@ class ModelTraverserTest extends CakeTestCase {
         }
     }
 
-    public function testlastInstanceBelongsTo() {
+    public function testLastInstanceBelongsTo() {
         $articles = $this->Article->find('all');
 
         foreach ($articles as $article) {
@@ -77,7 +83,13 @@ class ModelTraverserTest extends CakeTestCase {
                 'recursive' => 0,
                     )
             );
-            $this->assertNotEqual($author, false);
+
+            if ($article[$this->Article->alias]['author_id']) {
+                $this->assertNotEqual($author, false);
+                $this->assertNotEqual($author, array());
+            } else {
+                $this->assertEqual($author, array());
+            }
 
             foreach (array_keys($this->Author->schema()) as $authorField) {
                 $this->assertEquals(
@@ -99,7 +111,13 @@ class ModelTraverserTest extends CakeTestCase {
             $author = $this->Author->findById(
                     ModelTraverser::value($this->Article, $article, 'author_id')
             );
-            $this->assertNotEqual($author, false);
+
+            if ($article[$this->Article->alias]['author_id']) {
+                $this->assertNotEqual($author, false);
+                $this->assertNotEqual($author, array());
+            } else {
+                $this->assertEqual($author, array());
+            }
 
             foreach (array_keys($this->Author->schema()) as $authorField) {
                 $this->assertEquals(
@@ -108,7 +126,7 @@ class ModelTraverserTest extends CakeTestCase {
                                 , $article
                                 , $this->Article->Author->alias . '.' . $authorField
                         )
-                        , $author[$this->Author->alias][$this->Author->primaryKey]
+                        , isset($author[$this->Author->alias][$this->Author->primaryKey]) ? $author[$this->Author->alias][$this->Author->primaryKey] : null
                 );
             }
         }

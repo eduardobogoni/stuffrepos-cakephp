@@ -30,8 +30,10 @@ class ModelTraverser {
 
     /**
      *
-     * @param mixed $path 
-     * @return mixed
+     * @param Model $model
+     * @param array $row
+     * @param string|array $path
+     * @return type
      */
     public static function value(Model $model, $row, $path) {
         $result = self::find($model, $row, $path, $row);
@@ -45,7 +47,9 @@ class ModelTraverser {
 
     public static function lastInstancePrimaryKeyValue(Model $model, $row, $path) {
         $result = self::find($model, $row, $path, $row);
-        return $result['lastInstance'][$result['model']->alias][$result['model']->primaryKey];
+        return isset($result['lastInstance'][$result['model']->alias][$result['model']->primaryKey]) ?
+            $result['lastInstance'][$result['model']->alias][$result['model']->primaryKey] :
+            null;
     }
 
     public static function lastInstanceAssociationDisplayFieldValue(Model $model, $row, $path) {
@@ -110,11 +114,8 @@ class ModelTraverser {
 
             if (self::isField($model, $path[0])) {
                 if (count($path) == 1) {
-                    if (!isset($row[$model->alias])) {
-                        throw new Exception("{$model->alias} not found in ".print_r($row,true));
-                    }
                     return array(
-                        'all' => $row[$model->alias][$path[0]],
+                        'all' => isset($row[$model->alias]) ? $row[$model->alias][$path[0]] : null,
                         'lastInstance' => $lastInstance,
                         'model' => $model,
                     );
@@ -122,7 +123,7 @@ class ModelTraverser {
                     throw new Exception("Path continues, but next model is null. Path: " . print_r($path, true));
                 }
             } else if (self::isBelongsToAssociation($model, $path[0])) {
-                if (!isset($row->{$path[0]})) {
+                if (!isset($row[self::CACHE_KEY][$path[0]])) {                    
                     $row[self::CACHE_KEY][$path[0]] = self::findBelongsToInstance($model, $path[0], $row);
                 }
 
