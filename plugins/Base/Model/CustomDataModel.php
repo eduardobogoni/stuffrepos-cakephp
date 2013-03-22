@@ -224,6 +224,10 @@ abstract class CustomDataModel extends AppModel {
         return $this->customDelete($row);
     }
 
+    public function clearCache() {
+        $this->cache = null;
+    }
+
 }
 
 ?>
