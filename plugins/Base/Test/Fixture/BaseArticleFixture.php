@@ -1,6 +1,6 @@
 <?php
 
-class ArticleFixture extends CakeTestFixture {
+class BaseArticleFixture extends CakeTestFixture {
 
     public $fields = array(
         'id' => array('type' => 'integer', 'key' => 'primary'),
@@ -16,10 +16,13 @@ class ArticleFixture extends CakeTestFixture {
 
 }
 
-class Article extends Model {
+class BaseArticle extends Model {
 
     public $belongsTo = array(
-        'Author'
+        'Author' => array(
+            'className' => 'BaseAuthor',
+            'foreignKey' => 'author_id',
+        )
     );
 
 }

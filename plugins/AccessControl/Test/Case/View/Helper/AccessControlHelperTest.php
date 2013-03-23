@@ -1,12 +1,12 @@
 <?php
 
 App::uses('AccessControlComponent', 'AccessControl.Controller/Component');
-App::uses('AccessControlFilter', 'AccessControl.Lib');
+App::uses('AccessControlFilter', 'AccessControl.Controller/Component/AccessControl');
 App::uses('View', 'View');
 App::uses('AccessControlHelper', 'AccessControl.View/Helper');
 App::uses('Controller', 'Controller');
 
-class AccessControlFilterTest implements AccessControlFilter {
+class AccessControlHelperFilterTest implements AccessControlFilter {
 
     public function userHasAccess(CakeRequest $request, $user, $object, $objectType) {
         return $user || ($object == '/free' && $objectType == 'url');
@@ -33,7 +33,7 @@ class AccessControlHelperTest extends CakeTestCase {
                 new CakeResponse()
             )
         );
-        AccessControlComponent::addFilter(new AccessControlFilterTest());        
+        AccessControlComponent::addFilter(new AccessControlHelperFilterTest());        
         $this->AccessControl = new AccessControlHelper(new View());
     }
 

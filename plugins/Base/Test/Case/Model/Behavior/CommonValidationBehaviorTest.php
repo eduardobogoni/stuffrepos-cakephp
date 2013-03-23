@@ -3,13 +3,13 @@
 class CommonValidationBehaviorTest extends CakeTestCase {
 
     public $fixtures = array(
-        'plugin.Base.Article',
-        'plugin.Base.Author',
+        'plugin.Base.BaseArticle',
+        'plugin.Base.BaseAuthor',
     );
 
     public function setUp() {
         parent::setUp();
-        $this->Article = ClassRegistry::init('Article');
+        $this->Article = ClassRegistry::init('BaseArticle');
         $this->Article->Behaviors->attach('Base.CommonValidation');
     }
 
@@ -24,9 +24,9 @@ class CommonValidationBehaviorTest extends CakeTestCase {
 
         foreach ($articles as $article) {
             $this->Article->create();
-            $equalsArticle['Article'] = array(
-                'title' => $article['Article']['title'],
-                'author_id' => $article['Article']['author_id'],
+            $equalsArticle[$this->Article->alias] = array(
+                'title' => $article[$this->Article->alias]['title'],
+                'author_id' => $article[$this->Article->alias]['author_id'],
             );
             $this->Article->set($equalsArticle);
             $this->assertEqual($this->Article->validates(), false);
@@ -36,9 +36,9 @@ class CommonValidationBehaviorTest extends CakeTestCase {
             );
 
             $this->Article->create();
-            $notEqualsArticle['Article'] = array(
-                'title' => 'Title from ' . $article['Article']['id'],
-                'author_id' => $article['Article']['author_id'],
+            $notEqualsArticle[$this->Article->alias] = array(
+                'title' => 'Title from ' . $article[$this->Article->alias]['id'],
+                'author_id' => $article[$this->Article->alias]['author_id'],
             );
             $this->Article->set($notEqualsArticle);
             $this->assertEqual($this->Article->validates(), true);

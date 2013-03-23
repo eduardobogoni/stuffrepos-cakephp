@@ -1,10 +1,10 @@
 <?php
 
 App::uses('AccessControlComponent', 'AccessControl.Controller/Component');
-App::uses('AccessControlFilter', 'AccessControl.Lib');
+App::uses('AccessControlFilter', 'AccessControl.Controller/Component/AccessControl');
 App::uses('Controller', 'Controller');
 
-class AccessControlFilterTest implements AccessControlFilter {
+class AccessControlComponentFilterTest implements AccessControlFilter {
 
     public function userHasAccess(CakeRequest $request, $user, $object, $objectType) {
         return $user || ($object == '/free' && $objectType == 'url');
@@ -35,7 +35,7 @@ class AccessControlComponentTest extends CakeTestCase {
         );
 
         $accessControl->clearFilters();
-        $accessControl->addFilter(new AccessControlFilterTest());
+        $accessControl->addFilter(new AccessControlComponentFilterTest());
     }
 
     public function testUserHasAccess() {

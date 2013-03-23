@@ -3,15 +3,15 @@
 class ModelTraverserTest extends CakeTestCase {
 
     public $fixtures = array(
-        'plugin.Base.Article',
-        'plugin.Base.Author',
+        'plugin.Base.BaseArticle',
+        'plugin.Base.BaseAuthor',
     );
 
     public function setUp() {
         parent::setUp();
         App::import('Lib', 'Base.ModelTraverser');
-        $this->Article = ClassRegistry::init('Article');
-        $this->Author = ClassRegistry::init('Author');
+        $this->Article = ClassRegistry::init('BaseArticle');
+        $this->Author = ClassRegistry::init('BaseAuthor');
     }
 
     public function testValue() {
