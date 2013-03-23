@@ -48,7 +48,7 @@ class ActionListHelper extends AppHelper {
         array('url' => array('action' => 'view'), 'hasId' => true, 'format' => 'Visualizar %s', 'plural' => false),
         array('url' => array('action' => 'edit'), 'hasId' => true, 'format' => 'Editar %s', 'plural' => false),
         array('url' => array('action' => 'delete'), 'hasId' => true, 'format' => 'Remover %s', 'plural' => false,
-            'question' => 'Tem certeza de que deseja remover?', 'linkOptions' => array('method' => 'post'))
+            'question' => 'Tem certeza de que deseja remover?', 'post' => true)
     );
 
     /**
