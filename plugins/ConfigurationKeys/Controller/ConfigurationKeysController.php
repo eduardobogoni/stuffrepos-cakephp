@@ -26,7 +26,10 @@ class ConfigurationKeysController extends AppController {
                 ),
                 'setted_value',
             ),
-            'indexUnsetFields,viewUnsetFields' => array(),
+            'indexUnsetFields' => array(
+                'default_value',
+                'setted_value'
+            )
         )
     );
 

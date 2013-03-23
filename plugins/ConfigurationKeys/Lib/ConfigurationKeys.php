@@ -3,39 +3,15 @@
 class ConfigurationKeys {
 
     /**
-     * @var ConfigurationKeys
+     * @var array(key:string => options:array())
      */
-    private static $instance;
-
-    /**
-     * @return ConfigurationKeys
-     */
-    public static function getInstance() {
-        if (!self::$instance) {
-            self::$instance = new ConfigurationKeys();
-        }
-        return self::$instance;
-    }
-
     private static $keys = null;
 
-    protected function __construct() {
-        if (($keys = Configure::read('configurationKeys'))) {
-            foreach ($keys as $key => $options) {
-                if (is_int($key)) {
-                    $key = $options;
-                    $options = array();
-                }
-                $this->keys[$key] = $this->_mergeDefaultOptions($options);
-            }
-        }
+    public static function reset() {
+        self::$keys = null;
     }
 
-    public function addKey($key, $options = array()) {
-        $this->keys[$key] = $this->_mergeDefaultOptions($options);
-    }
-
-    public static function getKeys() {
+    private static function _getKeys() {
         if (self::$keys === null) {
             if ((self::$keys = Configure::read('configurationKeys'))) {
                 foreach (self::$keys as $key => $options) {
@@ -43,15 +19,22 @@ class ConfigurationKeys {
                         $key = $options;
                         $options = array();
                     }
-                    self::$keys[$key] = self::_mergeDefaultOptions($options);
+                    self::$keys[$key] = $options + array(
+                        'description' => null,
+                        'defaultValue' => null
+                    );
                 }
             }
         }
         return self::$keys;
     }
 
-    public function getRequiredKeyValue($key) {
-        if (($value = $this->getKeyValue($key))) {
+    public static function getKeys() {
+        return array_keys(self::_getKeys());
+    }
+
+    public static function getRequiredKeyValue($key) {
+        if (($value = self::getKeyValue($key))) {
             return $value;
         } else {
             throw new Exception(sprintf(__('Configuration value not found to key=%s'), $key));
@@ -59,9 +42,7 @@ class ConfigurationKeys {
     }
 
     public static function getKeyValue($key) {
-        if (!self::hasKey($key)) {
-            throw new Exception(sprintf(__('Key not setted: %s (Keys setted: %s)'), $key, implode(',', array_keys($this->keys))));
-        }
+        self::_throwExceptionIfKeyNotExists($key);
 
         $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
         $settedConfigurationKey = $SettedConfigurationKey->findByName($key);
@@ -71,19 +52,14 @@ class ConfigurationKeys {
             return self::$keys[$key]['defaultValue'];
         }
     }
-    
+
     public static function getKeyDefaultValue($key) {
-        if (!self::hasKey($key)) {
-            throw new Exception(sprintf(__('Key not setted: %s (Keys setted: %s)'), $key, implode(',', array_keys($this->keys))));
-        }
-        
-        return self::$keys[$key]['defaultValue'];        
+        self::_throwExceptionIfKeyNotExists($key);
+        return self::$keys[$key]['defaultValue'];
     }
 
     public static function setKeyValue($key, $value) {
-        if (!self::hasKey($key)) {
-            throw new Exception(sprintf(__('Key not setted: %s (Keys setted: %s)'), $key, implode(',', array_keys($this->keys))));
-        }
+        self::_throwExceptionIfKeyNotExists($key);
 
         $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
         $settedConfigurationKey = $SettedConfigurationKey->findByName($key);
@@ -97,18 +73,31 @@ class ConfigurationKeys {
         return $SettedConfigurationKey->save($settedConfigurationKey);
     }
 
-    public static function hasKey($key) {
-        return array_key_exists($key, self::getKeys());
+    public static function clearKeyValue($key) {
+        self::_throwExceptionIfKeyNotExists($key);
+
+        $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
+        $settedConfigurationKey = $SettedConfigurationKey->findByName($key);
+
+        if (!empty($settedConfigurationKey)) {
+            $SettedConfigurationKey->delete($settedConfigurationKey[$SettedConfigurationKey->alias][$SettedConfigurationKey->primaryKey]);
+        }
     }
 
-    private static function _mergeDefaultOptions($options) {
-        foreach (array('description', 'defaultValue') as $option) {
-            if (!isset($options[$option])) {
-                $options[$option] = null;
-            }
-        }
+    public static function hasKey($key) {
+        return array_key_exists($key, self::_getKeys());
+    }
 
-        return $options;
+    public static function getKeyOptions($key, $option = null) {
+        self::_throwExceptionIfKeyNotExists($key);
+        $options = self::$keys[$key];
+        return $option ? $options[$option] : $option;
+    }
+
+    private static function _throwExceptionIfKeyNotExists($key) {
+        if (!self::hasKey($key)) {
+            throw new Exception(sprintf(__('Key not setted: %s (Keys setted: %s)'), $key, implode(',', array_keys($this->keys))));
+        }
     }
 
 }

@@ -6,7 +6,24 @@ App::import('Lib', 'ConfigurationKeys.ConfigurationKeys');
 class ConfigurationKey extends CustomDataModel {
 
     public $displayField = 'name';
-    public $primaryKey = 'name';    
+    public $primaryKey = 'name';
+    public $validate = array(
+        'name' => array(
+            'notempty' => array(
+                'rule' => array('notempty'),
+                'required' => true
+            ),
+            'keyExists' => array(
+                'rule' => array('keyExists'),
+            ),
+        ),
+        'setted_value' => array(
+            'required' => array(
+                'rule' => '/.*/i',
+                'required' => true,
+            ),
+        ),
+    );
 
     private function _findKeyValue($name) {
         $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
@@ -17,16 +34,23 @@ class ConfigurationKey extends CustomDataModel {
             return null;
         }
     }
+    
+    private function _keyIsSetted($name) {        
+        return ClassRegistry::init('SettedConfigurationKey')->findByName($name) ?
+            true :
+            false;        
+    }
 
     protected function customData() {
         $data = array();                
 
-        foreach (ConfigurationKeys::getInstance()->getKeys() as $name => $options) {
+        foreach (ConfigurationKeys::getKeys() as $name) {
             $row = array(
                 'name' => $name,
-                'description' => $options['description'],
-                'default_value' => $options['defaultValue'],
+                'description' => ConfigurationKeys::getKeyOptions($name, 'description'),
+                'default_value' => ConfigurationKeys::getKeyOptions($name, 'defaultValue'),
                 'setted_value' => $this->_findKeyValue($name),
+                'setted' => $this->_keyIsSetted($name),
             );
 
             $row['current_value'] = $row['setted_value'] ? $row['setted_value'] : $row['default_value'];
@@ -43,6 +67,7 @@ class ConfigurationKey extends CustomDataModel {
             'default_value' => array('type' => 'string'),
             'setted_value' => array('type' => 'string'),
             'current_value' => array('type' => 'string'),
+            'setted' => array('type' => 'boolean'),
         );
     }
 
@@ -51,17 +76,13 @@ class ConfigurationKey extends CustomDataModel {
         $settedConfigurationKey = $SettedConfigurationKey->findByName($this->id);
 
         if ($settedConfigurationKey) {
-            return $SettedConfigurationKey->delete($settedConfigurationKey[$SettedConfigurationKey->alias][$SettedConfigurationKey->primaryKey], $cascade);
+            return $SettedConfigurationKey->delete($settedConfigurationKey[$SettedConfigurationKey->alias][$SettedConfigurationKey->primaryKey]);
         } else {
             return false;
         }
     }
 
     protected function customSave($isNew) {
-        if (empty($this->data[$this->alias]['name']) || !isset($this->data[$this->alias]['setted_value'])) {
-            return false;
-        }
-
         $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
         $settedConfigurationKey = $SettedConfigurationKey->findByName($this->data[$this->alias]['name']);
 
@@ -72,6 +93,20 @@ class ConfigurationKey extends CustomDataModel {
         $settedConfigurationKey[$SettedConfigurationKey->alias]['value'] = $this->data[$this->alias]['setted_value'];
 
         return $SettedConfigurationKey->save($settedConfigurationKey);
+    }
+
+    public function keyExists($check, $params) {
+        foreach ($check as $key) {
+            if (!ConfigurationKeys::hasKey($key)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function nullValidation($check, $params) {
+        return true;
     }
 
 }
