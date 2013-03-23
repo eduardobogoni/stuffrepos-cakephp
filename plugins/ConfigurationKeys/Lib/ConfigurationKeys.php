@@ -58,7 +58,7 @@ class ConfigurationKeys {
         }
     }
 
-    public function getKeyValue($key) {
+    public static function getKeyValue($key) {
         if (!self::hasKey($key)) {
             throw new Exception(sprintf(__('Key not setted: %s (Keys setted: %s)'), $key, implode(',', array_keys($this->keys))));
         }
@@ -68,8 +68,16 @@ class ConfigurationKeys {
         if ($settedConfigurationKey) {
             return $settedConfigurationKey[$SettedConfigurationKey->alias]['value'];
         } else {
-            return $this->keys[$key]['defaultValue'];
+            return self::$keys[$key]['defaultValue'];
         }
+    }
+    
+    public static function getKeyDefaultValue($key) {
+        if (!self::hasKey($key)) {
+            throw new Exception(sprintf(__('Key not setted: %s (Keys setted: %s)'), $key, implode(',', array_keys($this->keys))));
+        }
+        
+        return self::$keys[$key]['defaultValue'];        
     }
 
     public static function setKeyValue($key, $value) {
