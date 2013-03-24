@@ -4,12 +4,15 @@ App::uses('ConfigurationKeys', 'ConfigurationKeys.Lib');
 
 class ConfigurationKeysTest extends CakeTestCase {
 
+    private $oldConfigurationKeys;
     public $fixtures = array(
         'plugin.ConfigurationKeys.SettedConfigurationKey',
     );
 
     public function setUp() {
         parent::setUp();
+
+        $this->oldConfigurationKeys = Configure::read('configurationKeys');
 
         Configure::write('configurationKeys', array(
             'without_default_value' => array(
@@ -26,6 +29,12 @@ class ConfigurationKeysTest extends CakeTestCase {
         foreach (ConfigurationKeys::getKeys() as $key) {
             ConfigurationKeys::clearKeyValue($key);
         }
+    }
+
+    public function tearDown() {
+        Configure::write('configurationKeys', $this->oldConfigurationKeys);
+        ConfigurationKeys::reset();
+        parent::tearDown();
     }
 
     public function testGetKeyValue() {

@@ -96,7 +96,7 @@ class ConfigurationKeys {
 
     private static function _throwExceptionIfKeyNotExists($key) {
         if (!self::hasKey($key)) {
-            throw new Exception(sprintf(__('Key not setted: %s (Keys setted: %s)'), $key, implode(',', array_keys($this->keys))));
+            throw new Exception(sprintf(__('Key not setted: %s (Keys setted: %s)'), $key, implode(',', self::getKeys())));
         }
     }
 

@@ -18,6 +18,8 @@ class ConfigurationKeyTest extends CakeTestCase {
         $this->ConfigurationKey = ClassRegistry::init('ConfigurationKey');
         $this->assertEqual(get_class($this->ConfigurationKey), 'ConfigurationKey');
 
+        $this->oldConfigurationKeys = Configure::read('configurationKeys');
+        
         Configure::write('configurationKeys', array(
             'without_default_value' => array(
                 'description' => 'Configuration without default value.',
@@ -33,6 +35,12 @@ class ConfigurationKeyTest extends CakeTestCase {
         foreach (ConfigurationKeys::getKeys() as $key) {
             ConfigurationKeys::clearKeyValue($key);
         }
+    }
+    
+    public function tearDown() {        
+        Configure::write('configurationKeys', $this->oldConfigurationKeys);
+        ConfigurationKeys::reset();
+        parent::tearDown();
     }
 
     public function testSaveKeyNotExists() {
