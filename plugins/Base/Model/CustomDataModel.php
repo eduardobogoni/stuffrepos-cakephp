@@ -1,6 +1,9 @@
 <?php
 
-abstract class CustomDataModel extends AppModel {
+App::uses('Model', 'Model');
+App::uses('ArrayUtil', 'Base.Lib');
+
+abstract class CustomDataModel extends Model {
 
     public $useTable = false;
     public $useCache = true;
@@ -65,9 +68,10 @@ abstract class CustomDataModel extends AppModel {
             }
             return false;
         } else {            
-            if (preg_match('/\s*([a-zA-Z\._]+)\s*([!=<>]{1,2})?\s*/', $conditionKey, $matches)) {
+            if (preg_match('/\s*([a-zA-Z\._]+)\s*(?:([!=<>]{1,2}|like)(.*))?/', $conditionKey, $matches)) {
                 list($conditionAlias, $conditionField) = explode('.', $matches[1]);
                 $operation = isset($matches[2]) ? $matches[2] : '==';
+                $rightOperand = isset($matches[3]) ? trim($matches[3]) : '';
             } else {
                 throw new Exception("Condition not parsed: \"$conditionKey\"");
             }
@@ -81,6 +85,7 @@ abstract class CustomDataModel extends AppModel {
             }
 
             $rowValue = $row[$conditionAlias][$conditionField];
+            $conditionValue = $this->_buildConditionValue($conditionValue, $rightOperand);
 
             switch ($operation) {
                 case '=':
@@ -91,8 +96,15 @@ abstract class CustomDataModel extends AppModel {
                 case '!=':
                     return $rowValue != $conditionValue;
 
+                case 'like':
+                    try {
+                        return $this->_like($rowValue, $conditionValue);
+                    } catch (Exception $ex) {
+                        throw new Exception(print_r(compact('conditionAlias', 'conditionField', 'row', 'rowValue', 'conditionValue'), true), 0, $ex);
+                    }
+
                 default:
-                    throw new Exception("Operation not mapped: \"$operation\"");
+                    throw new Exception("Operation not mapped: " . print_r(compact('operation', 'conditionKey', 'matches'), true));
             }
         }
     }
@@ -209,7 +221,12 @@ abstract class CustomDataModel extends AppModel {
             return false;
         }
 
-        return $this->customSave(empty($this->data[$this->alias][$this->primaryKey]));
+        if ($this->customSave(empty($this->data[$this->alias][$this->primaryKey]))) {
+            $this->clearCache();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function delete($id = null, $cascade = true) {
@@ -226,6 +243,52 @@ abstract class CustomDataModel extends AppModel {
 
     public function clearCache() {
         $this->cache = null;
+    }
+
+    private function _like($rowValue, $conditionValue) {
+        return preg_match($this->_likePregPattern($conditionValue), $rowValue);
+    }
+
+    private function _likePregPattern($check) {
+        if (!preg_match_all('/(%+|[^%]+)/', $check, $matches)) {
+            throw new Exception("Not matched: '$check'");
+        }
+
+        $pattern = '/^';
+        foreach ($matches[0] as $part) {
+            $pattern .= preg_match('/^%+$/', $part) ? '.*' : preg_quote($part);
+        }
+        $pattern .= '$/';
+
+        return $pattern;
+    }
+
+    private function _buildConditionValue($conditionValue, $rightOperand) {
+        if ($rightOperand == '') {
+            return $conditionValue;
+        } else {
+
+            if (preg_match_all("/('[^']*'|\?|\|{2})/", $rightOperand, $matches)) {
+                $value = '';
+                $conditionValues = ArrayUtil::arraylize($conditionValue);
+                $valueIndex = 0;
+                foreach ($matches[0] as $part) {
+                    if ($part == '?') {
+                        $value .= $conditionValues[$valueIndex++];
+                    } else if (preg_match("/'([^']*)'/", $part, $subMatches)) {
+                        $value .= $subMatches[1];
+                    } else if ($part == '||') {
+                        // Do nothing
+                    } else {
+                        throw new Exception("No matched: $part => $rightOperand");
+                    }
+                }
+
+                return $value;
+            } else {
+                throw new Exception("No matched: $rightOperand");
+            }
+        }
     }
 
 }
