@@ -12,6 +12,10 @@ class OpenLdapUtils {
         }
     }
 
+    public static function isHashedPassword($password)  {
+        return preg_match('/^\{\w+\}[^\s]+$/',$password) ? true : false;
+    }
+
     public static function encodePassword($openLdapHashedPassword, $enabled) {
         return ($enabled ? '' : rand(1000000000,9999999999)). $openLdapHashedPassword;
     }
@@ -24,7 +28,7 @@ class OpenLdapUtils {
             );
         }
         else {
-            throw new Exception("\"$openLdapEncodedPassword\" is not a OpenLdap encoded password");
+            throw new InvalidArgumentException("\"$openLdapEncodedPassword\" is not a OpenLdap encoded password");
         }        
     }
 }

@@ -4,7 +4,7 @@ App::uses('Model', 'Model');
 
 class LdapPersonTest extends Model {
 
-    public $useDbConfig = 'ldapTest';    
+    public $useDbConfig = 'testLdap';    
     public $schema = array(
         'first_name' => array(),
         'last_name' => array(),
@@ -35,34 +35,18 @@ class LdapTest extends CakeTestCase {
     public function setUp() {
         parent::setUp();
         $this->LdapPerson = new LdapPersonTest();
-
-        $this->LdapPerson->delete(
-            $this->LdapPerson->getDataSource()->buildDnByData(
-                $this->LdapPerson, $this->sampleData
-            )
-        );
-        
-        $this->LdapPerson->delete(
-            $this->LdapPerson->getDataSource()->buildDnByData(
-                $this->LdapPerson, $this->sampleDataModified
-            )
-        );
+        $this->_clearData();
     }
 
     public function tearDown() {
-        $this->LdapPerson->delete(
-            $this->LdapPerson->getDataSource()->buildDnByData(
-                $this->LdapPerson, $this->sampleData
-            )
-        );
-        
-        $this->LdapPerson->delete(
-            $this->LdapPerson->getDataSource()->buildDnByData(
-                $this->LdapPerson, $this->sampleDataModified
-            )
-        );
-
+        $this->_clearData();
         parent::tearDown();
+    }
+
+    private function _clearData() {
+        foreach ($this->LdapPerson->find('all') as $person) {
+            $this->LdapPerson->delete($person[$this->LdapPerson->alias][$this->LdapPerson->primaryKey]);
+        }
     }
 
     public function testSchema() {
@@ -137,7 +121,31 @@ class LdapTest extends CakeTestCase {
         ));
     }
 
-    public function testFindAll() {
+    public function testFindAllWithoutConditions() {
+
+        $all = array();
+
+        for ($i = 0; $i < 10; $i++) {
+            $sampleData[$this->LdapPerson->alias] = array();
+            foreach ($this->sampleData as $field => $value) {
+                $sampleData[$this->LdapPerson->alias][$field] = $value . ' ' . $i;
+            }
+
+            $this->LdapPerson->create();
+            $this->assertNotEqual(
+                $this->LdapPerson->save($sampleData)
+                , false
+            );
+
+            $all[] = $this->LdapPerson->read();
+        }
+
+        $found = $this->LdapPerson->find('all');
+
+        $this->assertEqual($found, $all);
+    }
+
+    public function testFindAllWithConditions() {
         $this->assertEqual($this->LdapPerson->find('all', array(
                 'conditions' => array(
                     $this->LdapPerson->alias . '.first_name' => $this->sampleData['first_name']

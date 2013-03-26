@@ -110,8 +110,10 @@ class Ldap extends DataSource {
         }
                 
         $info = ldap_get_entries($this->connection, $searchResult);
-        
-        
+        if ($search['excludeBase']) {
+            $infoBefore = $info;
+            $info = $this->_excludeDn($info, $search['baseDn']);
+        }
         
         if ($this->_isQueryCount($queryData)) {      
             $result[0][$model->alias]['count'] =  $info['count'];
@@ -137,9 +139,11 @@ class Ldap extends DataSource {
         if (array_key_exists("{$model->alias}.{$model->primaryKey}", $conditions)) {
             $baseDn = $queryData['conditions']["{$model->alias}.{$model->primaryKey}"];
             $filter = '(objectclass=*)';
+            $excludeBase = false;
         } else {
             $baseDn = $this->_getModelBaseDn($model);
             $filter = $this->_conditions($model, $conditions);
+            $excludeBase = true;
         }
 
         $attributes = array();
@@ -156,6 +160,7 @@ class Ldap extends DataSource {
                         , 'sizeLimit'
                         , 'timeLimit'
                         , 'deref'
+                        , 'excludeBase'
         );
     }
     
@@ -206,6 +211,10 @@ class Ldap extends DataSource {
         for ($i = 0; $i < count($fields); $i++) {
             $modelData[$fields[$i]] = $values[$i];
         }                
+        
+        if (empty($modelData[$model->primaryKey])) {
+            $modelData[$model->primaryKey] = $model->id;
+        }
 
         $ldapData = $this->_toLdapData($model, $modelData);
                 
@@ -477,33 +486,10 @@ class Ldap extends DataSource {
     private function _toLdapData(Model $model, $modelData) {
         $method = $this->_getDatabaseMethod($model, 'ToLdap');
         if ($method->getNumberOfParameters() > 1) {
-            if (!empty($modelData[$model->primaryKey])) {
-                $id = $modelData[$model->primaryKey];
-            }
-            else if (!empty($model->id)) {
-                $id = $model->id;
-            }            
-            
-            if (!empty($id)) {
-                $previousData = $model->find(
-                    'first', array(
-                    'conditions' => array(
-                        "{$model->alias}.{$model->primaryKey}" => $id
-                    )
-                    ));
-                        
-                $previousData = empty($previousData) ? 
-                        false :
-                        $previousData[$model->alias];
-            }
-            else {
-                $previousData = false;
-            }
-
             $ldapData = $method->invoke(
                 ConnectionManager::$config
                 , $modelData
-                , $previousData
+                , $this->_previousLdapData($model, $modelData)
             );
         } else {
             $ldapData = $method->invoke(
@@ -661,6 +647,54 @@ class Ldap extends DataSource {
         unset($parts['count']);
         array_shift($parts);        
         return implode(',', $parts);
+    }
+
+    private function _excludeDn($entries, $dn) {
+        $dn = LdapUtils::normalizeDn($dn);
+        $newEntries = array();
+        for ($i = 0; $i < $entries['count']; $i++) {
+            if ($this->_entryDn($entries[$i]) != $dn) {
+                $newEntries[] = $entries[$i];
+            }
+        }
+
+        $newEntries['count'] = count($newEntries);
+        return $newEntries;
+    }
+
+    private function _entryDn($entry) {
+        foreach (array('dn', 'DN', 'Dn', 'dN') as $key) {
+            if (isset($entry[$key])) {
+                return LdapUtils::normalizeDn($entry[$key]);
+            }
+        }
+
+        throw new Exception("Entry has no DN attribute");
+    }
+
+    private function _previousLdapData($model, $modelData) {
+        if (!empty($modelData[$model->primaryKey])) {
+            $id = $modelData[$model->primaryKey];
+        } /*else if (!empty($model->id)) {
+            $id = $model->id;
+        }*/
+
+        if (!empty($id)) {
+            $previousData = $model->find(
+                'first', array(
+                'conditions' => array(
+                    "{$model->alias}.{$model->primaryKey}" => $id
+                )
+                ));
+
+            $previousData = empty($previousData) ?
+                false :
+                $previousData[$model->alias];
+        } else {
+            $previousData = false;
+        }
+
+        return $previousData;
     }
 
 } // LdapSource
