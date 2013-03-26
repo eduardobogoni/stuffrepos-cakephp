@@ -2,7 +2,7 @@
 
 class DATABASE_CONFIG {
 
-    public $openLdapTest = array(
+    public $testLdap = array(
         'datasource' => 'Ldap.Ldap',
         'login' => 'cn=admin,dc=nodomain',
         'password' => 'admin',
@@ -18,7 +18,7 @@ class DATABASE_CONFIG {
         )
     );
 
-    public function __ldapTestLdapPersonTestToLdap($modelData) {
+    public function __testLdapLdapPersonTestToLdap($modelData) {
         $ldapData = array();
 
         if (isset($modelData['first_name'])) {
@@ -32,7 +32,7 @@ class DATABASE_CONFIG {
         return $ldapData;
     }
 
-    public function __ldapTestLdapPersonTestFromLdap($ldapData) {
+    public function __testLdaptLdapPersonTestFromLdap($ldapData) {
 
         $modelData = array();
 
