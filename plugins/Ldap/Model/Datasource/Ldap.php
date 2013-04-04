@@ -422,11 +422,10 @@ class Ldap extends DataSource {
         
         $ldapData = array();
         foreach($this->_toLdapData($model, $modelData) as $attribute => $value) {
-            $ldapData[$attribute] = $this->_quote($value);
+            $ldapData[] = array($attribute, $this->_quote($value));
         }
 
-        $ldapData['objectClass'] = '*';
-                
+        $ldapData[] = array('objectClass', $this->_getModelConfig($model, 'objectClass'));
         return $this->_conditionsArrayToString($ldapData);        
     }        
     /**
@@ -435,20 +434,30 @@ class Ldap extends DataSource {
      * @param array $conditions condition
      * @return string
      */
-    function _conditionsArrayToString($conditions) {
+    function _conditionsArrayToString($conditions, $join = '&') {
         if (empty($conditions)) {
             return null;
         }
         else {
             reset($conditions);
-            $attribute = key($conditions);
-            $value = $conditions[$attribute];
-            unset($conditions[$attribute]);
+            list($attribute, $value) = $conditions[key($conditions)];            
+            unset($conditions[key($conditions)]);
             
-            $currentCondition = "($attribute=$value)";
+            $currentCondition = $this->_conditionAttributeValue($attribute, $value);
             $leftConditions = $this->_conditionsArrayToString($conditions);
-            
-            return $leftConditions ? '(&' . $currentCondition . $leftConditions . ')' : "$currentCondition";
+            return $leftConditions ? '(' . $join . $currentCondition . $leftConditions . ')' : "$currentCondition";
+        }
+    }
+
+    private function _conditionAttributeValue($attribute, $value) {
+        if (is_array($value)) {
+            $conditions = array();
+            foreach ($value as $subValue) {
+                $conditions = array(array($attribute, $subValue));
+            }
+            return $this->_conditionsArrayToString($conditions, '|');
+        } else {
+            return "($attribute=$value)";
         }
     }
 
