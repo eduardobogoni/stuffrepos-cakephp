@@ -16,7 +16,7 @@ class LdapUtils {
     }
 
     public static function explodeDn($dn, $explodeRdns = false) {
-        $rdns = ldap_explode_dn($dn, 0);
+        $rdns = explode(',', $dn);
         unset($rdns['count']);
 
         if ($explodeRdns) {
