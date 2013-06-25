@@ -3,34 +3,58 @@
 App::uses('CustomDataModel', 'Base.Model');
 
 class CustomDataModelModelTest extends CustomDataModel {
-
-    public static $initialData = array(
-        array('CustomDataModelModelTest' => array('id' => 1, 'color' => 'Red')),
-        array('CustomDataModelModelTest' => array('id' => 2, 'color' => 'Green')),
-        array('CustomDataModelModelTest' => array('id' => 3, 'color' => 'Blue')),
-        array('CustomDataModelModelTest' => array('id' => 4, 'color' => 'Yellow')),
-        array('CustomDataModelModelTest' => array('id' => 5, 'color' => 'White')),
-        array('CustomDataModelModelTest' => array('id' => 6, 'color' => 'Black')),
-        array('CustomDataModelModelTest' => array('id' => 7, 'color' => 'Orange')),
+       
+    public $_schema = array(
+        'id' => array('type' => 'integer', 'key' => 'primary'),
+        'color' => array('type' => 'string'),
     );
 
+    public static $initialData = array(
+        'Red',
+        'Green',
+        'Blue',
+        'Yellow',
+        'White',
+        'Black',
+        'Orange',
+    );
+    public static $customData = null;
+
     protected function customData() {
-        return self::$initialData;
+        $data = array();
+        foreach (self::$customData as $color) {
+            $data[] = array(
+                'color' => $color
+            );
+        }
+        return $data;
     }
 
     protected function customDelete($row) {
-        return false;
+        $key = array_search($row['color'], self::$customData);
+
+        if ($key === false) {
+            return false;
+        } else {
+            unset(self::$customData[$key]);
+            return true;
+        }
     }
 
-    protected function customSave($isNew) {
-        return false;
-    }
+    protected function customSave($oldData, $newData) {
+        if (empty($oldData)) {
+            self::$customData[] = $newData['color'];
+            return true;
+        } else {
+            $key = array_search($oldData['color'], self::$customData);
 
-    protected function customSchema() {
-        return array(
-            'id' => array('type' => 'integer'),
-            'color' => array('type' => 'string'),
-        );
+            if ($key === false) {
+                return false;
+            } else {
+                self::$customData[$key] = $newData['color'];
+                return true;
+            }
+        }
     }
 
 }
@@ -46,22 +70,14 @@ class CustomDataModelTest extends CakeTestCase {
         parent::setUp();
 
         $this->Model = ClassRegistry::init('CustomDataModelModelTest');
-        $this->Model->clearCache();
+        CustomDataModelModelTest::$customData = CustomDataModelModelTest::$initialData;
+        $this->Model->dropTable();
     }
 
-    public function testFindAll() {
-        $this->assertEqual(
-            $this->Model->find('all')
-            , CustomDataModelModelTest::$initialData
-        );
-    }
-
-    public function testFindByMagicMethod() {
+    public function testFind() {
         foreach ($this->Model->find('all') as $row) {
-            foreach ($row[$this->Model->alias] as $field => $value) {
-                $findRow = $this->Model->{'findBy' . Inflector::camelize($field)}($value);
-                $this->assertEqual($findRow, $row, 'testFindByMagicMethod - ' . $field);
-            }
+            $first = $this->Model->findById($row[$this->Model->alias]['id']);
+            $this->assertEqual($first, $row);
         }
     }
 
@@ -72,86 +88,63 @@ class CustomDataModelTest extends CakeTestCase {
         }
     }
 
-    public function testFindWithConditions() {
-        foreach ($this->Model->find('all') as $row) {
-            $findRow = $this->Model->find('first', array(
-                'conditions' => array(
-                    "{$this->Model->alias}.{$this->Model->primaryKey}" => $row[$this->Model->alias][$this->Model->primaryKey]
-                )
-                ));
-            $this->assertEqual($findRow, $row);
+    public function testCreate() {
+        $newColor = array(
+            $this->Model->alias => array(
+                'color' => 'Magenta',
+            )
+        );
+       
+        $beforeCustomData = CustomDataModelModelTest::$customData;
+        $this->Model->create();        
+        $result = $this->Model->save($newColor);
+        $allRows = $this->Model->find('all');
+        $this->assertNotEqual($result, false);
+        $this->assertNotEqual($this->Model->id, false);
+
+        $this->assertEqual(count(CustomDataModelModelTest::$customData), count($beforeCustomData) + 1);
+        $this->assertEqual(count(CustomDataModelModelTest::$customData), count($allRows));
+        foreach ($allRows as $row) {
+            $this->assertNotIdentical(array_search($row[$this->Model->alias]['color'], CustomDataModelModelTest::$customData), false);
         }
     }
 
-    public function testFindWithLikeCondition() {
-        $this->assertEqual($this->Model->find('all', array(
-                'conditions' => array(
-                    "{$this->Model->alias}.color like" => 'B%'
-                )
-            )), array(
-            array($this->Model->alias => array('id' => 3, 'color' => 'Blue')),
-            array($this->Model->alias => array('id' => 6, 'color' => 'Black')),
-        ));
+    public function testUpdate() {
+        $color = $this->Model->find('first');
+        $oldColor = $color[$this->Model->alias]['color'];
+        $newColor = 'Dark ' . $oldColor;
+        $color[$this->Model->alias]['color'] = $newColor;
 
-        $this->assertEqual($this->Model->find('all', array(
-                'conditions' => array(
-                    "{$this->Model->alias}.color like" => '%ll%'
-                )
-            )), array(
-            array($this->Model->alias => array('id' => 4, 'color' => 'Yellow')),
-        ));
+        $this->assertNotIdentical(array_search($oldColor, CustomDataModelModelTest::$customData), false);
+        $this->assertIdentical(array_search($newColor, CustomDataModelModelTest::$customData), false);
 
-        $this->assertEqual($this->Model->find('all', array(
-                'conditions' => array(
-                    "{$this->Model->alias}.color like" => '%nge'
-                )
-            )), array(
-            array('CustomDataModelModelTest' => array('id' => 7, 'color' => 'Orange')),
-        ));
+        $beforeCustomData = CustomDataModelModelTest::$customData;
+        $this->Model->create();
+        $result = $this->Model->save($color);
+        $this->assertNotEqual($result, false);
+        $this->assertNotEqual($this->Model->id, false);
 
-        $this->assertEqual($this->Model->find('all', array(
-                'conditions' => array(
-                    "{$this->Model->alias}.color like" => 'W%%e'
-                )
-            )), array(
-            array('CustomDataModelModelTest' => array('id' => 5, 'color' => 'White')),
-        ));
+        $allRows = $this->Model->find('all');
+        $this->assertEqual(count(CustomDataModelModelTest::$customData), count($beforeCustomData));
+        $this->assertEqual(count(CustomDataModelModelTest::$customData), count($allRows));
+
+        $find = $this->Model->findById($color[$this->Model->alias]['id']);
+        $this->assertEqual($find[$this->Model->alias]['color'], $newColor);
+
+        $this->assertIdentical(array_search($oldColor, CustomDataModelModelTest::$customData), false);
+        $this->assertNotIdentical(array_search($newColor, CustomDataModelModelTest::$customData), false);
     }
 
-    public function testFindWithLikeConditionAndVariable() {
+    public function testDelete() {        
+        $color = $this->Model->find('first');
+        $this->assertNotIdentical(array_search($color[$this->Model->alias]['color'], CustomDataModelModelTest::$customData), false);
 
-        $this->assertEqual($this->Model->find('all', array(
-                'conditions' => array(
-                    "{$this->Model->alias}.color like '%' || ? || '%'" => 'll'
-                )
-            )), array(
-            array($this->Model->alias => array('id' => 4, 'color' => 'Yellow')),
-        ));
+        $this->assertNotEqual($this->Model->delete($color[$this->Model->alias]['id']), false);
+        
+        $find = $this->Model->findById($color[$this->Model->alias]['id']);
 
-        $this->assertEqual($this->Model->find('all', array(
-                'conditions' => array(
-                    "{$this->Model->alias}.color like ? || '%' " => 'B'
-                )
-            )), array(
-            array($this->Model->alias => array('id' => 3, 'color' => 'Blue')),
-            array($this->Model->alias => array('id' => 6, 'color' => 'Black')),
-        ));
-
-        $this->assertEqual($this->Model->find('all', array(
-                'conditions' => array(
-                    "{$this->Model->alias}.color like '%' || ? " => 'nge'
-                )
-            )), array(
-            array('CustomDataModelModelTest' => array('id' => 7, 'color' => 'Orange')),
-        ));
-
-        $this->assertEqual($this->Model->find('all', array(
-                'conditions' => array(
-                    "{$this->Model->alias}.color like ? || '%%' || ? " => array('W','e')
-                )
-            )), array(
-            array('CustomDataModelModelTest' => array('id' => 5, 'color' => 'White')),
-        ));
+        $this->assertEqual(empty($find), true);
+        $this->assertIdentical(array_search($color[$this->Model->alias]['color'], CustomDataModelModelTest::$customData), false);
     }
 
 }

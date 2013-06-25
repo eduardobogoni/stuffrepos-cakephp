@@ -23,7 +23,7 @@ abstract class AutoCreateTableModel extends Model {
      */
     private static $initializingTable = array();
 
-    private function _assertInitializedTable() {
+    public function assertInitializedTable() {
 
         if (!empty(self::$initializingTable[$this->table])) {
             throw new Exception("Initializing loop: " . $this->table);
@@ -51,20 +51,21 @@ abstract class AutoCreateTableModel extends Model {
             }
         }                
         $this->_createTable();       
+        $this->afterCreateTable();
     }
 
     public function find($type = 'first', $query = array()) {
-        $this->_assertInitializedTable();
+        $this->assertInitializedTable();
         return parent::find($type, $query);
     }
 
     public function save($data = null, $validate = true, $fieldList = array()) {
-        $this->_assertInitializedTable();
+        $this->assertInitializedTable();
         return parent::save($data, $validate, $fieldList);
     }
 
     public function delete($id = null, $cascade = true) {
-        $this->_assertInitializedTable();
+        $this->assertInitializedTable();
         return parent::delete($id, $cascade);
     }
 
@@ -72,6 +73,10 @@ abstract class AutoCreateTableModel extends Model {
         $ds = ConnectionManager::getDataSource($this->useDbConfig);
         $ds->execute($ds->dropSchema($this->_getSchema()));
         unset(self::$initializedTables[$this->table]);
+    }
+    
+    public function afterCreateTable() {
+        //To override
     }
 
     private function _tableExists() {
