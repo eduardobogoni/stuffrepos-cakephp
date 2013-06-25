@@ -70,16 +70,18 @@ abstract class AutoCreateTableModel extends Model {
 
     public function dropTable() {
         $ds = ConnectionManager::getDataSource($this->useDbConfig);
-        if ($this->_tableExists()) {
-            $ds->execute($ds->dropSchema($this->_getSchema()));
-        }
+        $ds->execute($ds->dropSchema($this->_getSchema()));
         unset(self::$initializedTables[$this->table]);
     }
 
     private function _tableExists() {
-        return array_search(
-                        $this->tablePrefix . $this->table, ConnectionManager::getDataSource($this->useDbConfig)->listSources()
+        $ds = ConnectionManager::getDataSource($this->useDbConfig);
+        $ds->cacheSources = false;
+        $result = array_search(
+                        $this->tablePrefix . $this->table, $ds->listSources()
                 ) !== false;
+        $ds->cacheSources = true;
+        return $result;
     }
     
     private function _getSchema() {

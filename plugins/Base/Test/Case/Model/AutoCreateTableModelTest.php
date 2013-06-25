@@ -74,4 +74,9 @@ class AutoCreateTableModelTest extends CakeTestCase {
         $this->assertEqual(empty($findColor), true);
     }
 
+    public function testNoAlwaysRenewTable() {
+        Configure::write('alwaysRecreateTable.AutoCreateTableModelModelTest', false);        
+        $this->Model->find('all');
+    }
+
 }
