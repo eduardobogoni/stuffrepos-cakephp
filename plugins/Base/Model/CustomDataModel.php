@@ -2,13 +2,64 @@
 
 App::uses('Model', 'Model');
 App::uses('ArrayUtil', 'Base.Lib');
-App::uses('AutoCreateTableModel', 'Base.Model');
-App::uses('CakeSchema', 'Model');
 
-abstract class CustomDataModel extends AutoCreateTableModel {
+abstract class CustomDataModel extends Model {
 
-    public function afterCreateTable() {
-        $internalModel = new Model(false, $this->table, $this->useDbConfig);
+    /**
+     * !empty($initializedTables[$table]) indicates
+     * that $table was initialized.
+     * @var array
+     */
+    private static $initializedModels = array();
+
+    /**
+     *
+     * @var array
+     */
+    private static $initializingModels = array();
+
+    public function assertInitializedData() {        
+        if (!$this->_isInitialized()) {            
+            $this->_setInitializing();
+            $this->_initData();
+            $this->_setInitialized();
+        }
+    }
+
+    public function clearCache() {
+        $this->getDataSource()->truncate($this->table);
+        self::_setUnitialized($this);
+    }
+
+    private function _setInitializing() {
+        if (array_search($this->name, self::$initializingModels)) {
+            throw new Exception("Initializing loop: " . $this->name . "\n" . print_r(self::$initializingModels, true));
+        } else {
+            array_push(self::$initializingModels, $this->name);
+        }
+    }
+
+    private function _setInitialized() {
+        self::$initializedModels[$this->name] = true;
+
+        $poped = array_pop(self::$initializingModels);
+        if ($poped != $this->name) {
+            throw new Exception("Poped: $poped / Model name: {$this->name}");
+        }
+    }
+
+    private function _setUnitialized() {
+        unset(self::$initializedModels[$this->name]);
+    }
+
+    private function _isInitialized() {
+        return !empty(self::$initializedModels[$this->name]);
+    }
+
+    private function _initData() {
+        $this->getDataSource()->truncate($this->table);
+        $this->beforeInitData();
+        $internalModel = new Model(false, $this->table, $this->useDbConfig);        
         $internalModel->begin();
         foreach ($this->customData() as $row) {
             $internalModel->create();
@@ -18,10 +69,19 @@ abstract class CustomDataModel extends AutoCreateTableModel {
 
             if (!$internalModel->save($aliasedRow)) {
                 $validationErrors = $internalModel->validationErrors;
-                throw new Exception("Error on save " . print_r(compact('aliasedRow', 'validationErrors'), true));
+                throw new Exception("Fail to save on data initializing: " . print_r(compact('aliasedRow', 'validationErrors'), true));
             }
         }
         $internalModel->commit();
+        $this->afterInitData();
+    }
+    
+    public function beforeInitData() {
+        //To override
+    }
+
+    public function afterInitData() {
+        //To override
     }
 
     /**
@@ -44,9 +104,14 @@ abstract class CustomDataModel extends AutoCreateTableModel {
     protected function customDelete($row) {
         return false;
     }
+    
+    public function find($type = 'first', $query = array()) {
+        $this->assertInitializedData();
+        return parent::find($type, $query);
+    }
 
     public function save($data = null, $validate = true, $fieldList = array()) {
-        $this->assertInitializedTable();
+        $this->assertInitializedData();
         if ($data) {
             $this->set($data);
         }
@@ -73,7 +138,13 @@ abstract class CustomDataModel extends AutoCreateTableModel {
             $oldData = empty($oldData[$this->alias]) ? false : $oldData[$this->alias];
         }
 
-        if ($this->customSave($oldData, $this->data[$this->alias])) {
+        $saveResult = $this->customSave($oldData, $this->data[$this->alias]);
+        
+        if ($saveResult !== false) {
+
+            if (is_array($saveResult)) {
+                $this->data[$this->alias] = $this->data[$this->alias] + $saveResult;
+            }
             return parent::save();
         } else {
             return false;
@@ -81,7 +152,7 @@ abstract class CustomDataModel extends AutoCreateTableModel {
     }
 
     public function delete($id = null, $cascade = true) {
-        $this->assertInitializedTable();
+        $this->assertInitializedData();
         if ($id) {
             $this->id = $id;
         }

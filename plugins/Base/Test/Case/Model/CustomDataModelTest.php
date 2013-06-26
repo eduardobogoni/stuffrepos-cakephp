@@ -3,11 +3,6 @@
 App::uses('CustomDataModel', 'Base.Model');
 
 class CustomDataModelModelTest extends CustomDataModel {
-       
-    public $_schema = array(
-        'id' => array('type' => 'integer', 'key' => 'primary'),
-        'color' => array('type' => 'string'),
-    );
 
     public static $initialData = array(
         'Red',
@@ -61,6 +56,10 @@ class CustomDataModelModelTest extends CustomDataModel {
 
 class CustomDataModelTest extends CakeTestCase {
 
+    public $fixtures = array(
+        'plugin.Base.CustomDataModelModelTest',        
+    );
+
     /**
      * @var CustomDataModelModelTest
      */
@@ -71,14 +70,12 @@ class CustomDataModelTest extends CakeTestCase {
 
         $this->Model = ClassRegistry::init('CustomDataModelModelTest');
         CustomDataModelModelTest::$customData = CustomDataModelModelTest::$initialData;
-        $this->Model->dropTable();
+        $this->Model->clearCache();
     }
 
     public function testFind() {
-        foreach ($this->Model->find('all') as $row) {
-            $first = $this->Model->findById($row[$this->Model->alias]['id']);
-            $this->assertEqual($first, $row);
-        }
+        $all = $this->Model->find('all');
+        $this->assertEqual(count($all), count(CustomDataModelModelTest::$customData));        
     }
 
     public function testRead() {
