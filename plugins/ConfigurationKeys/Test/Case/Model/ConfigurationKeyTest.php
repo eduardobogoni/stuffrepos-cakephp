@@ -3,6 +3,7 @@
 class ConfigurationKeyTest extends CakeTestCase {
 
     public $fixtures = array(
+        'plugin.ConfigurationKeys.ConfigurationKey',
         'plugin.ConfigurationKeys.SettedConfigurationKey',
     );
 

@@ -17,6 +17,7 @@ abstract class CustomDataModel extends Model {
      * @var array
      */
     private static $initializingModels = array();
+    public $alwaysInitialize = false;
 
     public function assertInitializedData() {        
         if (!$this->_isInitialized()) {            
@@ -40,6 +41,10 @@ abstract class CustomDataModel extends Model {
     }
 
     private function _setInitialized() {
+        if (!file_exists($this->_initializedDirectory())) {
+            mkdir($this->_initializedDirectory());
+        }
+        touch($this->_initializedFile());
         self::$initializedModels[$this->name] = true;
 
         $poped = array_pop(self::$initializingModels);
@@ -49,11 +54,27 @@ abstract class CustomDataModel extends Model {
     }
 
     private function _setUnitialized() {
+        if (file_exists($this->_initializedFile())) {
+            unlink($this->_initializedFile());
+        }
         unset(self::$initializedModels[$this->name]);
     }
 
+    private function _initializedDirectory() {
+        return TMP . DS . 'custom_data_models';
+    }
+
+    private function _initializedFile() {
+        return $this->_initializedDirectory() . DS . $this->name;
+    }
+
     private function _isInitialized() {
-        return !empty(self::$initializedModels[$this->name]);
+        if ($this->alwaysInitialize) {
+            return !empty(self::$initializedModels[$this->name]);
+        }
+        else {
+            return file_exists($this->_initializedFile());
+        }
     }
 
     private function _initData() {

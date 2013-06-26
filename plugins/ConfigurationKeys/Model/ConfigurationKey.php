@@ -5,6 +5,7 @@ App::import('Lib', 'ConfigurationKeys.ConfigurationKeys');
 
 class ConfigurationKey extends CustomDataModel {
 
+    public $alwaysInitialize = true;
     public $displayField = 'name';
     public $primaryKey = 'name';
     public $validate = array(
@@ -54,21 +55,10 @@ class ConfigurationKey extends CustomDataModel {
             );
 
             $row['current_value'] = $row['setted_value'] ? $row['setted_value'] : $row['default_value'];
-            $data[][$this->alias] = $row;
+            $data[] = $row;
         }
 
         return $data;
-    }
-
-    protected function customSchema() {
-        return array(
-            'name' => array('type' => 'string'),
-            'description' => array('type' => 'string'),
-            'default_value' => array('type' => 'string'),
-            'setted_value' => array('type' => 'string'),
-            'current_value' => array('type' => 'string'),
-            'setted' => array('type' => 'boolean'),
-        );
     }
 
     protected function customDelete($row) {
