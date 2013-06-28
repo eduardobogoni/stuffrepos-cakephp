@@ -71,8 +71,7 @@ abstract class CustomDataModel extends Model {
     private function _isInitialized() {
         if ($this->alwaysInitialize) {
             return !empty(self::$initializedModels[$this->name]);
-        }
-        else {
+        } else {
             return file_exists($this->_initializedFile());
         }
     }
@@ -80,7 +79,7 @@ abstract class CustomDataModel extends Model {
     private function _initData() {
         $this->getDataSource()->truncate($this->table);
         $this->beforeInitData();
-        $internalModel = new Model(false, $this->table, $this->useDbConfig);        
+        $internalModel = new Model(false, $this->table, $this->useDbConfig);
         $internalModel->begin();
         foreach ($this->customData() as $row) {
             $internalModel->create();
@@ -96,7 +95,7 @@ abstract class CustomDataModel extends Model {
         $internalModel->commit();
         $this->afterInitData();
     }
-    
+
     public function beforeInitData() {
         //To override
     }
@@ -172,6 +171,10 @@ abstract class CustomDataModel extends Model {
         }
     }
 
+    public function cacheSave($data = null, $validate = true, $fieldList = array()) {
+        return parent::save($data, $validate, $fieldList);
+    }
+
     public function delete($id = null, $cascade = true) {
         $this->assertInitializedData();
         if ($id) {
@@ -188,6 +191,10 @@ abstract class CustomDataModel extends Model {
         } else {
             return false;
         }
+    }
+
+    public function cacheDelete($id = null, $cascade = true) {
+        return parent::delete($id, $cascade);
     }
 
 }
