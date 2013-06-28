@@ -81,6 +81,21 @@ class Basics {
         return $string;
     }
 
+    public static function saveModelOrThrowException(Model $model, $data) {
+        if (!$model->save($data)) {
+            $validationErrors = $model->validationErrors;
+            $alias = $model->alias;
+            throw new Exception("Failed to save {$model->name}: " . print_r(compact('data', 'validationErrors', 'alias'), true));
+        }
+    }
+
+    public static function deleteModelOrThrowException(Model $model, $data) {
+        if (!$model->delete($data[$model->alias][$model->primaryKey])) {
+            $alias = $model->alias;
+            throw new Exception("Failed to delete {$model->name}: " . print_r(compact('data', 'alias'), true));
+        }
+    }
+
 }
 
 ?>
