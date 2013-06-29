@@ -81,18 +81,56 @@ class Basics {
         return $string;
     }
 
-    public static function saveModelOrThrowException(Model $model, $data) {
+    /**
+     * 
+     * @param mixed $model A Model or a model name (string)
+     * @param array $data
+     * @return array
+     * @throws Exception
+     */
+    public static function saveModelOrThrowException($model, $data) {
+        $model = self::_getModel($model);
+        
+        if (empty($data[$model->alias][$model->primaryKey])) {
+            $model->create();
+        }
+
         if (!$model->save($data)) {
             $validationErrors = $model->validationErrors;
             $alias = $model->alias;
             throw new Exception("Failed to save {$model->name}: " . print_r(compact('data', 'validationErrors', 'alias'), true));
+        } else {
+            return $model->read();
         }
     }
 
-    public static function deleteModelOrThrowException(Model $model, $data) {
+    public static function deleteModelOrThrowException($model, $data) {
+        $model = self::_getModel($model);
         if (!$model->delete($data[$model->alias][$model->primaryKey])) {
             $alias = $model->alias;
             throw new Exception("Failed to delete {$model->name}: " . print_r(compact('data', 'alias'), true));
+        }
+    }
+
+    /**
+     * 
+     * @param mixed $model A Model or a model name (string)
+     * @return \Model
+     * @throws Exception
+     */
+    private static function _getModel($model) {
+        if ($model instanceof Model) {
+            return $model;
+        } else if (is_string($model)) {
+            $modelName = $model;
+            $model = ClassRegistry::init($modelName);
+            if ($model instanceof Model) {
+                return $model;
+            } else {
+                throw new Exception("\"$modelName\" is not a Model's name");
+            }
+        } else {
+            throw new Exception("Parameter \$model is not a Model neither a string name");
         }
     }
 
