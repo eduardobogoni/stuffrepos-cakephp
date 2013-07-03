@@ -71,16 +71,6 @@ class ActionListHelper extends AppHelper {
         'layout' => self::LAYOUT_LIST
     );
 
-    /**
-     * @var array
-     */
-    private $settings;
-
-    public function __construct(\View $View, $settings = array()) {
-        parent::__construct($View, $settings);
-        $this->settings = $settings;
-    }
-
     public function outputModuleMenu($options = array()) {
         $this->options = $this->_mergeOptions($options);
         $this->currentController = $this->_foundCurrentController();

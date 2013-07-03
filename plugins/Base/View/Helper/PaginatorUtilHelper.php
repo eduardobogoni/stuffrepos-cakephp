@@ -26,7 +26,7 @@ class PaginatorUtilHelper extends AppHelper {
     public function filterForm() {
 
         if (!empty($this->params['paginatorUtil']['filterFields'])) {
-            $submitOptions = array('type' => 'get', 'url' => Router::url(null, true) . '?_update=true');
+            $submitOptions = array('type' => 'get', 'url' => $this->_updateUrl());
 
             $buffer = "<div class='filterForm'>";
             $buffer .= $this->ExtendedForm->create(null, $submitOptions);
@@ -47,6 +47,15 @@ class PaginatorUtilHelper extends AppHelper {
         } else {
             return '';
         }
+    }
+    
+    private function _updateUrl() {
+            $url = Router::parse($this->request->url); 
+            $named = empty($url['named']) ? array() : $url['named'];
+            $url += $named;
+            unset($url['named']);            
+            $url['page'] = 1;            
+            return Router::url($url, true) . '?_update=true';
     }
 
     public function link($label, $parameters, $linkOptions = array()) {

@@ -1,5 +1,7 @@
 <?php
 
+App::uses('Sanitize', 'Utility');
+
 class ConfigurationKeys {
 
     /**
@@ -56,6 +58,23 @@ class ConfigurationKeys {
     public static function getKeyDefaultValue($key) {
         self::_throwExceptionIfKeyNotExists($key);
         return self::$keys[$key]['defaultValue'];
+    }
+    
+    public static function getKeyValueSql($key) {
+        self::_throwExceptionIfKeyNotExists($key);
+        $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
+        $defaultValue = Sanitize::escape(self::$keys[$key]['defaultValue'], $SettedConfigurationKey->useDbConfig);
+        $key = Sanitize::escape($key, $SettedConfigurationKey->useDbConfig);
+        return <<<EOT
+ifnull(
+        (
+    select scc.value
+    from {$SettedConfigurationKey->tablePrefix}{$SettedConfigurationKey->table} scc
+    where scc.name = '$key'
+    limit 1)
+    , '$defaultValue'
+)
+EOT;
     }
 
     public static function setKeyValue($key, $value) {
