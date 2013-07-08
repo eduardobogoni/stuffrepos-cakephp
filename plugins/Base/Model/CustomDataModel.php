@@ -2,8 +2,13 @@
 
 App::uses('Model', 'Model');
 App::uses('ArrayUtil', 'Base.Lib');
+App::uses('ArrayUtil', 'Base.Lib');
+App::uses('AtomicOperation', 'Operations.Lib');
+App::uses('ModelOperations', 'Operations.Lib');
+App::uses('OperationSet', 'Operations.Lib');
+App::uses('TransactionModel', 'Operations.Model');
 
-abstract class CustomDataModel extends Model {
+abstract class CustomDataModel extends TransactionModel {
 
     /**
      * !empty($initializedTables[$table]) indicates
@@ -19,8 +24,8 @@ abstract class CustomDataModel extends Model {
     private static $initializingModels = array();
     public $alwaysInitialize = false;
 
-    public function assertInitializedData() {        
-        if (!$this->_isInitialized()) {            
+    public function assertInitializedData() {
+        if (!$this->_isInitialized()) {
             $this->_setInitializing();
             $this->_initData();
             $this->_setInitialized();
@@ -110,19 +115,21 @@ abstract class CustomDataModel extends Model {
     protected abstract function customData();
 
     /**
-     * @param $isNew bool
-     * @return bool
+     * 
+     * @param array $oldData
+     * @param array $newData
+     * @return void
      */
     protected function customSave($oldData, $newData) {
-        return false;
+        throw new Exception("Must be overrided");
     }
 
     /**
      * @param $row array
-     * @return bool 
+     * @return void
      */
     protected function customDelete($row) {
-        return false;
+        throw new Exception("Must be overrided");
     }
     
     public function find($type = 'first', $query = array()) {
@@ -136,21 +143,17 @@ abstract class CustomDataModel extends Model {
             $this->set($data);
         }
 
-        if (!$this->beforeSave()) {
-            return false;
-        }
-
         if (!$this->validates()) {
             return false;
         }
 
-        if (empty($this->data[$this->alias][$this->primaryKey])) {
+        if (empty($data[$this->alias][$this->primaryKey])) {
             $oldData = false;
         } else {
             $oldData = $this->find(
                     'first', array(
                 'conditions' => array(
-                    "{$this->alias}.{$this->primaryKey}" => ($this->data[$this->alias][$this->primaryKey]
+                    $this->escapeField($this->primaryKey) => ($data[$this->alias][$this->primaryKey]
                     )
                 )
                     )
@@ -158,17 +161,10 @@ abstract class CustomDataModel extends Model {
             $oldData = empty($oldData[$this->alias]) ? false : $oldData[$this->alias];
         }
 
-        $saveResult = $this->customSave($oldData, $this->data[$this->alias]);
-        
-        if ($saveResult !== false) {
+        $newData = $this->data[$this->alias];
+        $this->customSave($oldData, $newData);
 
-            if (is_array($saveResult)) {
-                $this->data[$this->alias] = $this->data[$this->alias] + $saveResult;
-            }
-            return parent::save();
-        } else {
-            return false;
-        }
+        return parent::save($this->data, $validate, $fieldList);
     }
 
     public function cacheSave($data = null, $validate = true, $fieldList = array()) {
@@ -184,17 +180,36 @@ abstract class CustomDataModel extends Model {
             'conditions' => array(
                 "{$this->alias}.{$this->primaryKey}" => $this->id
             )
-                ));
+        ));
 
-        if (!empty($row) && $this->customDelete($row[$this->alias])) {
-            return parent::delete();
-        } else {
-            return false;
+        if (empty($row)) {
+            throw new Exception("Row not found with id \"{$this->id}\"");
         }
+        
+        $this->customDelete($row[$this->alias]);
+
+        return parent::delete($id, $cascade);
     }
 
     public function cacheDelete($id = null, $cascade = true) {
         return parent::delete($id, $cascade);
+    }
+
+    /**
+     * 
+     * @return BaseModel
+     */
+    private function _createInternalModel() {
+        $internalModel = new BaseModel(false, $this->table, $this->useDbConfig);
+        $internalModel->name = $this->name;
+        $internalModel->alias = $this->alias;
+        return $internalModel;
+    }
+
+    public static function failOperation() {
+        return new AnonymousFunctionOperation(function() {
+                    return false;
+                });
     }
 
 }
