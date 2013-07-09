@@ -67,7 +67,6 @@ class CustomDataModelTest extends CakeTestCase {
 
     public function setUp() {
         parent::setUp();
-        ConnectionManager::getDataSource('test')->cacheSources = false;
         $this->Model = ClassRegistry::init('CustomDataModelModelTest');
         CustomDataModelModelTest::$customData = CustomDataModelModelTest::$initialData;
         $this->Model->clearCache();
