@@ -35,4 +35,15 @@ class TransactionModelTest extends CakeTestCase {
         $this->assertNotEqual($this->Model->id, false);
     }
 
+    public function testRollback() {
+        $this->expectException('PDOException');
+        $this->Model->begin();
+        $this->Model->create();
+        $this->Model->save(array($this->Model->alias => array('name' => 'teste')));
+        $this->assertEqual($this->Model->find('count'), 1);
+        $this->Model->create();
+        $this->Model->save(array($this->Model->alias => array('name' => null)));        
+        $this->assertEqual($this->Model->find('count'), 0);
+    }
+
 }

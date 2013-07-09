@@ -162,7 +162,13 @@ abstract class CustomDataModel extends TransactionModel {
         }
 
         $newData = $this->data[$this->alias];
-        $this->customSave($oldData, $newData);
+
+        try {
+            $this->customSave($oldData, $newData);
+        } catch (Exception $ex) {
+            $this->rollback();
+            throw $ex;
+        }
 
         return parent::save($this->data, $validate, $fieldList);
     }
@@ -185,8 +191,13 @@ abstract class CustomDataModel extends TransactionModel {
         if (empty($row)) {
             throw new Exception("Row not found with id \"{$this->id}\"");
         }
-        
-        $this->customDelete($row[$this->alias]);
+
+        try {
+            $this->customDelete($row[$this->alias]);
+        } catch (Exception $ex) {
+            $this->rollback();
+            throw $ex;
+        }
 
         return parent::delete($id, $cascade);
     }

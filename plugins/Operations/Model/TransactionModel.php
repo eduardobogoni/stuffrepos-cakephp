@@ -31,6 +31,14 @@ class TransactionModel extends Model {
         }
     }
 
+    public function rollback() {
+        if (self::$operation) {
+            self::$operation->rollback();
+            parent::rollback();
+            self::$operation = null;
+        }
+    }
+
     public function rawSave($data = null, $validate = true, $fieldList = array()) {
         return parent::save($data, $validate, $fieldList);
     }
