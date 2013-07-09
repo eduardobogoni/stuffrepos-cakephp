@@ -5,8 +5,9 @@ class TransactionOperation {
     private $operations = array();
 
     public function execute(UndoableOperation $operation) {
-        if ($operation->run()) {
+        if (($result = $operation->run())) {
             $this->operations[] = $operation;
+            return $result;
         } else {
             $operation->undo();
             $this->rollback();
