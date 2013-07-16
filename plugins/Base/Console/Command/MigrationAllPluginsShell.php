@@ -25,6 +25,8 @@ class MigrationAllPluginsShell extends Shell {
     }
 
     public function main() {
+        $this->dispatchShell('Migrations.migration', 'status', '-q');
+
         if ($this->params['reset']) {
             $this->_migrateAllPlugins('reset');
         }
