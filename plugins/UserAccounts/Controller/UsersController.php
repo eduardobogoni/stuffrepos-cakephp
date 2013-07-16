@@ -24,7 +24,6 @@ class UsersController extends AppController {
             )
         ),
         'Authentication.Authentication',
-        'Auth',
     );
 
     
