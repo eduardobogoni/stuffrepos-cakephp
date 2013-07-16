@@ -45,15 +45,17 @@ class UsersController extends AppController {
     }
     
     public function afterScaffoldSave($method) {
-        
-        parent::afterScaffoldSave($method);
+        if (!parent::afterScaffoldSave($method)) {
+            return false;
+        }
 
-        
-        if ($method == 'add') {
+        if ($method == 'add' && $this->Components->enabled('Auth')) {
             $this->Authentication->sendSelfUserCreationNotification(
                     $this->User->id, $this->currentPassword
             );
         }
+        
+        return true;
     }
 
 }
