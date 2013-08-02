@@ -7,6 +7,12 @@ echo $this->Form->input('email');
 echo $this->Form->input('password');
 echo $this->Form->end('Login');
 ?>
+
+<?php
+$helper = $this->Helpers->enabled('AccessControl')
+        ? $this->AccessControl
+        : $this->Html;
+?>
 <p>
-    <?php echo $this->AccessControl->link('Esqueceu sua senha?', '/contas/recuperacao_senha_notificacao'); ?>
+    <?php echo $helper->link('Esqueceu sua senha?', '/contas/recuperacao_senha_notificacao'); ?>
 </p>
