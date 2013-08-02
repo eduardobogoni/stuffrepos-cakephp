@@ -3,7 +3,9 @@
 class AuthenticationController extends AppController {
 
     public $uses = array();
-
+    public $components = array(
+        'Session'
+    );
     public function login() {
         if ($this->request->is('post')) {
             if ($this->Auth->login()) {
