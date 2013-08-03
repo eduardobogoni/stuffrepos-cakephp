@@ -16,8 +16,19 @@ class ListsHelper extends AppHelper {
     private $model;
     private $controller;
     private $showActions;
+    
+    private $options = array();
+    
+    private $defaultOptions = array(
+        'paginatorPrevText' => '<< ',
+        'paginatorNextText' => ' >>',
+        'paginatorNumberSeparator' => ' | ',
+        'paginatorHiddenDisabled' => true,
+        'rowActionListOptions' => array()
+    );
 
     public function listElement($fields, $rows, $options = array()) {
+        $this->_setup($options);
         $b = $this->PaginatorUtil->filterForm();
         $b .= $this->paginatorInfo();
         $b .= $this->rowsTable($fields, $rows, $options);
@@ -33,28 +44,15 @@ class ListsHelper extends AppHelper {
             $b .= " $key=\"$value\"";
         }
         $b .= ">\n";
-        $b .= "\t<tr>\n";
-        if ($this->showOrderNumbers) {
-            $b.= "\t\t<th>\n";
-            $b.= '#';
-            $b.= "\t\t</th>\n";
-        }
-        foreach ($fields as $_field) {
-            $b.= "\t\t<th>\n";
-            $b.= $this->_fieldLabel($_field);
-            $b.= "\t\t</th>\n";
-        }
-        if ($this->showActions) {
-            $b .= "\t<th>" . __('Actions', true) . "</th>\n";
-        }
-        $b .= "\t</tr>\n";
-
+        $b .= $this->_header($fields);
         if (empty($rows)) {
             $b .= "\t<tr><td colspan='100%' style='text-align: center'><em>Nenhum registro foi encontrado.</em></td></tr>\n";
         } else {
             $i = 0;
             foreach ($rows as $row) {
-                $b .= $this->_rowLine($fields, $row, $i++);
+                $options['position'] = $i == 0 ? 'top' :
+                        ($i == count($rows) - 1 ? 'bottom' : 'middle');
+                $b .= $this->_rowLine($fields, $row, $i++, $options);
             }
         }
         $b .= "\n";
@@ -63,9 +61,41 @@ class ListsHelper extends AppHelper {
         return $b;
     }
 
-    public function rowLine($fields, $row, $rowIndex, $tableOptions = array(),$rowOptions = array()) {
+    private function _header($fields) {
+        $columns = array();
+        if ($this->showOrderNumbers) {
+            $columns[] = '#';
+        }
+        foreach ($fields as $_field) {
+            $columns[] = $this->_fieldLabel($_field);
+        }
+        if ($this->showActions) {
+            $columns[] = __('Actions', true);
+        }
+
+        $b = "\t<thead><tr>\n";
+        for ($i = 0; $i < count($columns); ++$i) {
+            if ($i == 0) {
+                $class = 'left';
+            }
+            else if ($i == count($columns) - 1) {
+                $class = 'right';
+            }
+            else {
+                $class = 'center';
+            }
+            
+            $b.= "\t\t<th scope='col' class='$class'>\n";
+            $b .= $columns[$i];
+            $b.= "\t\t</th>\n";
+        }
+        $b .= "\t</tr></thead>\n";
+        return $b;
+    }
+
+    public function rowLine($fields, $row, $rowIndex, $tableOptions = array(), $rowOptions = array()) {
         $this->_setup($tableOptions);
-        return $this->_rowLine($this->_extractFields($fields), $row, $rowIndex,$rowOptions);
+        return $this->_rowLine($this->_extractFields($fields), $row, $rowIndex, $rowOptions);
     }
 
     public function _setup($options) {
@@ -89,24 +119,36 @@ class ListsHelper extends AppHelper {
         $this->htmlAttributes = isset($options['htmlAttributes']) ? $options['htmlAttributes'] : array();
         $this->showActions = (isset($options['showActions']) ? $options['showActions'] : true);
         $this->showOrderNumbers = (isset($options['showOrderNumbers']) ? $options['showOrderNumbers'] : false);
+        $this->options = $options + $this->defaultOptions;
     }
 
     public function paginatorInfo() {
         $b = '<div class="paging">';
-        if ($this->Paginator->hasPrev()) {
-            $b .= "\t" . $this->Paginator->prev('<< ') . "\n";
-            $b .= ' | ';
+        if ($this->Paginator->hasPrev() || !$this->options['paginatorHiddenDisabled']) {
+            $b .= "\t" . $this->Paginator->prev(
+                    $this->options['paginatorPrevText'],  
+                    array(), 
+                    null, 
+                    array('class' => 'disabled')
+            ) . "\n";
+            $b .= $this->options['paginatorNumberSeparator'];
         }
-        $b .= $this->Paginator->numbers(array('modulus' => 4, 'first' => 2, 'last' => 2)) . "\n";
-        if ($this->Paginator->hasNext()) {
-            $b .= ' | ';
-            $b .= "\t " . $this->Paginator->next(' >>') . "\n";
+        $b .= $this->Paginator->numbers(array('modulus' => 4, 'first' => 2, 'last' => 2, 'separator' => $this->options['paginatorNumberSeparator'])) . "\n";
+        if ($this->Paginator->hasNext() || !$this->options['paginatorHiddenDisabled']) {
+            $b .= $this->options['paginatorNumberSeparator'];
+            $b .= "\t" . $this->Paginator->next(
+                    $this->options['paginatorNextText'],  
+                    array(), 
+                    null, 
+                    array('class' => 'disabled')
+            ) . "\n";
         }
 
-
+        $b .= "<span class='counter'>";
         $b .= $this->Paginator->counter(array(
             'format' => __('({:page}-{:pages}/{:count})', true)
                 ));
+        $b .= "</span>";
         $b .= '</div>';
 
         return $b;
@@ -205,10 +247,21 @@ class ListsHelper extends AppHelper {
 
     private function _rowLine($fields, $row, $rowIndex, $options = array()) {
 
-        $class = null;
+        $class = array();
         if ($rowIndex % 2 == 0) {
-            $class = ' class="altrow"';
+            $class[] = 'altrow';
         }
+
+        if (!empty($options['position'])) {
+            $class[] = $options['position'];
+        }
+
+        if (!empty($class)) {
+            $class = ' class="' . implode(' ', $class) . '"';
+        } else {
+            $class = '';
+        }
+
         $b = "\n\t<tr{$class}";
         
         if (!empty($options['htmlAttributes']) && is_array($options['htmlAttributes'])) {
@@ -216,66 +269,80 @@ class ListsHelper extends AppHelper {
                 $b .= " $key='$value'";
             }
         }
-        
-        
+
         $b .= ">\n";
 
+        $cells = array();
+
         if ($this->showOrderNumbers) {
-            $b .= "\t\t<td style='text-align: center'>\n";
-
-            $b .= ($this->_currentPageFirstRowIndex() + $rowIndex + 1);
-
-            $b .= "\t\t</td>\n";
+            $cells[] = array(
+                'attributes' => array(
+                    'style' => 'text-align: center'
+                ),
+                'content' => ($this->_currentPageFirstRowIndex() + $rowIndex + 1)
+            );
         }
 
         $first = true;
-
         foreach ($fields as $field) {
-
-            $b .= $this->_rowField($field, $row, $first);
-
+            $cells[] = array(
+                'attributes' => array(
+                    'style' => 'text-align: '.$this->_fieldValueDefaultAlign($field),
+                ),
+                'content' => $this->_rowFieldValue($field, $row, $first)
+            );
             $first = false;
         }
 
         if ($this->showActions) {
-            $b .= "\t\t<td class=\"actions\">\n";
+            $cells[] = array(
+                'attributes' => array(
+                    'class' => array('actions')
+                ),
+                'content' => $this->ActionList->outputObjectMenu($row, $this->controller->name, $this->options['rowActionListOptions'])
+            );
+        }
 
-            $b .= $this->ActionList->outputObjectMenu($row, $this->controller->name);
-
-            $b .= "\t\t</td>\n";
+        for ($i = 0; $i < count($cells); ++$i) {
+            if ($i == 0) {
+                $cells[$i]['attributes']['class'][] = 'left';
+            } else if ($i == count($cells) - 1) {
+                $cells[$i]['attributes']['class'][] = 'right';
+            } else {
+                $cells[$i]['attributes']['class'][] = 'center';
+            }
+            
+            $b .= "\t\t<td{$this->_parseAttributes($cells[$i]['attributes'])}>\n";
+            $b .= $cells[$i]['content'];
+            $b.= "\t\t</td>\n";
         }
         $b .= "\t</tr>\n";
 
         return $b;
     }
 
-    private function _rowField($field, $row, $firstField) {
+    private function _fieldValueDefaultAlign($field) {
         if (empty($field['align'])) {
             if (empty($field['association'])) {
                 switch ($field['type']) {
                     case 'boolean':
-                        $align = 'center';
+                        return 'center';
                         break;
                     case 'integer';
                     case 'float';
-                        $align = 'right';
+                       return 'right';
                         break;
 
                     case 'string':
                     default:
-                        $align = 'left';
+                        return 'left';
                 }
             } else {
-                $align = 'center';
+                return 'center';
             }
         } else {
-            $align = $field['align'];
+            return $field['align'];
         }
-        $b = "\t\t<td style='text-align: $align;'>\n\t\t\t";
-        $b .= $this->_rowFieldValue($field, $row, $firstField);
-        $b .= " \n\t\t</td>\n";
-
-        return $b;
     }
 
     private function _modelAssociations() {
