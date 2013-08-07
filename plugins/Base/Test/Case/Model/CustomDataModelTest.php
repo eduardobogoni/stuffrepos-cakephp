@@ -1,6 +1,7 @@
 <?php
 
 App::uses('CustomDataModel', 'Base.Model');
+App::uses('AnonymousFunctionOperation', 'Operations.Lib');
 
 class CustomDataModelModelTest extends CustomDataModel {
 
@@ -26,27 +27,26 @@ class CustomDataModelModelTest extends CustomDataModel {
     }
 
     protected function customDelete($row) {
-        $key = array_search($row['color'], self::$customData);
+        $key = array_search($row['color'], CustomDataModelModelTest::$customData);
 
         if ($key === false) {
             return false;
         } else {
-            unset(self::$customData[$key]);
+            unset(CustomDataModelModelTest::$customData[$key]);
             return true;
         }
     }
 
     protected function customSave($oldData, $newData) {
         if (empty($oldData)) {
-            self::$customData[] = $newData['color'];
-            return true;
+            CustomDataModelModelTest::$customData[] = $newData['color'];
         } else {
-            $key = array_search($oldData['color'], self::$customData);
+            $key = array_search($oldData['color'], CustomDataModelModelTest::$customData);
 
             if ($key === false) {
                 return false;
             } else {
-                self::$customData[$key] = $newData['color'];
+                CustomDataModelModelTest::$customData[$key] = $newData['color'];
                 return true;
             }
         }
@@ -67,7 +67,6 @@ class CustomDataModelTest extends CakeTestCase {
 
     public function setUp() {
         parent::setUp();
-
         $this->Model = ClassRegistry::init('CustomDataModelModelTest');
         CustomDataModelModelTest::$customData = CustomDataModelModelTest::$initialData;
         $this->Model->clearCache();

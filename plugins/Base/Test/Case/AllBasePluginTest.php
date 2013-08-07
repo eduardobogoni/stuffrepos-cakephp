@@ -9,7 +9,8 @@ class AllBasePluginTest extends PHPUnit_Framework_TestSuite {
      */
     public static function suite() {
         $suite = new CakeTestSuite("All Base plugin's tests");
-        $suite->addTestDirectoryRecursive(dirname(__FILE__));        
+        $suite->addTestDirectoryRecursive(dirname(__FILE__) . DS . 'Lib');
+        $suite->addTestDirectoryRecursive(dirname(__FILE__) . DS . 'Model');        
         return $suite;
     }
 

@@ -1,2 +1,5 @@
 <?php
-CakePlugin::load('ExtendedScaffold');
+PluginManager::init('UserAccounts', array(
+    'Authentication',
+    'ExtendedScaffold',
+));

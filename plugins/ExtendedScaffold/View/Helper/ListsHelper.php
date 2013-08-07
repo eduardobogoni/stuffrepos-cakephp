@@ -1,6 +1,7 @@
 <?php
 
 App::import('Lib', 'Base.ModelTraverser');
+App::import('Helper', 'ExtendedScaffold.ViewUtil');
 
 class ListsHelper extends AppHelper {
 

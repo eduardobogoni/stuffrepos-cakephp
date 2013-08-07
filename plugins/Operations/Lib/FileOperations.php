@@ -26,17 +26,26 @@ class FileOperations {
 class FileOperations_Touch implements UndoableOperation {
 
     private $fileName;
+    
+    /**
+     *
+     * @var bool
+     */
+    private $alreadyExists;
 
     public function __construct($fileName) {
         $this->fileName = $fileName;
     }
 
     public function run() {
+        $this->alreadyExists = file_exists($this->fileName);
         return touch($this->fileName);
     }
 
     public function undo() {
-        @unlink($this->fileName);
+        if (!$this->alreadyExists) {
+            @unlink($this->fileName);
+        }
     }
 
     public function __toString() {

@@ -37,17 +37,20 @@ class AtomicOperationTest extends CakeTestCase {
     }
 
     public function testFail() {
-        touch($this->file2);
         $this->assertEqual(file_exists($this->file1), false);        
-        $this->assertEqual(file_exists($this->file2), true);
+        $this->assertEqual(file_exists($this->file2), false);
 
         $atomic = new AtomicOperation();
-        $atomic->add(FileOperations::touch($this->file1));        
-        $atomic->add(FileOperations::unlink($this->file2));
         $atomic->add(FileOperations::touch($this->file1));
-        $atomic->run();
+        $atomic->add(FileOperations::unlink($this->file2));
+        
+        try {
+            $atomic->run();
+        } catch (Exception $ex) {
+            
+        }
 
-        $this->assertEqual(file_exists($this->file1), true);
+        $this->assertEqual(file_exists($this->file1), false);
         $this->assertEqual(file_exists($this->file2), false);
     }
 
