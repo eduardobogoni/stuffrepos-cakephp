@@ -14,6 +14,15 @@ class LayoutsHelper extends Helper {
             0 => $path
         ), true), $rel, $options);
     }
+
+    public function cssBox($selectors, $cssOptions = array(), $rel = null, $options = array()) {
+        return $this->Html->css(Router::url(array(
+            'plugin' => 'layouts',
+            'controller' => 'css',
+            'action' => 'css_box',
+            0 => $selectors,
+        ) + $cssOptions, true), $rel, $options);
+    }
 }
 
 ?>

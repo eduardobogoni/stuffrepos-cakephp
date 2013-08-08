@@ -1,5 +1,7 @@
 <?php
 
+App::uses('CssBox', 'Layouts.Lib');
+
 class CssController extends AppController {
 
     public function beforeFilter() {
@@ -12,17 +14,21 @@ class CssController extends AppController {
 
     public function process($path) {
         if (file_exists($this->_cssFilePath($path))) {
-            $this->_serveCss($this->_cssFilePath($path));
+            $this->_serveCss(file_get_contents($this->_cssFilePath($path)));
         } else {
             throw new Exception("File not found: {$this->_cssFilePath($path)}");
         }
     }
 
-    private function _serveCss($filePath) {
+    public function css_box($selectors) {        
+        $box = new CssBox($this->request->params['named']);
+        $this->_serveCss($box->build($selectors));
+    }
+
+    private function _serveCss($content) {
         $this->response->type('text/css');
         //$this->response->header('Expires: '.gmdate('D, d M Y H:i:s',time() + (60 * 60 * 24 * $days_to_cache)).' GMT');
 
-        $content = file_get_contents($filePath);
         foreach ($this->_variables() as $name => $value) {
             $content = preg_replace('/\$' . preg_quote($name) . '(?!\w)/', $value, $content);
         }
