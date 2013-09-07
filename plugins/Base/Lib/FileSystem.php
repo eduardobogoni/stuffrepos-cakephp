@@ -12,18 +12,18 @@ class FileSystem {
         return $dir;
     }
 
-    public static function listFiles($directory) {
-        return self::_listFiles($directory, '');
+    public static function listFiles($directory, $recursive = false) {
+        return self::_listFiles($directory, '', $recursive);
     }
 
-    private static function _listFiles($directory, $prefix) {
+    private static function _listFiles($directory, $prefix, $recursive) {
         $tree = array();
         $it = new DirectoryIterator($directory);
 
         while ($it->valid()) {
             if (!$it->isDot()) {
                 $tree[] = $prefix . $it->getFilename();
-                if ($it->isDir()) {
+                if ($it->isDir() && $recursive) {
                     foreach (self::_listFiles($it->getPathname(), $prefix . $it->getFilename() . '/') as $file) {
                         $tree[] = $file;
                     }
