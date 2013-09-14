@@ -77,6 +77,41 @@ class Make {
         return $returnedValue == $expectedValue;
     }
 
+    public function checkRecursive($name) {     
+        return $this->_checkRecursive($name, array(), array()) !== false;
+    }
+    
+    private function _checkRecursive($taskName, $checkedTasks, $stack) {
+        if (!array_key_exists($taskName, $this->tasks)) {
+            throw new Exception("Task \"$taskName\" do not exists");
+        }
+
+        if (!in_array($taskName, $checkedTasks)) {
+            if (in_array($taskName, $stack)) {
+                throw new Exception("Circular reference: " . print_r(compact('taskName', 'stack'), true));
+            }
+
+            $stack[] = $taskName;
+            foreach ($this->tasks[$taskName]['dependencies'] as $dependency) {
+                $subCheckedTasks = $this->_checkRecursive($dependency, $checkedTasks, $stack);
+                if ($subCheckedTasks === false) {
+                    return false;
+                }
+                $checkedTasks += $subCheckedTasks;
+            }
+            if ($this->check($taskName)) {
+                $checkedTasks[] = $taskName;
+            }
+            else {
+                return false;
+            }
+            
+            array_pop($stack);
+        }
+
+        return $checkedTasks;
+    }
+
     private function _runTask($taskName) {
         $checkResult = $this->check($taskName, $returnedValue, $expectedValue);
 
@@ -92,7 +127,7 @@ class Make {
             call_user_func($this->tasks[$taskName]['executeFunction']);
 
             if (!$this->check($taskName, $returnedValue, $expectedValue)) {
-                throw new Exception("Task executed, but check returned false: " . print_r(compact('returnedValue', 'expectedValue')));
+                throw new Exception("Task executed, but check returned false: " . print_r(compact('returnedValue', 'expectedValue'), true));
             }
 
             if ($this->afterExecute) {
