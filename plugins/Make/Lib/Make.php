@@ -90,6 +90,11 @@ class Make {
                 call_user_func($this->beforeExecute, $taskName);
             }
             call_user_func($this->tasks[$taskName]['executeFunction']);
+
+            if (!$this->check($taskName, $returnedValue, $expectedValue)) {
+                throw new Exception("Task executed, but check returned false: " . print_r(compact('returnedValue', 'expectedValue')));
+            }
+
             if ($this->afterExecute) {
                 call_user_func($this->afterExecute, $taskName);
             }
