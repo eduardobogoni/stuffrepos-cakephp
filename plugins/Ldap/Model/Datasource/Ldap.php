@@ -7,7 +7,7 @@ class Ldap extends DataSource {
 
     const LDAP_ERROR_NO_SUCH_OBJECT = 32;
 
-    private $connection = null;
+    public $connection = null;
 
     protected $_baseConfig = array(
         'host' => 'localhost',
