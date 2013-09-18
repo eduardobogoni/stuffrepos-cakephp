@@ -79,4 +79,14 @@ class LdapUtils {
         }
     }
 
+    public static function parentDn($dn) {
+        $rdns = self::explodeDn($dn, true);
+        array_shift($rdns);
+        if (empty($rdns)) {
+            return false;
+        } else {
+            return self::implodeDn($rdns, true);
+        }
+    }
+
 }
