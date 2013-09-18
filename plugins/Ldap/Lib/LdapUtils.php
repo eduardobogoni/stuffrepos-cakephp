@@ -68,4 +68,15 @@ class LdapUtils {
                 return $explodedDn[0];
         }
     }
+
+    public static function joinDns($dn1, $dn2) {
+        $dn1 = trim($dn1);
+        $dn2 = trim($dn2);
+        if ($dn1 != '' && $dn2 != '') {
+            return $dn1 . ',' . $dn2;
+        } else {
+            return $dn1 . $dn2;
+        }
+    }
+
 }
