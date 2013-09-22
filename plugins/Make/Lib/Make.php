@@ -120,13 +120,13 @@ class Make {
         return $checkedTasks;
     }
 
-    public function addTasksObject($tasksObject) {
-        foreach ($tasksObject->_tasksConfiguration() as $taskName => $taskData) {
+    public function addTasksObject(TasksObject $tasksObject) {
+        foreach ($tasksObject->getTasksConfiguration() as $taskName => $taskData) {
             $this->_addTasksObjectTask($tasksObject, $taskName, $taskData);
         }
     }
 
-    private function _addTasksObjectTask($tasksObject, $taskName, $taskData) {
+    private function _addTasksObjectTask(TasksObject $tasksObject, $taskName, $taskData) {
         $defaultExecuteFunction = function() {
                     return false;
                 };
@@ -174,7 +174,7 @@ class Make {
         );
     }
 
-    private function _tasksObjectCustomFunction($tasksObject, $value) {
+    private function _tasksObjectCustomFunction(TasksObject $tasksObject, $value) {
         $params = ArrayUtil::arraylize($value);
         $functionName = $value[0];
         array_shift($params);
@@ -183,7 +183,7 @@ class Make {
                 };
     }
 
-    private function _tasksObjectMethod($tasksObject, $methodName, $defaultFunction) {
+    private function _tasksObjectMethod(TasksObject $tasksObject, $methodName, $defaultFunction) {
         if (method_exists($tasksObject, $methodName)) {
             $reflection = new ReflectionMethod($tasksObject, $methodName);
             if (!$reflection->isPublic()) {
