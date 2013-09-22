@@ -1,11 +1,21 @@
 <?php
 
+App::uses('MakeListener', 'Make.Lib');
+App::uses('TasksObject', 'Make.Lib');
+
 class Make {
 
+    /**
+     *
+     * @var array() 
+     */
     private $tasks = array();
-    private $afterExecute = false;
-    private $beforeExecute = false;
-    private $afterCheck = false;
+
+    /**
+     *
+     * @var MakeListener[]
+     */
+    private $listeners = array();
 
     /**
      * 
@@ -45,16 +55,8 @@ class Make {
         $this->_execute($name, array(), array());
     }
 
-    public function setAfterExecute($callback) {
-        $this->afterExecute = $callback;
-    }
-
-    public function setBeforeExecute($callback) {
-        $this->beforeExecute = $callback;
-    }
-
-    public function setAfterCheck($callback) {
-        $this->afterCheck = $callback;
+    public function addListener(MakeListener $listener) {
+        $this->listeners[] = $listener;
     }
 
     private function _execute($taskName, $executedTasks, $stack) {
@@ -198,24 +200,28 @@ class Make {
     private function _runTask($taskName) {
         $checkResult = $this->check($taskName, $returnedValue, $expectedValue);
 
-        if ($this->afterCheck) {
-            call_user_func($this->afterCheck, $taskName, $checkResult
-                    , $returnedValue, $this->tasks[$taskName]['expectedValue']);
-        }
+        $this->_fireListeners('onMakeAfterCheck', array(
+            $taskName
+            , $checkResult
+            , $returnedValue
+            , $this->tasks[$taskName]['expectedValue']
+        ));
 
         if (!$checkResult) {
-            if ($this->beforeExecute) {
-                call_user_func($this->beforeExecute, $taskName);
-            }
+            $this->_fireListeners('onMakeBeforeExecute', array($taskName));
             call_user_func($this->tasks[$taskName]['executeFunction']);
 
             if (!$this->check($taskName, $returnedValue, $expectedValue)) {
                 throw new Exception("Task executed, but check returned false: " . print_r(compact('returnedValue', 'expectedValue'), true));
             }
 
-            if ($this->afterExecute) {
-                call_user_func($this->afterExecute, $taskName);
-            }
+            $this->_fireListeners('onMakeAfterExecute', array($taskName));
+        }
+    }
+
+    private function _fireListeners($method, $parameters) {
+        foreach ($this->listeners as $listener) {
+            call_user_method_array($method, $listener, $parameters);
         }
     }
 
