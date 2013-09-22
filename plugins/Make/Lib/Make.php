@@ -26,6 +26,14 @@ class Make {
             }
         }
 
+        if (!is_callable($checkFunction)) {
+            throw new InvalidArgumentException("\"$taskName\" check function is not a valid callback. " . print_r($checkFunction, true));
+        }
+
+        if (!is_callable($executeFunction)) {
+            throw new InvalidArgumentException("\"$taskName\" execute function is not a valid callback. " . print_r($executeFunction, true));
+        }
+
         $this->tasks[$taskName] = compact('dependencies', 'checkFunction', 'executeFunction', 'expectedValue');
     }
 
@@ -110,6 +118,81 @@ class Make {
         }
 
         return $checkedTasks;
+    }
+
+    public function addTasksObject($tasksObject) {
+        foreach ($tasksObject->_tasksConfiguration() as $taskName => $taskData) {
+            $this->_addTasksObjectTask($tasksObject, $taskName, $taskData);
+        }
+    }
+
+    private function _addTasksObjectTask($tasksObject, $taskName, $taskData) {
+        $defaultExecuteFunction = function() {
+                    return false;
+                };
+        $checkFunction = null;
+        $executeFunction = $this->_tasksObjectMethod(
+                $tasksObject
+                , '_' . Inflector::variable($taskName)
+                , $defaultExecuteFunction
+        );
+        $dependencies = array();
+        $expectedValue = true;
+        foreach ($taskData as $key => $value) {
+            if ($key === 'executeFunction') {
+                $executeFunction = $this->_tasksObjectCustomFunction($tasksObject, $value);
+            } else if ($key === 'checkFunction') {
+                $checkFunction = $this->_tasksObjectCustomFunction($tasksObject, $value);
+            } else if ($key === 'expectedValue') {
+                $expectedValue = $value;
+            } else {
+                $dependencies[] = $value;
+            }
+        }
+        if (!$checkFunction) {
+            $checkFunctionName = '_' . Inflector::variable('check_' . $taskName);
+            $_this = $this;
+            $checkFunction = method_exists($tasksObject, $checkFunctionName) ?
+                    array($tasksObject, $checkFunctionName) : function() use ($dependencies, $_this) {
+                        return true;
+                        foreach ($dependencies as $dependency) {
+                            if (!$_this->checkRecursive($dependency)) {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    };
+        }
+
+        $this->addTask(
+                $taskName
+                , $dependencies
+                , $checkFunction
+                , $executeFunction
+                , $expectedValue
+        );
+    }
+
+    private function _tasksObjectCustomFunction($tasksObject, $value) {
+        $params = ArrayUtil::arraylize($value);
+        $functionName = $value[0];
+        array_shift($params);
+        return function() use ($tasksObject, $functionName, $params) {
+                    return call_user_func_array(array($tasksObject, $functionName), $params);
+                };
+    }
+
+    private function _tasksObjectMethod($tasksObject, $methodName, $defaultFunction) {
+        if (method_exists($tasksObject, $methodName)) {
+            $reflection = new ReflectionMethod($tasksObject, $methodName);
+            if (!$reflection->isPublic()) {
+                throw new RuntimeException("Método \"$methodName\" não é público.");
+            }
+            return array($tasksObject, $methodName);
+        } else {
+            return $defaultFunction;
+        }
     }
 
     private function _runTask($taskName) {
