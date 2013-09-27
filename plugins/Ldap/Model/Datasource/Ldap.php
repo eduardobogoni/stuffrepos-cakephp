@@ -27,12 +27,14 @@ class Ldap extends DataSource {
     }
     
     private function _buildConnection() {
-        if (empty($this->config['port'])) {
-            $connection = ldap_connect($this->config['host']);
-        } else {
-            $connection = ldap_connect($this->config['host'], $this->config['port']);
-        }
+        $url = ($this->config['ssl'] ? 'ldaps' : 'ldap') . '://' . $this->config['host'];
         
+        if (!empty($this->config['port'])) {           
+            $url .= ':' . $this->config['port'];
+        }
+
+        $connection = ldap_connect($url);
+
         if (!$connection) {
             throw new Exception("Not connected");
         }
