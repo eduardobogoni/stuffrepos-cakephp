@@ -12,7 +12,7 @@ class MysqlDumper implements DatasourceDumper {
             throw new Exception("Command \"{$this->dumpCommand}\" no exists");
         }
 
-        $command = "'$this->dumpCommand'";
+        $command = "'$this->dumpCommand' --lock-tables=false";
 
 
         if ($ds->config['host']) {
