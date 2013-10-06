@@ -11,6 +11,10 @@ class AccessControlComponent extends Component {
      * @var AccessControlFilter[] 
      */
     private static $filters = array();
+    
+    public $components = array(
+        'Session'
+    );
 
     public function __construct(\ComponentCollection $collection, $settings = array()) {
         parent::__construct($collection, $settings);
@@ -28,8 +32,10 @@ class AccessControlComponent extends Component {
         $this->loadFilters();
         self::$request = $controller->request;
 
-        if (!self::sessionUserHasAccessByUrl(self::$request->params)) {
-            $controller->flash('Acesso negado', '/');
+        if (!self::sessionUserHasAccessByUrl(self::$request->params)) {            
+            $this->Session->setFlash('Acesso Negado');
+            $controller->redirect('/');
+            return false;
         }
     }
     
