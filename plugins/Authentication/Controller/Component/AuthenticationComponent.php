@@ -41,12 +41,14 @@ class AuthenticationComponent extends Component {
             ),
             'Form'
         );
+        $controller->Auth->authorize = array('Controller');
         $controller->Auth->loginAction = array(
             'controller' => 'authentication',
             'action' => 'login',
             'plugin' => 'authentication'
         );
-        $controller->Auth->allow('reset_password', 'reset_password_request');
+        $controller->Auth->allow();
+        $controller->Auth->allow('index', 'add', 'edit', 'delete', 'view');
     }
 
     public function sendSelfUserCreationNotification($userId, $password) {
