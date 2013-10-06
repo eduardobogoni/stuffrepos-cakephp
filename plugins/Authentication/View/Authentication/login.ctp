@@ -14,5 +14,10 @@ $helper = $this->Helpers->enabled('AccessControl')
         : $this->Html;
 ?>
 <p>
-    <?php echo $helper->link('Esqueceu sua senha?', '/contas/recuperacao_senha_notificacao'); ?>
+<?php
+echo $helper->link(
+        'Esqueceu sua senha?'
+        , array('action' => 'reset_password_request')
+);
+?>
 </p>

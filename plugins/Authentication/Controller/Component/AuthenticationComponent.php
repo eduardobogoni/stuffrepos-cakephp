@@ -1,35 +1,67 @@
 <?php
 
-//App::import('Component', '.BaseModel');
+App::uses('AuthenticationUser', 'Authentication.Model');
 
 class AuthenticationComponent extends Component {
-    
-    private $emailField = 'email';
-    private $userModel = null;
-    
-    public $components = array('Auth');
 
-    public function initialize(Controller $controller) {
-        
+    public function __construct(\ComponentCollection $collection, $settings = array()) {
+        parent::__construct($collection, $settings + array(
+            'emailField' => 'email',
+            'usernameField' => 'username',
+            'passwordField' => 'password',
+            'activeField' => 'active',
+            'userModel' => null,
+        ));
+        AuthenticationUser::configure($this->settings);
+    }
+
+    public $components = array(
+        'Auth' => array(
+            'loginAction' => array(
+                'controller' => 'authentication',
+                'action' => 'login',
+                'plugin' => 'authentication'
+            )
+        )
+    );
+
+    public function initialize(\Controller $controller) {
+        parent::initialize($controller);
+        if (!$controller->Components->loaded('Auth')) {
+            $controller->Auth = $controller->Components->load('Auth');
+            $controller->Auth->initialize($controller);
+        }
+        $controller->Auth->authenticate = array(
+            'all' => array(
+                'userModel' => $this->settings['userModel'],
+                'fields' => array(
+                    'username' => $this->settings['usernameField']
+                    , 'password' => $this->settings['passwordField']
+                ),
+            ),
+            'Form'
+        );
+        $controller->Auth->loginAction = array(
+            'controller' => 'authentication',
+            'action' => 'login',
+            'plugin' => 'authentication'
+        );
+        $controller->Auth->allow('reset_password', 'reset_password_request');
     }
 
     public function sendSelfUserCreationNotification($userId, $password) {
-        App::uses('CakeEmail', 'Network/Email');        
-        
-        $user = $this->userModel()->findById($userId);
-        $user = $user[$this->userModel()->alias];
+        App::uses('CakeEmail', 'Network/Email');
 
-        $email = new CakeEmail('default');                
-        $email->to($user[$this->emailField]);
-        $email->subject(__('Your account was created.',true));        
-        $email->send("Username: {$user['email']}\nPassword: $password");
-    }
-    
-    private function userModel() {
-        if (empty($this->userModel)) {
-            $this->userModel = ClassRegistry::init($this->Auth->userModel);
-        }
-        return $this->userModel;
+        $model = ClassRegistry::init('Authentication.AuthenticationUser');
+        $user = $model->findById($userId);
+        $user = $user[$model->alias];
+
+        $email = new CakeEmail('default');
+        $email->to($user['email']);
+        $email->subject(__('Your account was created.', true));
+        $email->send(
+                __('Usernamme') . ': ' . $user['username']
+                . "\n" . __('Password') . ': ' . $password);
     }
 
     /**
