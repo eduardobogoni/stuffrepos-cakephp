@@ -10,9 +10,13 @@ class MenuHelper extends AppHelper {
     );
 
     public function __construct(\View $View, $settings = array()) {
-        parent::__construct($View, $settings);
-        
-        $this->ScaffoldUtil->addCssLink('Widgets.MenuHelper.css');
+        parent::__construct($View, $settings + array(
+            'defaultCss' => true,
+        ));
+
+        if ($this->settings['defaultCss']) {
+            $this->ScaffoldUtil->addCssLink('Widgets.MenuHelper.css');
+        }
     }
 
     public function dropdown($entries, $mainEntriesEqualsWidth = false) {
