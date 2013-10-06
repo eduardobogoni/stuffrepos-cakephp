@@ -12,6 +12,7 @@ class MenuHelper extends AppHelper {
     public function __construct(\View $View, $settings = array()) {
         parent::__construct($View, $settings + array(
             'defaultCss' => true,
+            'subMenuSymbol' => '&darr;',
         ));
 
         if ($this->settings['defaultCss']) {
@@ -72,7 +73,7 @@ class MenuHelper extends AppHelper {
     }
 
     private function _submenu($label, $entries, $width = null) {
-        $buffer = "<a href='#'>$label &darr;</a>";
+        $buffer = "<a href='#'>$label {$this->settings['subMenuSymbol']}</a>";
         $buffer .= "<ul class='sub_menu'>";
         foreach ($entries as $name => $entry) {
             if (is_array($entry)) {
