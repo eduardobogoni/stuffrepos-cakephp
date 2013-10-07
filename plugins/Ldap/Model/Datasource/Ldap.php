@@ -11,7 +11,8 @@ class Ldap extends DataSource {
 
     protected $_baseConfig = array(
         'host' => 'localhost',
-        'version' => 3
+        'version' => 3,
+        'ssl' => false,
     );
     
     private $_modelBaseConfig = array(
