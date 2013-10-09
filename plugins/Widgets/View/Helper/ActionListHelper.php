@@ -70,6 +70,11 @@ class ActionListHelper extends AppHelper {
         'skipActions' => array(),
         'layout' => self::LAYOUT_LIST
     );
+    
+    public function __construct(\View $View, $settings = array()) {
+        parent::__construct($View, $settings);
+        $this->defaultOptions = $settings + $this->defaultOptions;
+    }
 
     public function outputModuleMenu($options = array()) {
         $this->options = $this->_mergeOptions($options);
