@@ -31,7 +31,8 @@ class ScaffoldUtilComponent extends Component {
     public $currentAction = null;
     public $defaultOptions;
         
-    public function initialize(Controller $controller) {
+    public function startup(Controller $controller) {
+        parent::startup($controller);
         $this->controller = $controller;
         if ($this->controller->modelClass) {
             $this->defaultOptions = array(
