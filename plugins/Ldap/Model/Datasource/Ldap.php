@@ -7,11 +7,12 @@ class Ldap extends DataSource {
 
     const LDAP_ERROR_NO_SUCH_OBJECT = 32;
 
-    private $connection = null;
+    public $connection = null;
 
     protected $_baseConfig = array(
         'host' => 'localhost',
-        'version' => 3
+        'version' => 3,
+        'ssl' => false,
     );
     
     private $_modelBaseConfig = array(
@@ -27,12 +28,14 @@ class Ldap extends DataSource {
     }
     
     private function _buildConnection() {
-        if (empty($this->config['port'])) {
-            $connection = ldap_connect($this->config['host']);
-        } else {
-            $connection = ldap_connect($this->config['host'], $this->config['port']);
-        }
+        $url = ($this->config['ssl'] ? 'ldaps' : 'ldap') . '://' . $this->config['host'];
         
+        if (!empty($this->config['port'])) {           
+            $url .= ':' . $this->config['port'];
+        }
+
+        $connection = ldap_connect($url);
+
         if (!$connection) {
             throw new Exception("Not connected");
         }
