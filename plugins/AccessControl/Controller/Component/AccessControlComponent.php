@@ -18,7 +18,10 @@ class AccessControlComponent extends Component {
 
     public function __construct(\ComponentCollection $collection, $settings = array()) {
         parent::__construct($collection, $settings);
-        $this->settings = $settings + array('filters' => array());
+        $this->settings = $settings + array(
+            'filters' => array(),
+            'deniedAccessRedirect' => '/'
+            );
     }
 
     /**
@@ -34,7 +37,7 @@ class AccessControlComponent extends Component {
 
         if (!self::sessionUserHasAccessByUrl(self::$request->params)) {            
             $this->Session->setFlash('Acesso Negado');
-            $controller->redirect('/');
+            $controller->redirect($this->settings['deniedAccessRedirect']);
             return false;
         }
     }
