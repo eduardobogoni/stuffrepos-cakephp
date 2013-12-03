@@ -39,6 +39,8 @@ class ExtendedFormHelper extends FormHelper {
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__input_masked.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__input_searchable.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__list_field_set.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery-1.6.2.min.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery-ui-1.8.17.custom.min.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery.textchange.min.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery.inputmask/jquery.inputmask.js');
     }
