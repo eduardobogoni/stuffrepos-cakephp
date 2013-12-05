@@ -1,0 +1,2 @@
+<?php
+PluginManager::init('Webservices');
