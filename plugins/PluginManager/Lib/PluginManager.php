@@ -6,7 +6,7 @@ class PluginManager {
 
     private static $plugins = array();
 
-    public static function init($pluginName, $dependencies) {
+    public static function init($pluginName, $dependencies = array()) {
         self::$plugins[$pluginName] = new Plugin($pluginName, $dependencies);
         self::$plugins[$pluginName]->load();
     }
