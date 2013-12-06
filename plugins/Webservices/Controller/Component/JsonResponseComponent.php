@@ -8,15 +8,14 @@ class JsonResponseComponent extends Component {
     }
 
     public function returnData(Controller $controller, $data) {
-        $this->_return('ok', $data);
+        $controller->response->type(array('json' => 'text/json'));
+        $controller->response->type('json');
+        echo json_encode($data);
     }
 
-    public function returnException(Exception $ex) {
-        $this->_return('error', $ex);
-    }
-
-    private function _return($status, $data) {
-        echo json_encode(compact('status', 'data'));
+    public function returnException(Controller $controller, Exception $ex) {
+        $controller->response->statusCode(500);
+        echo $ex->getTraceAsString();
     }
 
 }
