@@ -8,7 +8,7 @@ class JsonResponseComponent extends Component {
     }
 
     public function returnData(Controller $controller, $data) {
-        $controller->response->type(array('json' => 'text/json'));
+        $controller->response->type(array('json' => 'application/json'));
         $controller->response->type('json');
         echo json_encode($data);
     }
