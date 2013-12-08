@@ -4,6 +4,7 @@ App::uses('FormHelper', 'View/Helper');
 App::uses('ExtendedFieldsParser', 'ExtendedScaffold.Lib');
 App::uses('ArrayUtil', 'Base.Lib');
 App::uses('Basics', 'Base.Lib');
+App::uses('DateTimeInput', 'ExtendedScaffold.View/Helper/ExtendedForm');
 App::uses('ExtendedFieldSet', 'ExtendedScaffold.View/Helper/ExtendedForm');
 App::uses('InputSearchable', 'ExtendedScaffold.View/Helper/ExtendedForm');
 App::uses('InputsOnSubmit', 'ExtendedScaffold.View/Helper/ExtendedForm');
@@ -22,7 +23,7 @@ class ExtendedFormHelper extends FormHelper {
         'Base.CakeLayers',
         'ExtendedScaffold.ScaffoldUtil',
     );
-    private $inputsOnSubmit;
+    public $inputsOnSubmit;
     private $formId;
 
     public function __construct(View $View, $settings = array()) {
@@ -43,6 +44,7 @@ class ExtendedFormHelper extends FormHelper {
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery-ui-1.8.17.custom.min.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery.textchange.min.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery.inputmask/jquery.inputmask.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.moment.min.js');
     }
 
     public function defaultForm($fields = null) {
@@ -198,48 +200,17 @@ class ExtendedFormHelper extends FormHelper {
     }
 
     public function dateTime($fieldName, $dateFormat = 'DMY', $timeFormat = '12', $selected = null, $attributes = array()) {
-        $hiddenId = $this->createNewDomId();
-        $hiddenAttributes = array('id' => $hiddenId);
-        if (isset($selected['value'])) {
-            $hiddenAttributes['value'] = $selected['value'];
-        }
-        $hiddenInput = $this->hidden($fieldName, $hiddenAttributes);
-        $visibleInputName = $fieldName . '_masked';
-        $this->setEntity($visibleInputName);
-        $visibleId = $this->createNewDomId();
-        $visibleInput = parent::text(
-                        $visibleInputName, array_merge(
-                                $attributes, array(
-                            'id' => $visibleId
-                                )
-                        )
-        );
-        $buffer = $hiddenInput . $visibleInput . $this->dateTimeJavascript($hiddenId, $visibleId);
-        $this->setEntity($fieldName);
-        $this->inputsOnSubmit->addInput('dateTime', $visibleId, $hiddenId);
-        return $buffer;
+        return DateTimeInput::dateTime($this, $fieldName, $dateFormat, $timeFormat, $selected, $attributes);
     }
 
-    private function dateTimeJavascript($hiddenId, $visibleId) {
-        return $this->javascriptTag(
-                        "\$(document).ready(function(){
-   \$('#$visibleId').inputmask('d/m/y');  //direct mask   
-                if (\$('#$hiddenId').val()) {                
-                    try {
-                        date = $.datepicker.parseDate('yy-mm-dd',\$('#$hiddenId').val());
-                    }
-                    catch(ex) {
-                        date = null;
-                    }
-                    
-                    if (date instanceof Date) {
-                        \$('#$visibleId').val(
-                            $.datepicker.formatDate('dd/mm/yy',date)
-                        );
-                    }
-                
-                }
-});");
+    public function fieldDefinition($fieldName, $property = false) {
+        $fieldPath = Basics::fieldPath($fieldName, $this->model());
+        $fieldDef = $this->_introspectModel($fieldPath[0], 'fields', $fieldPath[1]);
+        if ($property) {
+            return $fieldDef[$property];
+        } else {
+            return $fieldDef;
+        }
     }
 
     public function text($fieldName, $options = array()) {
