@@ -205,7 +205,7 @@ class ViewUtilHelper extends AppHelper {
     }
 
     private function _isDate($value) {
-        if ($timestamp = strtotime(strval($value))) {
+        if (($timestamp = strtotime(strval($value))) && preg_match('/\d/', strval($value))) {
             $dateOnly = date('Y-m-d', $timestamp);
             $dateOnlyTimestamp = strtotime($dateOnly);
             if ($dateOnlyTimestamp == $timestamp) {
