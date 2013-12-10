@@ -13,12 +13,23 @@ if (!defined('CORE_PATH')) {
     define('CORE_PATH', CAKE_CORE_INCLUDE_PATH . DS);
 }
 
+function cakephpRootTemporaryDirectory($uid) {
+    if (is_int($uid)) {
+        $userConfig = posix_getpwuid($uid);
+    }
+    else {
+        $userConfig = posix_getpwnam($uid);
+    }
+    
+    return (empty($userConfig['dir']) ? sys_get_temp_dir() : $userConfig['dir']) . DS . '.cakephp-tmp' . DS;
+}
+
 // Configuração de diretório de temporários por usuário.
-$userConfig = posix_getpwuid(posix_getuid());
-$cakephpTmpRoot = (empty($userConfig['dir']) ? sys_get_temp_dir() : $userConfig['dir'])
-        . DS . '.cakephp-tmp' . DS;
-$appName = defined('APP_ID') ? APP_ID : 'undefined-app-id';
-define('TMP', $cakephpTmpRoot . $appName . DS);
+function cakephpAppTemporaryDirectory($uid) {
+    return cakephpRootTemporaryDirectory($uid) . (defined('APP_ID') ? APP_ID : 'undefined-app-id') . DS;
+}
+
+define('TMP', cakephpAppTemporaryDirectory(posix_getuid()));
 
 function removeStringPrefix($prefix, $string) {
     if (substr($string, 0, strlen($prefix)) == $prefix) {
