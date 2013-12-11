@@ -39,7 +39,7 @@ class CakeLayersHelper extends Helper {
                         $controller, $settings);
                 $controller->SubmoduleOneToMany->startup($controller);
             }
-            ClassRegistry::getInstance()->addObject($controllerClassUnderscore, &$controller);
+            ClassRegistry::getInstance()->addObject($controllerClassUnderscore, $controller);
         }
         return $controller;
     }

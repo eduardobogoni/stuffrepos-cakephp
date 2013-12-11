@@ -12,7 +12,7 @@ class ExtendedFieldsParser {
         return $instance[0];
     }
 
-    public function isExtendedFieldsDefinition($fields) {
+    public static function isExtendedFieldsDefinition($fields) {
         return isset($fields[self::EXTENDED_KEY]);
     }
 

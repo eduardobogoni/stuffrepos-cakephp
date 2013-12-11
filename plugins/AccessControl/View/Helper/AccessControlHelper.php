@@ -24,13 +24,13 @@ class AccessControlHelper extends Helper {
         return parent::__call($method, $params);
     }
 
-    public function output($url, $contentIfTrue, $contentIfFalse = '', $return = true) {
+    public function restrictedOutput($url, $contentIfTrue, $contentIfFalse = '', $return = true) {
         $out = $this->hasAccessByUrl($url) ? $contentIfTrue : $contentIfFalse;
         return $this->Html->output($out, $return);
     }
 
     public function link($title, $url = null, $htmlAttributes = array(), $confirmMessage = false, $escapeTitle = true, $showTextIfAccessDenied = false) {
-        return $this->output(
+        return $this->restrictedOutput(
                     $url, 
                 !empty($htmlAttributes['method']) && $htmlAttributes['method'] == 'post'
                 ? $this->Form->postlink($title, $url, $htmlAttributes, $confirmMessage, $escapeTitle)
@@ -43,7 +43,7 @@ class AccessControlHelper extends Helper {
     }
 
     public function image($title, $image, $url, $confirmationMessage = null) {
-        return $this->output(
+        return $this->restrictedOutput(
                         $url, $this->Html->image($image, array("alt" => $title, "title" => $title, 'url' => $url, "onclick" => (!empty($confirmationMessage) ? "return confirm('$confirmationMessage')" : "")))
         );
     }
