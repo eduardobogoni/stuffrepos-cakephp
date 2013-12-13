@@ -117,7 +117,7 @@ class ExtendedFormHelper extends FormHelper {
     public function input($fieldName, $options = array()) {
         $fields = array();
         $this->setEntity($fieldName);
-        $view = & ClassRegistry::getObject('view');
+        $view = ClassRegistry::getObject('view');
 
         if (strpos($fieldName, '.') === false) {
             $fieldName = $this->model() . '.' . $fieldName;
@@ -164,7 +164,7 @@ class ExtendedFormHelper extends FormHelper {
     }
 
     public function getReadonlyListOptions($fieldName) {
-        $view = & ClassRegistry::getObject('view');
+        $view = ClassRegistry::getObject('view');
         $fieldValue = ArrayUtil::arrayIndex($view->data, explode('.', $fieldName));
         return array(
             $fieldValue => $view->viewVars[$this->getListVariableDefaultName($fieldName)][$fieldValue]
