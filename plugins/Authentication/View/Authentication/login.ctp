@@ -17,7 +17,11 @@ $helper = $this->Helpers->enabled('AccessControl')
 <?php
 echo $helper->link(
         'Esqueceu sua senha?'
-        , array('action' => 'reset_password_request')
+        , array(
+            'plugin' => 'authentication'
+            , 'controller' => 'authentication'
+            , 'action' => 'reset_password_request'
+        )
 );
 ?>
 </p>
