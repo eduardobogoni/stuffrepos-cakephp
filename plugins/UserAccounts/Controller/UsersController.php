@@ -23,13 +23,25 @@ class UsersController extends AppController {
                 'active',
             )
         ),
-        'Authentication.Authentication',
     );
 
     
     public function beforeFilter() {        
         parent::beforeFilter();
         
+        if (!$this->Components->loaded('Authentication.Authentication')) {
+            $this->Authentication = $this->Components->load(
+                    'Authentication.Authentication'
+                    , array(
+                'userModel' => 'UserAccounts.User',
+                'usernameField' => 'email',
+                'emailField' => 'email',
+                'activeField' => 'active'
+                    )
+            );
+            $this->Authentication->initialize($this);
+        }
+
         if ($this->request->action == 'add' && $this->request->isPost()) {
             $this->currentPassword = $this->Authentication->generateRandomPassword();
             $this->request->data['User']['password'] = $this->currentPassword;
