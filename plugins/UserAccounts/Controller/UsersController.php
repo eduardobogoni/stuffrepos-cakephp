@@ -6,21 +6,17 @@ class UsersController extends AppController {
     
     public $components = array(
         'ExtendedScaffold.ScaffoldUtil' => array(
-            'indexSetFields' => array(
-                'name',
-                'email',
-                'active',
-                'created',
+            'indexUnsetFields' => array(
+                'id',
+                'password',
+                'modified',
             ),
             'viewUnsetFields' => array(
                 'id',
                 'password',
             ),
-            'editSetFields,addSetFields' => array(
-                'id',
-                'name',
-                'email',
-                'active',
+            'editUnsetFields,addUnsetFields' => array(
+                'password',
             )
         ),
     );
