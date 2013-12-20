@@ -192,7 +192,7 @@ class ModelTraverser {
                         'first', array(
                     'conditions' => array(
                         "{$alias}.{$model->{$alias}->primaryKey}" => $row[$model->alias][$model->belongsTo[$alias]['foreignKey']]
-                    ), 'recursive' => 0
+                    ), 'recursive' => -1
                         )
         );
     }
