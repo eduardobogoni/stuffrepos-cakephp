@@ -4,3 +4,6 @@
 [submodule "plugins/Migrations"]
 	path = plugins/Migrations
 	url = https://github.com/CakeDC/migrations.git
+[submodule "plugins/Tools"]
+	path = plugins/Tools
+	url = https://github.com/dereuromark/tools.git
