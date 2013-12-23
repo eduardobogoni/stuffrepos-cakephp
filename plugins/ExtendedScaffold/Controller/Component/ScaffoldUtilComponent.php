@@ -88,9 +88,10 @@ class ScaffoldUtilComponent extends Component {
         
         $this->controller->viewClass = 'Scaffold';
         $this->controller->set('pluralVar',Inflector::variable($this->controller->name));
+        $this->controller->set('singularVar', Inflector::variable($this->controller->modelClass));
         $this->controller->set('singularHumanName', Inflector::humanize(Inflector::underscore($this->controller->modelClass)));
         $this->controller->set('scaffoldFields', $scaffoldFields);
-        $this->controller->render('edit');
+        $this->controller->render($action);
     }
 
     private function _getActionOption($name) {
