@@ -9,8 +9,14 @@ class ViewUtilListFieldset {
     private $scaffoldVars;
     private $parent;
     private $listAssociation;
+    private $settings;
 
-    public function __construct(ViewUtilHelper $parent, $data, &$scaffoldVars) {
+    public function __construct(
+            ViewUtilHelper $parent
+            , $data
+            , &$scaffoldVars
+            , $settings
+    ) {
         $this->parent = $parent;
         $this->legend = empty($data['legend']) ? null : $data['legend'];
         foreach ($data['lines'] as $fields) {
@@ -20,6 +26,7 @@ class ViewUtilListFieldset {
         }
         $this->listAssociation = $data['listAssociation'];
         $this->scaffoldVars = &$scaffoldVars;
+        $this->settings = $settings;
     }
 
     public function output() {
@@ -31,11 +38,11 @@ class ViewUtilListFieldset {
         $b .= $this->parent->Lists->rowsTable(
                 $this->fields
                 , $this->_rows()
-                , array(
+                , Hash::merge($this->settings, array(
             'model' => $this->_model()
             , 'showActions' => false
             , 'controller' => $this->_controller()
-                )
+                ))
         );
 
         return $b;

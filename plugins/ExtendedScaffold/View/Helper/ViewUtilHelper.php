@@ -21,6 +21,18 @@ class ViewUtilHelper extends AppHelper {
      * @var int
      */
     private $viewFieldCount = 0;
+    
+    /**
+     *
+     * @var array
+     */
+    public $settings = array(
+        'listSettings' => array(),
+    );
+    
+    public function __construct(\View $View, $settings = array()) {
+        parent::__construct($View, $settings);        
+    }
 
     private function _getCurrentController() {
         if (empty($this->controller)) {
@@ -202,7 +214,7 @@ class ViewUtilHelper extends AppHelper {
         if (empty($fieldset['listAssociation'])) {
             $f = new ViewUtilExtendedFieldset($this, $fieldset, $scaffoldVars);
         } else {
-            $f = new ViewUtilListFieldset($this, $fieldset, $scaffoldVars);
+            $f = new ViewUtilListFieldset($this, $fieldset, $scaffoldVars, $this->settings['listSettings']);
         }
 
         return $f->output();
