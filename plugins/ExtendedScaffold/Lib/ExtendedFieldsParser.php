@@ -88,43 +88,37 @@ class ExtendedFieldsParser {
     private function _parseLinesData($value, $defaultModel = null) {
         $_this = & self::getInstance();
         $linesData = array();
-        foreach ($value as $line) {
-            $linesData[] = $_this->_parseLineData($line, $defaultModel);
+        foreach ($value as $subKey => $subValue) {
+            $linesData[] = $_this->_parseLineData($subKey, $subValue, $defaultModel);
         }
         return $linesData;
     }
 
-    private function _parseLineData($value, $defaultModel = null) {
-        $_this = & self::getInstance();
-        if (is_array($value)) {
+    private function _parseLineData($key, $value, $defaultModel = null) {
+        if (($field = $this->_parseFieldData($key, $value, $defaultModel))) {
+            $lineData = array($field);
+        } else {
             $lineData = array();
             foreach ($value as $subKey => $subValue) {
-                $lineData[] = $_this->_parseFieldData($subKey, $subValue, $defaultModel);
+                $lineData[] = $this->_parseFieldData($subKey, $subValue, $defaultModel);
             }
-        } else {
-            $lineData = array($_this->_parseFieldData(0, $value, $defaultModel));
         }
-
         return $lineData;
     }
 
-    private function _parseFieldData($subKey, $subValue, $defaultModel = null) {
-        $_this = & self::getInstance();
-        if (!is_int($subKey)) {
-            $name = $subKey;
-            $options = $subValue;
+    private function _parseFieldData($key, $value, $defaultModel = null) {
+        if ((is_int($key) && preg_match('/^\d+$/', $key) && is_string($value))) {
+            $field = array('name' => $value, 'options' => array());
+        } else if (is_string($key) && preg_match('/^[^\d]/', $key) && is_array($value)) {
+            $field = array('name' => $key, 'options' => $value);
         } else {
-            $name = $subValue;
-            $options = array();
+            return false;
         }
-
-        $nameParts = explode('.', $name);
-
+        $nameParts = explode('.', $field['name']);
         if (count($nameParts) == 1 && $defaultModel) {
-            $name = "$defaultModel.{$nameParts[0]}";
+            $field['name'] = "$defaultModel.{$nameParts[0]}";
         }
-
-        return compact('name', 'options');
+        return $field;
     }
 
 }
