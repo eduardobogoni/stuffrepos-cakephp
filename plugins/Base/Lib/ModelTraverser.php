@@ -179,6 +179,9 @@ class ModelTraverser {
     }
 
     private static function isField(Model $model, $name) {
+        if (!is_array($schema = $model->schema())) {
+            throw new Exception("{$model->name}->schema() do not returned a array. Returned: \"$schema\"" );
+        }
         return in_array($name, array_keys($model->schema())) ||
                 !empty($model->virtualFields[$name]);
     }
