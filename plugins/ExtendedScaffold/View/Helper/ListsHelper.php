@@ -1,7 +1,7 @@
 <?php
 
 App::import('Lib', 'Base.ModelTraverser');
-App::import('Helper', 'ExtendedScaffold.ViewUtil');
+App::uses('ViewUtilHelper', 'ExtendedScaffold.View/Helper');
 
 class ListsHelper extends AppHelper {
 
@@ -25,6 +25,23 @@ class ListsHelper extends AppHelper {
         'paginatorNumberSeparator' => ' | ',
         'paginatorHiddenDisabled' => true,
         'rowActionListOptions' => array()
+    );
+
+    /**
+     * 
+     * @var array
+     */
+    private $defaultField = array(
+        'path' => null,
+        'emptyValue' => '&nbsp;',
+        'label' => null,
+        'type' => null,
+        'align' => null,
+        'valueFunction' => null,
+        'extraData' => null,
+        'staticValue' => null,
+        'mask' => null,
+        'link' => null,
     );
 
     public function listElement($fields, $rows, $options = array()) {
@@ -165,30 +182,18 @@ class ListsHelper extends AppHelper {
     }
 
     private function _extractField($key, $value) {
-        $path = null;
-        $emptyValue = '&nbsp;';
-        $label = null;
-        $type = null;
-        $align = null;
-        $valueFunction = null;
-        $extraData = null;
-        $staticValue = null;
-        $mask = null;
+        $field = is_array($value) ?
+                array_merge(array('name' => $key), $value) :
+                array('name' => $value);
+        $field = Hash::merge($this->defaultField, $field);
+        $field['association'] = $this->_fieldAssociation($field['name']);
+        list($field['path'], $model) = $this->_fieldPathModel($field['name']);
+        $field['type'] = $this->_fieldType($field['path'], $model);
+        return $field;
+    }
 
-        if (is_array($value)) {
-            $name = $key;
-            foreach (array('staticValue', 'align', 'label', 'emptyValue', 'valueFunction', 'extraData', 'mask') as $option) {
-                if (isset($value[$option])) {
-                    ${$option} = $value[$option];
-                }
-            }
-        } else {
-            $name = $value;
-        }
-
-        $association = $this->_fieldAssociation($name);
-
-        $nameParts = explode('.', $name);
+    private function _fieldPathModel($fieldName) {
+        $nameParts = explode('.', $fieldName);
         if (count($nameParts) == 1) {
             if ($this->model) {
                 $path = array(
@@ -204,32 +209,20 @@ class ListsHelper extends AppHelper {
             $path = $nameParts;
             $model = &$this->model->{$nameParts[0]};
         }
+        return array($path, $model);
+    }
 
+    private function _fieldType($path, \Model $model) {
         if ($model) {
             $modelSchema = $model->schema();
-
             if (!empty($modelSchema[$path[1]])) {
-                $type = $modelSchema[$path[1]]['type'];
+                return $modelSchema[$path[1]]['type'];
             } else if (!empty($model->virtualFieldsSchema[$path[1]]['type'])) {
-                $type = $model->virtualFieldsSchema[$path[1]]['type'];
+                return $model->virtualFieldsSchema[$path[1]]['type'];
             }
         } else {
-            $type = 'string';
+            return 'string';
         }
-
-        return compact(
-                        'staticValue'
-                        , 'name'
-                        , 'path'
-                        , 'type'
-                        , 'emptyValue'
-                        , 'label'
-                        , 'align'
-                        , 'valueFunction'
-                        , 'extraData'
-                        , 'mask'
-                        , 'association'
-        );
     }
 
     private function _fieldAssociation($field) {
@@ -385,8 +378,6 @@ class ListsHelper extends AppHelper {
             $value = $field['staticValue'];
         } else {
             if (!empty($field['association'])) {
-                $modelIndex = $field['association']['alias'];
-                $fieldIndex = $field['association']['displayField'];
                 if (!empty($row[$this->model->alias][$field['association']['foreignKey']])) {
                     $link = array('controller' => $field['association']['controller'], 'action' => 'view',
                         $row[$this->model->alias][$field['association']['foreignKey']]);
@@ -399,13 +390,6 @@ class ListsHelper extends AppHelper {
                         $row[$this->model->alias][$this->model->primaryKey]
                     );
                 }
-
-                if (count($field['path']) > 1) {
-                    list($modelIndex, $fieldIndex) = $field['path'];
-                } else {
-                    $modelIndex = false;
-                    list($fieldIndex) = $field['path'];
-                }
             }
             
             $value = $this->CakeLayers->modelInstanceFieldByPath(
@@ -415,7 +399,6 @@ class ListsHelper extends AppHelper {
             if (is_array($value)) {
                 $value = $this->_formatValueAsList($value);
             } else {
-                App::import('Helper', 'ViewUtil');
                 switch ($field['type']) {
                     case ViewUtilHelper::VALUE_TYPE_BOOLEAN:
                         $value = $this->ViewUtil->yesNo($value);
