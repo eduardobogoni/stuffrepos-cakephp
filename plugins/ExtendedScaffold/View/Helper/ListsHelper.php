@@ -369,12 +369,11 @@ class ListsHelper extends AppHelper {
                     return $this->Paginator->sort($title, $key);
                 }
             }
-        } else {
-            if (empty($title)) {
-                $title = Inflector::humanize($key);
-            }
-            return __($title, true);
         }
+        if (empty($title)) {
+            $title = Inflector::humanize($key);
+        }
+        return __($title, true);
     }
 
     private function _rowFieldValue($field, $row, $firstField) {
