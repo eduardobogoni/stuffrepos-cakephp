@@ -143,7 +143,7 @@ class CakeLayersHelper extends Helper {
     }
 
     public function getCurrentView() {
-        return ClassRegistry::getObject('view');
+        return $this->_View;
     }
 
     public function modelInstanceField($model, $instance, $field, $toDisplay = false) {
