@@ -2,6 +2,7 @@
 
 App::uses('ArrayUtil', 'Base.Lib');
 App::uses('AppHelper', 'View/Helper');
+App::uses('ControllerInspector', 'Base.Lib');
 
 /**
  * Monta menus automaticamente baseados em convenções ou configurações
@@ -288,10 +289,7 @@ class ActionListHelper extends AppHelper {
         }
 
         // Negado pelo controller
-        if (($actionUrl['controller'] == $this->_getTargetControllerUri()) &&
-                isset($this->targetController->notModuleActions) &&
-                array_search($actionUrl['action'], $this->targetController->notModuleActions) !== false
-        ) {
+        if ($this->_deniedAction($actionUrl)) {
             return __('Denied by controller.', true);
         }
 
@@ -308,6 +306,16 @@ class ActionListHelper extends AppHelper {
         }
 
         return false;
+    }
+
+    private function _deniedAction($actionUrl) {
+        if ($actionUrl['controller'] == $this->_getTargetControllerUri()) {
+            return !ControllerInspector::actionExists($this->targetController, $actionUrl['action']) ||
+                    (isset($this->targetController->notModuleActions) &&
+                    array_search($actionUrl['action'], $this->targetController->notModuleActions) !== false);
+        } else {
+            return false;
+        }
     }
 
     private function _buildActionUrl($targetAction) {
