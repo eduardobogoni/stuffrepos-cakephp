@@ -11,6 +11,7 @@ class AuthenticationComponent extends Component {
             'passwordField' => 'password',
             'activeField' => 'active',
             'userModel' => null,
+            'loginRedirect' => null,
         ));
         AuthenticationUser::configure($this->settings);
     }
@@ -47,6 +48,7 @@ class AuthenticationComponent extends Component {
             'action' => 'login',
             'plugin' => 'authentication'
         );
+        $controller->Auth->loginRedirect = $this->settings['loginRedirect'];
         $controller->Auth->allow();
         $controller->Auth->allow('index', 'add', 'edit', 'delete', 'view');
     }
