@@ -6,7 +6,7 @@ class ModelTraverser {
     const FIND_LAST_INSTANCE = 'LastInstance';
     const FIND_ALL = 'All';
 
-    public function schema(Model $model, $path) {
+    public static function schema(Model $model, $path) {
         try {
             if (!is_array($path)) {
                 $path = explode('.', $path);
