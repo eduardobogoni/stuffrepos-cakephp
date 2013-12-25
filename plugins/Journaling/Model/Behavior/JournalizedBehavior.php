@@ -25,7 +25,7 @@ class JournalizedBehavior extends ModelBehavior {
         );
     }
 
-    public function beforeSave(Model $model) {
+    public function beforeSave(\Model $model, $options = array()) {
         if (!parent::beforeSave($model)) {
             return false;
         }
@@ -33,8 +33,8 @@ class JournalizedBehavior extends ModelBehavior {
         $this->storeRowPreviousValues($model);
     }
 
-    public function afterSave(\Model $model, $created) {
-        if (!parent::afterSave($model, $created)) {
+    public function afterSave(\Model $model, $created, $options = array()) {
+        if (!parent::afterSave($model, $created, $options)) {
             return false;
         }
 

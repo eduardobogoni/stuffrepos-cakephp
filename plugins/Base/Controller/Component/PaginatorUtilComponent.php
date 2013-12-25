@@ -33,7 +33,8 @@ class PaginatorUtilComponent extends Component {
         parent::__construct($collection, $settings);
     }
 
-    public function startup(&$controller) {
+    public function startup(\Controller $controller) {
+        parent::startup($controller);
         if ($controller->params['action'] == 'index') {
             $this->startupIndex($controller);
         }
@@ -89,7 +90,8 @@ class PaginatorUtilComponent extends Component {
         return $this->filters[$controller->name][$filterName];
     }
 
-    public function beforeRender(&$controller) {
+    public function beforeRender(\Controller $controller) {
+        parent::beforeRender($controller);
         if ($controller->params['action'] == 'index') {
             $this->beforeRenderIndex($controller);
         }
