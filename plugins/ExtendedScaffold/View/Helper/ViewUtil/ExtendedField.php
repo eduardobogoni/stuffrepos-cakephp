@@ -57,7 +57,7 @@ class ExtendedField {
         if (!empty($this->options['label'])) {
             return $this->options['label'];
         } else {
-            $associations = &$this->parent->getParent()->getAssociations();
+            $associations = $this->parent->getParent()->getAssociations();
 
             if (!empty($associations['belongsTo'])) {
                 foreach ($associations['belongsTo'] as $_alias => $_details) {
@@ -117,10 +117,10 @@ class ExtendedField {
 
     private function _getValue() {
 
-        $ViewUtilHelper = &$this->parent->getParent()->getParent();
+        $ViewUtilHelper = $this->parent->getParent()->getParent();
 
-        $instance = &$this->parent->getParent()->getInstance();
-        $associations = &$this->parent->getParent()->getAssociations();
+        $instance = $this->parent->getParent()->getInstance();
+        $associations = $this->parent->getParent()->getAssociations();
 
         if (!empty($associations['belongsTo'])) {
             foreach ($associations['belongsTo'] as $_alias => $_details) {

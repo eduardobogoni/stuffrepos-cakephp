@@ -25,7 +25,7 @@ class ExtendedFieldsParser {
         }
     }
 
-    public function parseFieldsets($fieldsData, $defaultModel = null) {
+    public static function parseFieldsets($fieldsData, $defaultModel = null) {
         $_this = & self::getInstance();
 
         if ($_this->isExtendedFieldsDefinition($fieldsData)) {
