@@ -72,15 +72,15 @@ class ConfigurationKey extends CustomDataModel {
         }
     }
 
-    protected function customSave($isNew) {
+    protected function customSave($oldData, $newData) {
         $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
-        $settedConfigurationKey = $SettedConfigurationKey->findByName($this->data[$this->alias]['name']);
+        $settedConfigurationKey = $SettedConfigurationKey->findByName($newData['name']);
 
         if (!$settedConfigurationKey) {
-            $settedConfigurationKey[$SettedConfigurationKey->alias]['name'] = $this->data[$this->alias]['name'];
+            $settedConfigurationKey[$SettedConfigurationKey->alias]['name'] = $newData['name'];
         }
 
-        $settedConfigurationKey[$SettedConfigurationKey->alias]['value'] = $this->data[$this->alias]['setted_value'];
+        $settedConfigurationKey[$SettedConfigurationKey->alias]['value'] = $newData['setted_value'];
 
         return $SettedConfigurationKey->save($settedConfigurationKey);
     }
