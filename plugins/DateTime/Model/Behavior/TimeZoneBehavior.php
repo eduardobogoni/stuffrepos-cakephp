@@ -58,8 +58,8 @@ class TimeZoneBehavior extends ModelBehavior {
      */
     private function _toDatabase(\Model $model, &$row) {
         foreach ($this->config[$model->name] as $field) {
-            $this->_assertTimeZoneField($model, &$row, $field);
-            $this->_convertDateFieldToUtc($model, &$row, $field);
+            $this->_assertTimeZoneField($model, $row, $field);
+            $this->_convertDateFieldToUtc($model, $row, $field);
         }
         if (empty($row[$model->alias][$this->_timeZoneField($field)])) {
             throw new Exception("{$this->_timeZoneField($field)} field is empty");
