@@ -50,6 +50,15 @@ class TimeZoneBehavior extends ModelBehavior {
         return $results;
     }
 
+    public function isValidTimeZone(\Model $model, $check) {
+        foreach ($check as $value) {
+            if (!in_array($value, timezone_identifiers_list())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * 
      * @param Model $model
