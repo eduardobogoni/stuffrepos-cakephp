@@ -6,6 +6,7 @@ class AuthenticationController extends AppController {
 
     public $uses = array(
         'Authentication.AuthenticationUser',
+        'Authentication.UserChangePassword',
         'Authentication.UserResetPassword',
         'Authentication.UserResetPasswordRequest',
         'Authentication.UserResetPasswordRequestSubmission',
@@ -25,6 +26,15 @@ class AuthenticationController extends AppController {
 
     public function logout() {
         $this->redirect($this->Auth->logout());
+    }
+    
+    public function change_password() {
+        if ($this->request->isPost()) {
+            $this->request->data[$this->UserChangePassword->alias]['user_id'] = $this->Authentication->userId();
+            if ($this->UserChangePassword->save($this->data)) {
+                $this->flash('Senha alterada', $this->referer());
+            }
+        }
     }
 
     public function reset_password($chave) {

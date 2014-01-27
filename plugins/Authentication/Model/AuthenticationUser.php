@@ -59,6 +59,7 @@ class AuthenticationUser extends AppModel {
                     'username' => $user[$model->alias][self::$settings['usernameField']],
                     'email' => $user[$model->alias][self::$settings['emailField']],
                     'active' => $user[$model->alias][self::$settings['activeField']],
+                    'password' => $user[$model->alias][self::$settings['passwordField']],
                 )
             );
         }

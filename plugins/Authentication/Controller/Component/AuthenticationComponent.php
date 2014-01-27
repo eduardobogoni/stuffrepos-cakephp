@@ -67,6 +67,15 @@ class AuthenticationComponent extends Component {
                 __('Usernamme') . ': ' . $user['username']
                 . "\n" . __('Password') . ': ' . $password);
     }
+    
+    public function userId() {
+        $user = $this->Auth->user();
+        return $user[$this->_userModel()->primaryKey];
+    }
+    
+    private function _userModel() {
+        return ClassRegistry::init($this->settings['userModel']);
+    }
 
     /**
      * Adaptado de http://www.laughing-buddha.net/php/lib/password
