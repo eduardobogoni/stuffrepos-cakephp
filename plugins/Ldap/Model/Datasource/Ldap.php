@@ -2,6 +2,7 @@
 
 App::uses('Basics', 'Base.Lib');
 App::uses('LdapUtils', 'Ldap.Lib');
+App::uses('LdapObjectNotWritableException', 'Ldap.Lib');
 
 class Ldap extends DataSource {
 
@@ -65,6 +66,7 @@ class Ldap extends DataSource {
             'objectClass' => $this->_getModelConfig($model, 'objectClass')
             ) + $this->_toLdapData($model, $modelData);
         $dn = $this->buildDnByData($model, $modelData);        
+        $this->_throwExceptionIfIsNotWritable($model, $dn);
         
         unset($ldapData['dn']);
 
@@ -231,6 +233,7 @@ class Ldap extends DataSource {
             throw new Exception("No primary key value was defined");
         }                
         
+        $this->_throwExceptionIfIsNotWritable($model, $dn);
         unset($ldapData['dn']);
                 
         $rdnAttribute = $this->_rdnAttribute($dn);        
@@ -577,7 +580,7 @@ class Ldap extends DataSource {
             throw new Exception("Ldap data has no DN attribute \"$dnAttribute\"");
         }
 
-        $modelDn = $this->_getModelBaseDn($model);
+        $modelDn = $this->_getModelWritableBaseDn($model);
         return LdapUtils::normalizeDn("$dnAttribute={$ldapData[$dnAttribute]}" . ($modelDn ? ',' . $modelDn : ''));
     }
 
@@ -591,8 +594,15 @@ class Ldap extends DataSource {
             return LdapUtils::normalizeDn($modelDn . $dataSourceDn);
         }
     }
+        
+    private function _getModelWritableBaseDn(\Model $model) {
+        return LdapUtils::joinDns(
+                        $this->_getModelConfig($model, 'writableRelativeBaseDn', false, '')
+                        , $this->_getModelBaseDn($model)
+                );
+    }
 
-    private function _getModelConfig(Model $model, $key) {
+    private function _getModelConfig(Model $model, $key, $required = true, $defaultValue = null) {
         $class = new ReflectionClass($model);
 
         while ($class) {
@@ -606,8 +616,12 @@ class Ldap extends DataSource {
         if (!empty($this->_modelBaseConfig[$key])) {
             return $this->_modelBaseConfig[$key];
         }
-
-        throw new Exception("No config '$key' defined for model \"{$model->name}\"");
+        if ($required) {
+            throw new Exception("No config '$key' defined for model \"{$model->name}\"");
+        }
+        else {
+            return $defaultValue;
+        }
     }
 
     private function _throwPhysicalConnectionException($message) {
@@ -707,6 +721,22 @@ class Ldap extends DataSource {
         }
 
         return $previousData;
+    }
+    
+    private function _throwExceptionIfIsNotWritable(\Model $model, $dn) {
+        if (!$this->isWritable($model, $dn)) {
+            throw new LdapObjectNotWritableException(
+                    $model
+                    , $dn
+                    , $this->_getModelWritableBaseDn($model));
+        }
+    }
+    
+    public function isWritable(\Model $model, $dn) {
+        return LdapUtils::isDnParent(
+                        $this->_getModelWritableBaseDn($model)
+                        , $dn
+        );
     }
 
 } // LdapSource

@@ -89,4 +89,18 @@ class LdapUtils {
         }
     }
 
+    public static function isDnParent($parentDn, $childDn) {
+        $parentRdns = array_reverse(self::explodeDn($parentDn));
+        $childRdns = array_reverse(self::explodeDn($childDn));
+        if (count($childRdns) <= count($parentRdns)) {
+            return false;
+        }
+        for ($i = 0; $i < count($parentRdns); $i++) {
+            if (strtolower($parentRdns[$i]) != strtolower($childRdns[$i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
