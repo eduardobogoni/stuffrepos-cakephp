@@ -30,6 +30,7 @@ class ScaffoldUtilComponent extends Component {
     public $components = array('Session');
     public $currentAction = null;
     public $defaultOptions;
+    private $referer;
         
     public function startup(Controller $controller) {
         parent::startup($controller);
@@ -43,6 +44,7 @@ class ScaffoldUtilComponent extends Component {
         } else {
             $this->defaultOptions = array();
         }
+        $this->_fetchRefererFromRequest($controller);
     }
 
     public function beforeRender(Controller $controller) {
@@ -77,6 +79,24 @@ class ScaffoldUtilComponent extends Component {
 
             $controller->set('scaffoldFields', $scaffoldFields);
         }
+        $this->_setRefererOnData($controller);
+    }
+    
+    public function referer() {
+        return $this->referer;
+    }
+    
+    private function _fetchRefererFromRequest(\Controller $controller) {
+        if (empty($controller->request->data['_ScaffoldUtil']['referer'])) {
+            $this->referer = $controller->referer();
+        }
+        else {
+            $this->referer = $controller->request->data['_ScaffoldUtil']['referer'];
+        }        
+    }
+    
+    private function _setRefererOnData(\Controller $controller) {
+        $controller->request->data['_ScaffoldUtil']['referer'] = $this->referer;
     }
 
     public function addJavascriptLink($file) {

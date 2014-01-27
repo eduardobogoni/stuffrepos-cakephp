@@ -12,7 +12,8 @@ class AuthenticationController extends AppController {
         'Authentication.UserResetPasswordRequestSubmission',
     );
     public $components = array(
-        'Session'
+        'Session',
+        'ExtendedScaffold.ScaffoldUtil',
     );
     public function login() {
         if ($this->request->is('post')) {
@@ -32,7 +33,7 @@ class AuthenticationController extends AppController {
         if ($this->request->isPost()) {
             $this->request->data[$this->UserChangePassword->alias]['user_id'] = $this->Authentication->userId();
             if ($this->UserChangePassword->save($this->data)) {
-                $this->flash('Senha alterada', $this->referer());
+                $this->flash('Senha alterada', $this->ScaffoldUtil->referer());
             }
         }
     }

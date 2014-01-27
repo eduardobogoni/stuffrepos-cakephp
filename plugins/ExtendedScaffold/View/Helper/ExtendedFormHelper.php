@@ -229,7 +229,12 @@ class ExtendedFormHelper extends FormHelper {
         $this->formId = $this->createNewDomId();
         $options['id'] = $this->formId;
         $buffer = parent::create($model, $options);
+        $buffer .= $this->_refererInput();
         return $buffer;
+    }
+    
+    private function _refererInput() {
+        return $this->hidden('_ScaffoldUtil.referer');
     }
 
     public function end($options = null) {
