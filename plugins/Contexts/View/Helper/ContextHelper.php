@@ -79,15 +79,31 @@ EOT;
 
     private function _actions($modules) {
         $actions = array();
-        foreach ($modules as $controller => $action) {
-            $linkOptions = array();
-            if ($controller == $this->params['controller']) {
-                $linkOptions['class'] = 'current';
-            }
-            $action['linkOptions'] = $linkOptions;
-            $actions[] = $action;
+        foreach ($modules as $controller => $actionData) {
+            $actions[] = array(
+                'url' => $this->_moduleActionUrl($controller, $actionData),
+                'caption' => $this->_moduleActionCaption($actionData),
+                'linkOptions' => $this->_moduleActionLinkOptions($controller, $actionData),
+            );
         }
         return $actions;
+    }
+
+    private function _moduleActionUrl($controller, $actionData) {
+        $url = empty($actionData['url']) ? "/{$controller}/index" : $actionData['url'];
+        return $url . '/' . $this->_View->viewVars['contextCurrentId'];
+    }
+
+    private function _moduleActionCaption($actionData) {
+        return empty($actionData['url']) ? $actionData : $actionData['caption'];
+    }
+
+    private function _moduleActionLinkOptions($controller, $actionData) {
+        $linkOptions = array();
+        if ($controller == $this->params['controller']) {
+            $linkOptions['class'] = 'current';
+        }
+        return $linkOptions;
     }
 
 }

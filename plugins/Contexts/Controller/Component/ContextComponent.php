@@ -14,7 +14,10 @@ class ContextComponent extends Component {
         parent::initialize($controller);
 
         $this->currentId = $controller->request->params['pass'][0];
-
+        $this->_checkChangeContext($controller);
+    }
+    
+    private function _checkChangeContext(\Controller $controller) {
         if (!empty($controller->request->params['named']['changeContextId'])) {
             $this->_changeContext(
                     $controller
