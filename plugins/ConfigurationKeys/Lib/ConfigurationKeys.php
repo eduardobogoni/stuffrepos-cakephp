@@ -23,7 +23,8 @@ class ConfigurationKeys {
                     }
                     self::$keys[$key] = $options + array(
                         'description' => null,
-                        'defaultValue' => null
+                        'defaultValue' => null,
+                        'listOptions' => null,
                     );
                 }
             }

@@ -23,6 +23,10 @@ class ConfigurationKey extends CustomDataModel {
                 'rule' => '/.*/i',
                 'required' => true,
             ),
+            'listOptions' => array(
+                'rule' => 'listOptionsValidation',
+                'message' => 'Valor informado não está contido na lista de valores permitidos',
+            ),
         ),
     );
 
@@ -97,6 +101,24 @@ class ConfigurationKey extends CustomDataModel {
 
     public function nullValidation($check, $params) {
         return true;
+    }
+    
+    public function listOptionsValidation($check) {
+        if (empty($this->data[$this->alias]['name'])) {
+            return false;
+        }
+        $listOptions = ConfigurationKeys::getKeyOptions($this->data[$this->alias]['name'], 'listOptions');
+        if (is_array($listOptions)) {
+            foreach($check as $value) {
+                if (!in_array($value, $listOptions)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        else {
+            return true;
+        }
     }
 
 }

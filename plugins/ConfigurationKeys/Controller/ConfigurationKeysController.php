@@ -37,6 +37,27 @@ class ConfigurationKeysController extends AppController {
         $this->redirect(array('action' => 'index'));
     }
 
+    public function beforeRender() {
+        parent::beforeRender();
+        if ($this->request->params['action'] == 'edit') {
+            $this->_settedValueListOptions();
+        }
+    }
+
+    private function _settedValueListOptions() {
+        if (!empty($this->request->data['ConfigurationKey']['name'])) {
+            $listOptions = ConfigurationKeys::getKeyOptions(
+                            $this->request->data['ConfigurationKey']['name']
+                            , 'listOptions'
+            );
+            if (is_array($listOptions)) {
+                $this->set(array(
+                    'settedValues' => ArrayUtil::keysAsValues($listOptions)
+                ));
+            }
+        }
+    }
+
 }
 
 ?>
