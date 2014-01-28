@@ -41,10 +41,6 @@ class ContextComponent extends Component {
 
     public function beforeRender(\Controller $controller) {
         $controller->set(
-                'contextObjectsList'
-                , $controller->{$controller->uses[0]}->find('list')
-        );
-        $controller->set(
                 'contextCurrentId'
                 , $this->getCurrentId()
         );
