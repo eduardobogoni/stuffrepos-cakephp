@@ -107,7 +107,11 @@ class ConfigurationKey extends CustomDataModel {
         if (empty($this->data[$this->alias]['name'])) {
             return false;
         }
-        $listOptions = ConfigurationKeys::getKeyOptions($this->data[$this->alias]['name'], 'listOptions');
+        try {
+            $listOptions = ConfigurationKeys::getKeyOptions($this->data[$this->alias]['name'], 'listOptions');
+        } catch (Exception $ex) {
+            return false;
+        }
         if (is_array($listOptions)) {
             foreach($check as $value) {
                 if (!in_array($value, $listOptions)) {
