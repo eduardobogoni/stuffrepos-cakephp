@@ -204,13 +204,24 @@ class ExtendedFormHelper extends FormHelper {
     }
 
     public function fieldDefinition($fieldName, $property = false) {
-        $fieldPath = Basics::fieldPath($fieldName, $this->model());
+        $fieldPath = $this->_fieldDefinitionPath($fieldName);
         $fieldDef = $this->_introspectModel($fieldPath[0], 'fields', $fieldPath[1]);
         if ($property) {
             return $fieldDef[$property];
         } else {
             return $fieldDef;
         }
+    }
+
+    private function _fieldDefinitionPath($fieldName) {
+        $parts = Basics::fieldPath($fieldName, $this->model());
+        $path = array();
+        foreach ($parts as $part) {
+            if (!preg_match('/^[0-9]$/', $part) && !preg_match('/^\%.+\%$/', $part)) {
+                $path[] = $part;
+            }
+        }
+        return $path;
     }
 
     public function text($fieldName, $options = array()) {
