@@ -33,13 +33,13 @@ class ExtendedFormHelper extends FormHelper {
     
     public function beforeLayout($layoutFile) {
         parent::beforeLayout($layoutFile);        
-        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.dom_helper.js');
-        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.lang.js');
-        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.collections.js');
-        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper.js');
-        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__input_masked.js');
-        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__input_searchable.js');
-        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__list_field_set.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.DomHelper.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.Lang.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.Collections.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.ExtendedFormHelper.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.ExtendedFormHelper/InputMasked.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.ExtendedFormHelper/InputSearchable.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.ExtendedFormHelper/ListFieldSet.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.ExtendedFormHelper/DateTimeInput.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery-1.6.2.min.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery-ui-1.8.17.custom.min.js');
