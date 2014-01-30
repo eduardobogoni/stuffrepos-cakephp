@@ -7,7 +7,7 @@ class DateTimeInput {
         $hiddenInput = self::_hiddenInput($helper, $fieldName, $selected);
         $visibleInput = self::_visibleInput($helper, $fieldName, $attributes);
         $initData = json_encode(array(
-            '_patterns' => self::_getPatterns($helper->fieldDefinition($fieldName, 'type'))
+            '_patterns' => self::_getPatterns(self::_type($dateFormat, $timeFormat))
         ));
         return <<<EOT
 <span id="$id" initCallback="ExtendedFormHelper.DateTimeInput.initInput" initData='$initData' >
@@ -15,6 +15,16 @@ class DateTimeInput {
     $visibleInput
 </span>
 EOT;
+    }
+    
+    private static function _type($dateFormat, $timeFormat) {
+        if ($dateFormat && $timeFormat) {
+            return 'datetime';
+        } else if ($timeFormat) {
+            return 'time';
+        } else {
+            return 'date';
+        }
     }
 
     private function _hiddenInput(ExtendedFormHelper $helper, $fieldName, $selected = null) {

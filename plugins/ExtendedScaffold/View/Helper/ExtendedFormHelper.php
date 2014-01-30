@@ -251,7 +251,7 @@ class ExtendedFormHelper extends FormHelper {
     }
 
     public function end($options = null) {
-        return parent::end($options) . $this->onSubmitEvent() . $this->_onReadyEvent();
+        return parent::end($options) . $this->_onReadyEvent();
     }
 
     private function _onReadyEvent() {
