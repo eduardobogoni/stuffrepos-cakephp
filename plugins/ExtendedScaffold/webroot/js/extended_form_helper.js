@@ -1,6 +1,18 @@
 function ExtendedFormHelper() {
 }
 
+ExtendedFormHelper.onSubmit = function(rootElement) {
+    if ($(rootElement).data('controller')) {
+        $(rootElement).data('controller').onSubmit()
+    }
+    else {
+        $(rootElement).children().map(function() {
+            ExtendedFormHelper.onSubmit(this);
+        });
+    }
+    return true;
+}
+
 ExtendedFormHelper.initInputs = function(rootElement) {
     if ($(rootElement).attr('initCallback')) {
         ExtendedFormHelper._initInput(rootElement);

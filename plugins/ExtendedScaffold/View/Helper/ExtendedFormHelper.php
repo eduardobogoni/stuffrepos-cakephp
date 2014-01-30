@@ -40,6 +40,7 @@ class ExtendedFormHelper extends FormHelper {
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__input_masked.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__input_searchable.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.extended_form_helper__list_field_set.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.ExtendedFormHelper/DateTimeInput.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery-1.6.2.min.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery-ui-1.8.17.custom.min.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery.textchange.min.js');
@@ -239,6 +240,7 @@ class ExtendedFormHelper extends FormHelper {
     public function create($model = null, $options = array()) {
         $this->formId = $this->createNewDomId();
         $options['id'] = $this->formId;
+        $options['onsubmit'] = 'return ExtendedFormHelper.onSubmit(this)';
         $buffer = parent::create($model, $options);
         $buffer .= $this->_refererInput();
         return $buffer;
@@ -252,15 +254,6 @@ class ExtendedFormHelper extends FormHelper {
         return parent::end($options) . $this->onSubmitEvent() . $this->_onReadyEvent();
     }
 
-    private function onSubmitEvent() {
-        $b = "\t\$('#{$this->formId}').submit(function(){\n";
-        $b .= $this->inputsOnSubmit->outputJavascript();
-        $b .= "
-            return true;
-});";
-        return $this->javascriptTag($b);
-    }
-    
     private function _onReadyEvent() {
         $b = <<<EOT
 $(document).ready(function(){
