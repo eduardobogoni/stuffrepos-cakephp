@@ -27,7 +27,7 @@ EOT;
         }
     }
 
-    private function _hiddenInput(ExtendedFormHelper $helper, $fieldName, $selected = null) {
+    private static function _hiddenInput(ExtendedFormHelper $helper, $fieldName, $selected = null) {
         $hiddenAttributes = array('subId' => 'hiddenInput',);
         if (isset($selected['value'])) {
             $hiddenAttributes['value'] = $selected['value'];
@@ -35,7 +35,7 @@ EOT;
         return $helper->hidden($fieldName, $hiddenAttributes);
     }
 
-    private function _visibleInput(ExtendedFormHelper $helper, $fieldName, $attributes = array()) {
+    private static function _visibleInput(ExtendedFormHelper $helper, $fieldName, $attributes = array()) {
         $visibleInputName = $fieldName . '_masked';
         $helper->setEntity($visibleInputName);
         $visibleId = $helper->createNewDomId();
