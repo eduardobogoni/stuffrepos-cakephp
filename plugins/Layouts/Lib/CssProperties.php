@@ -30,6 +30,20 @@ class CssProperties {
 
         return $b;
     }
+    
+    /**
+     * 
+     * @param CssProperties $otherProperties
+     * @return CssProperties
+     */
+    public function add(CssProperties $otherProperties) {
+        return new CssProperties(
+                array_merge(
+                        $this->properties
+                        , $otherProperties->properties
+                )
+        );
+    }
 
     private function _selectors($selectors, $pseudoClass) {
         if (!is_array($selectors)) {

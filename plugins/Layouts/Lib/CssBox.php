@@ -23,9 +23,9 @@ class CssBox {
     }
 
     public function build($selectors) {
-        $b = $this->_properties(false)->build($selectors);
+        $b = $this->_defaultProperties()->build($selectors);
         if ($this->autoBuildHover) {
-            $b .= $this->_properties(true)->build($selectors, 'hover');
+            $b .= $this->_hoverProperties()->build($selectors, 'hover');
         }
         return $b;
     }
@@ -35,7 +35,33 @@ class CssBox {
      * @param boolean $invertBackgroundColorStartEnd
      * @return CssProperties
      */
-    private function _properties($invertBackgroundColorStartEnd) {
+    private function _defaultProperties() {
+        $props = new CssProperties(array(
+            '-webkit-border-radius' => $this->borderRadius,
+            '-moz-border-radius' => $this->borderRadius,
+            'border-radius' => $this->borderRadius,
+            'border-width' => $this->borderWidth,
+            'border-style' => $this->borderStyle,
+            'border-color' => $this->borderColor,            
+            'padding' => $this->padding,
+            'text-decoration' => 'none',
+            'display' => 'inline-block',            
+            'filter' => "progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr={$this->backgroundColorStart}, endColorstr={$this->backgroundColorEnd})",
+        ));
+        return $props->add($this->_gradientProperties(false));
+    }
+    
+    /**
+     * @return CssProperties
+     */
+    private function _hoverProperties() {
+        return $this->_gradientProperties(true);
+    }
+    
+    /**
+     * @return CssProperties
+     */
+    private function _gradientProperties($invertBackgroundColorStartEnd) {
         if ($invertBackgroundColorStartEnd) {
             $backgroundColorEnd = $this->backgroundColorStart;
             $backgroundColorStart = $this->backgroundColorEnd;
@@ -45,16 +71,7 @@ class CssBox {
         }
 
         return new CssProperties(array(
-            '-webkit-border-radius' => $this->borderRadius,
-            '-moz-border-radius' => $this->borderRadius,
-            'border-radius' => $this->borderRadius,
-            'border-width' => $this->borderWidth,
-            'border-style' => $this->borderStyle,
-            'border-color' => $this->borderColor,
             'background-color' => $backgroundColorStart,
-            'padding' => $this->padding,
-            'text-decoration' => 'none',
-            'display' => 'inline-block',
             'background-image' => array(
                 "-webkit-gradient(linear, left top, left bottom, from({$backgroundColorStart}), to({$backgroundColorEnd}))",
                 "-webkit-linear-gradient(top, {$backgroundColorStart}, {$backgroundColorEnd})",
