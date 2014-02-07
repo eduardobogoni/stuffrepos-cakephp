@@ -41,7 +41,7 @@ class ExtendedFormHelper extends FormHelper {
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.ExtendedFormHelper/InputSearchable.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.ExtendedFormHelper/ListFieldSet.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.ExtendedFormHelper/DateTimeInput.js');
-        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery-1.6.2.min.js');
+        $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery-1.8.3.min.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery-ui-1.8.17.custom.min.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery.textchange.min.js');
         $this->ScaffoldUtil->addJavascriptLink('ExtendedScaffold.jquery.inputmask/jquery.inputmask.js');
