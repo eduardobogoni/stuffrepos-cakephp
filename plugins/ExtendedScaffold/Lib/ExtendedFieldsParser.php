@@ -16,7 +16,7 @@ class ExtendedFieldsParser {
         return isset($fields[self::EXTENDED_KEY]);
     }
 
-    public function extractExtendedFields($fields) {
+    public static function extractExtendedFields($fields) {
         $_this = & self::getInstance();
         if ($_this->isExtendedFieldsDefinition($fields)) {
             return $fields[self::EXTENDED_KEY];
