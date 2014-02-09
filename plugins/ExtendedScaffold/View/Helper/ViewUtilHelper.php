@@ -269,7 +269,7 @@ class ViewUtilHelper extends AppHelper {
         } else if (($formated = $this->_isDate($value)) !== false) {
             return $formated;
         } else {
-            return $value;
+            return $this->string($value);
         }
     }
 
@@ -307,6 +307,10 @@ class ViewUtilHelper extends AppHelper {
         }
 
         return $b;
+    }
+    
+    public function string($value) {
+        return nl2br(strip_tags($value));
     }
 
 }
