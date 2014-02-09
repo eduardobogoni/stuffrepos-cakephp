@@ -30,7 +30,7 @@ class ExtendedFieldSet {
         if (empty($this->fieldsetData['legend'])) {
             return '';
         } else {
-            return $this->tag('legend', $this->fieldsetData['legend']);
+            return $this->parent->Html->tag('legend', $this->fieldsetData['legend']);
         }
     }
 
