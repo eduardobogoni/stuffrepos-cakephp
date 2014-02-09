@@ -219,7 +219,7 @@ class ViewUtilHelper extends AppHelper {
 
     private function _scaffoldExtendedViewFieldListFieldset($fieldset, $scaffoldVars) {
         if (empty($fieldset['listAssociation'])) {
-            return $this->ViewUtilExtendedFieldset->fieldSet($this, $fieldset, $scaffoldVars);
+            return $this->ViewUtilExtendedFieldset->fieldSet($fieldset, $scaffoldVars);
         } else {
             $f = new ViewUtilListFieldset($this, $fieldset, $scaffoldVars, $this->settings['listSettings']);
         }
