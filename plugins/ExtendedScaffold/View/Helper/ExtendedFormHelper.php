@@ -19,6 +19,7 @@ class ExtendedFormHelper extends FormHelper {
     public $helpers = array(
         'AccessControl.AccessControl',
         'Html',
+        'ExtendedScaffold.FieldSetLayout',
         'ExtendedScaffold.Lists',
         'Base.CakeLayers',
         'ExtendedScaffold.ScaffoldUtil',

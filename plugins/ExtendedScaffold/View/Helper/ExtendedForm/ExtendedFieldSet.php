@@ -19,46 +19,70 @@ class ExtendedFieldSet {
     }
 
     public function output() {
-        $linesOut = '';
-        foreach ($this->fieldsetData['lines'] as $line) {
-            $linesOut .= $this->_extendedInputsLine($line);
-        }
+        return $this->parent->Html->tag(
+                        'fieldSet',
+                        $this->_legend() .
+                        $this->_inputs()
+        );
+    }
 
-        if (empty($linesOut)) {
+    private function _legend() {
+        if (empty($this->fieldsetData['legend'])) {
             return '';
         } else {
-            $b = '<fieldset>';
-
-            if (!empty($this->fieldsetData['legend'])) {
-                $b .= "<legend>{$this->fieldsetData['legend']}</legend>";
-            }
-
-            $b .= $linesOut;
-
-            $b .= '</fieldset>';
-
-            return $b;
+            return $this->tag('legend', $this->fieldsetData['legend']);
         }
     }
 
-    private function _extendedInputsLine($line) {
-        $fieldsOut = '';
-        foreach ($line as $fieldData) {
-            if ($this->_hasAccess($fieldData)) {
-                if (!in_array($fieldData['name'], $this->blacklist)) {
-                    if (($width = $this->_extendedInputWidth($fieldData['name']))) {
+    private function _inputs() {
+        return $this->parent->FieldSetLayout->fieldSet(
+                        $this->_lines()
+        );
+    }
 
-                        $fieldData['options']['style'] = "width: $width";
-                    }
-                    $fieldsOut .= "\t" . $this->parent->input($fieldData['name'], $fieldData['options']) . "\n";
-                }
+    private function _lines() {
+        $lines = array();
+        foreach ($this->fieldsetData['lines'] as $line) {
+            $line = $this->_line($line);
+            if (!empty($line)) {
+                $lines[] = $line;
             }
         }
-        if (!empty($fieldsOut)) {
-            return "<div class='line'>$fieldsOut</div>";
-        } else {
-            return '';
+        return $lines;
+    }
+
+    private function _line($line) {
+        $columns = array();
+        foreach ($line as $field) {
+            $column = $this->_column($field);
+            if (!empty($column)) {
+                list($label, $content) = $column;
+                $columns[$label] = $content;
+            }
         }
+        return $columns;
+    }
+
+    private function _column($field) {
+        if ($this->_hasAccess($field)) {
+            return array(
+                $this->_fieldLabel($field),
+                $this->_fieldInput($field)
+            );
+        } else {
+            return false;
+        }
+    }
+
+    private function _fieldLabel($field) {
+        return __(Inflector::humanize($field['name']));
+    }
+
+    private function _fieldInput($field) {
+        $options = $field['options'];
+        $options['div'] = false;
+        $options['label'] = false;
+        return $this->parent->input($field['name'], $options);
     }
 
     private function _hasAccess($fieldData) {        
@@ -72,42 +96,4 @@ class ExtendedFieldSet {
         return true;
     }
 
-    private function _extendedInputWidth($field) {
-        if ($this->parent->isListable($field)) {
-            return 'auto';
-        }
-
-        if ($this->parent->isVirtualField($field)) {
-            $value = $this->value();
-            return strlen($value['value']) . 'em';
-        }
-
-        $fieldInfo = $this->parent->getFieldInfo($field);
-
-        switch ($fieldInfo['type']) {
-            case 'string':
-                if (empty($fieldInfo['length'])) {
-                    return 'auto';
-                } elseif ($fieldInfo['length'] <= 16) {
-                    return $fieldInfo['length'] . 'em';
-                } elseif ($fieldInfo['length'] <= 32) {
-                    return '16em';
-                } else if ($fieldInfo['length'] <= 64) {
-                    return '32em';
-                } else if ($fieldInfo['length'] <= 128) {
-                    return '48em';
-                } else {
-                    return '64em';
-                }
-
-            case 'date':
-                return '8em';
-
-            default:
-                return 'auto';
-        }
-    }
-
 }
-
-?>

@@ -16,11 +16,8 @@ class FieldSetLayoutHelper extends AppHelper {
      */
     public function fieldSet($lines, $options = array()) {
         return $this->Html->tag(
-                        'table',
-                        $this->_rows(
-                                $lines
-                                , $this->Html->addClass($options, __CLASS__)
-                        ), $options
+                        'table', $this->_rows($lines),
+                        $this->Html->addClass($options, __CLASS__)
         );
     }
 
@@ -30,16 +27,15 @@ class FieldSetLayoutHelper extends AppHelper {
      * @param array $options
      * @return string
      */
-    private function _rows($lines, $options) {
+    private function _rows($lines) {
         $b = '';
         $lineIndex = 0;
         $lineCount = count($lines);
         $maxColumnCount = $this->_maxColumnCount($lines);
         foreach ($lines as $line) {
-            $b .= $this->_row($line,
-                    array_merge(compact(
-                                    'lineIndex', 'lineCount', 'maxColumnCount'
-                            ), $options));
+            $b .= $this->_row(
+                    $line, compact('lineIndex', 'lineCount', 'maxColumnCount')
+            );
             $lineIndex++;
         }
         return $b;
@@ -103,7 +99,7 @@ class FieldSetLayoutHelper extends AppHelper {
      * @return int
      */
     private function _maxColumnCount($lines) {
-        return max(array_map('count', $lines));
+        return count($lines) > 0 ? max(array_map('count', $lines)) : 0;
     }
 
     /**
