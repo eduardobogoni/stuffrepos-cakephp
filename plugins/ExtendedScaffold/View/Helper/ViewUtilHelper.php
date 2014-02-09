@@ -12,7 +12,14 @@ class ViewUtilHelper extends AppHelper {
     const VALUE_TYPE_UNKNOWN = 'unknown';
     const VALUE_TYPE_BOOLEAN = 'boolean';
 
-    public $helpers = array('Html', 'AccessControl.AccessControl', 'Base.CakeLayers', 'ExtendedScaffold.Lists');
+    public $helpers = array(
+        'Html',
+        'AccessControl.AccessControl',
+        'Base.CakeLayers',
+        'ExtendedScaffold.FieldSetLayout',
+        'ExtendedScaffold.Lists',
+        'ExtendedScaffold.ViewUtilExtendedFieldset',
+    );
     /**
      * @var AppControler
      */
@@ -212,7 +219,7 @@ class ViewUtilHelper extends AppHelper {
 
     private function _scaffoldExtendedViewFieldListFieldset($fieldset, $scaffoldVars) {
         if (empty($fieldset['listAssociation'])) {
-            $f = new ViewUtilExtendedFieldset($this, $fieldset, $scaffoldVars);
+            return $this->ViewUtilExtendedFieldset->fieldSet($this, $fieldset, $scaffoldVars);
         } else {
             $f = new ViewUtilListFieldset($this, $fieldset, $scaffoldVars, $this->settings['listSettings']);
         }

@@ -12,7 +12,7 @@ class ExtendedLine {
      */
     private $parent;
 
-    public function __construct(ViewUtilExtendedFieldset $parent, $data) {
+    public function __construct(ViewUtilExtendedFieldsetHelper $parent, $data) {
         $this->parent = $parent;
         foreach ($data as $fieldData) {
             $this->fields[] = new ExtendedField($this, $fieldData);

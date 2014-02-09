@@ -2,21 +2,12 @@
 
 App::uses('ViewUtilHelper', 'ExtendedScaffold.View/Helper');
 
-class ViewUtilExtendedFieldset {
+class ViewUtilExtendedFieldsetHelper extends AppHelper {
 
     private $legend;
-    private $lines = array();
+    private $lines  = array();
     private $scaffoldVars;
     private $parent;
-
-    public function __construct(ViewUtilHelper $parent, $data, &$scaffoldVars) {
-        $this->parent = $parent;
-        $this->legend = empty($data['legend']) ? null : $data['legend'];
-        foreach ($data['lines'] as $lineData) {
-            $this->lines[] = new ExtendedLine($this, $lineData);
-        }
-        $this->scaffoldVars = &$scaffoldVars;
-    }
 
     public function getParent() {
         return $this->parent;
@@ -42,8 +33,14 @@ class ViewUtilExtendedFieldset {
         return $lcd;
     }
 
-    public function output() {
-        $b = '';
+    public function fieldSet(ViewUtilHelper $parent, $data, &$scaffoldVars) {
+        $this->parent = $parent;
+        $this->legend = empty($data['legend']) ? null : $data['legend'];
+        foreach ($data['lines'] as $lineData) {
+            $this->lines[] = new ExtendedLine($this, $lineData);
+        }
+        $this->scaffoldVars = &$scaffoldVars;
+        $b                  = '';
         if (!empty($this->legend)) {
             $b .= "<h3>{$this->legend}</h3>";
         }
