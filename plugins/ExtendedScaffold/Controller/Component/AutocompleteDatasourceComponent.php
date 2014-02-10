@@ -11,7 +11,10 @@ class AutocompleteDatasourceComponent extends Component {
             $id = empty($controller->params['url']['id']) ? '' : $controller->params['url']['id'];
             $queryField = empty($controller->params['url']['queryField']) ? $Model->displayField : $controller->params['url']['queryField'];
             $displayField = empty($controller->params['url']['displayField']) ? $queryField : $controller->params['url']['displayField'];
-            $termInAnyPlace = empty($controller->params['url']['termInAnyPlace']) ? false : $controller->params['url']['termInAnyPlace'];
+            $termInAnyPlace = empty($controller->params['url']['termInAnyPlace']) ||
+                    strtolower(trim($controller->params['url']['termInAnyPlace'])) == 'false' ?
+                    false :
+                    $controller->params['url']['termInAnyPlace'];
 
             $options = compact(
                     'term', 'queryField', 'displayField', 'termInAnyPlace', 'id'
@@ -32,6 +35,7 @@ class AutocompleteDatasourceComponent extends Component {
         $rows = $Model->find(
                 'all', array(
             'conditions' => $this->_queryConditions($Model, $options),
+            'order' => $this->_queryOrder($Model, $options),
             'limit' => 50,
                 )
         );
@@ -63,6 +67,10 @@ class AutocompleteDatasourceComponent extends Component {
         }
 
         return $conditions;
+    }
+
+    private function _queryOrder($Model, $options) {
+        return "{$Model->alias}.{$options['displayField']}";
     }
 
     private function _queryById($Model, $options) {
