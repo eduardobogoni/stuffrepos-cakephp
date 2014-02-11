@@ -2,6 +2,7 @@
 
 App::uses('Shell', 'Console');
 App::uses('ConnectionManager', 'Model');
+App::uses('DatasourceDumperManager', 'Datasources.Lib');
 
 /**
  * Provides a CakePHP wrapper around PHPUnit.
@@ -166,16 +167,6 @@ class DumperShell extends Shell {
         $this->out('Clear: ' . ($this->clear ? 'yes' : 'no'));
     }
 
-    private function _findDump() {
-        foreach ($this->_listDumps() as $dump) {
-            if ($dump['name'] == $this->dumpName) {
-                return $dump;
-            }
-        }
-
-        return false;
-    }
-
     private function _newDumpPath() {
         $ds = ConnectionManager::getDataSource($this->connection);
         return $this->_getDumpsDirectory() . DS . $this->connection .
@@ -203,35 +194,6 @@ class DumperShell extends Shell {
         $this->clear = $this->params['clear'];
     }
 
-    /**
-     * 
-     * @param Datasource $ds
-     * @return DatasourceDumper
-     */
-    private function _getDumper($connection) {
-        $ds = ConnectionManager::getDataSource($connection);
-        $path = explode('/', $ds->config['datasource']);
-        $className = end($path) . 'Dumper';
-        array_pop($path);
-        $path = array_merge(array('Lib', 'DatasourceDumper'), $path);
-        $location = implode('/', $path);
-
-        $plugins = array_merge(
-            array(false)
-            , CakePlugin::loaded()
-        );
-
-        foreach ($plugins as $plugin) {
-            App::uses($className, $plugin ? "$plugin.$location" : $location);
-
-            if (class_exists($className)) {
-                return new $className;
-            }
-        }
-
-        throw new Exception("Class \"$className\" not found");
-    }
-
     public function show() {
         $this->out("Dumps directory: \"{$this->_getDumpsDirectory()}\"");
         $this->hr();
@@ -245,38 +207,9 @@ class DumperShell extends Shell {
         $this->hr();
         $this->out("Total: $total");
     }
-
-    private function _listDumps() {
-        $dir = new DirectoryIterator($this->_getDumpsDirectory());
-
-        $dumps = array();
-        while ($dir->valid()) {
-            if ($dir->isFile()) {
-                $dumps[] = $this->_parseDumpFile($dir->getPathname());
-            }
-            $dir->next();
-        }
-        return $dumps;
-    }
-
-    private function _parseDumpFile($filepath) {
-        $connection = '[_a-zA-Z][_a-zA-Z0-9]*';
-        $date = '\d{4}\-\d{2}\-\d{2}_\d{2}\-\d{2}\-\d{2}';
-        $datasource = '([_a-zA-Z][_a-zA-Z0-9]*)(\-[_a-zA-Z][_a-zA-Z0-9]*)*';
-
-        $pattern = "/($connection)_($date)_($datasource)/";
-
-        if (preg_match($pattern, basename($filepath), $matches)) {
-            return array(
-                'name' => basename($filepath),
-                'path' => $filepath,
-                'connection' => $matches[1],
-                'date' => str_replace('_', ' ', $matches[2]),
-                'datasource' => str_replace('-', '/', $matches[3])
-            );
-        } else {
-            throw new Exception("File \"$filepath\" has no dump format");
-        }
+    
+    private function _getDumper($connection) {
+        return DatasourceDumperManager::getDumper(ConnectionManager::getDataSource($connection));
     }
 
     private function _getDumpsDirectory() {
