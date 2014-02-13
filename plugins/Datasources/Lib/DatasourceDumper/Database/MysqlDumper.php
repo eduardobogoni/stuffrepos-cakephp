@@ -74,8 +74,8 @@ class MysqlDumper implements DatasourceDumper {
     }
 
     private function _commandExists($command) {
-        $returnVal = shell_exec("which '$command'");
-        return (empty($returnVal) ? false : true);
+        exec(escapeshellarg($command) . ' --version', $output, $returnVar);
+        return $returnVar === 0;
     }
 
     public function clear(Datasource $ds) {
