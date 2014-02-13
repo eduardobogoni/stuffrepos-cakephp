@@ -11,61 +11,41 @@ class MysqlDumper implements DatasourceDumper {
         if (!$this->_commandExists($this->dumpCommand)) {
             throw new Exception("Command \"{$this->dumpCommand}\" no exists");
         }
-
-        $command = "'$this->dumpCommand' --lock-tables=false";
-
-
-        if ($ds->config['host']) {
-            $command .= " -h '{$ds->config['host']}'";
-        }
-
-        if ($ds->config['port']) {
-            $command .= " -P '{$ds->config['port']}'";
-        }
-
-        if ($ds->config['password']) {
-            $command .= " '-p{$ds->config['password']}'";
-        }
-
-        if ($ds->config['login']) {
-            $command .= " -u '{$ds->config['login']}'";
-        }
-
-        $command .= " '{$ds->config['database']}' > '$filepath'";
-
-        exec($command, $output, $return);
-
-        if ($return != 0) {
-            throw new Exception("Command \"$command\" returned $return. Output: " . implode("\n", $output));
-        }
+        $this->_executeMysqlCommand(
+                $ds,
+                escapeshellarg($this->dumpCommand) .
+                ' ' . escapeshellarg('--lock-tables=false'),
+                ' > ' . escapeshellarg($filepath));
     }
 
     public function load(\Datasource $ds, $filepath) {
         if (!$this->_commandExists($this->loadCommand)) {
             throw new Exception("Command \"{$this->loadCommand}\" no exists");
         }
+        $this->_executeMysqlCommand(
+                $ds, escapeshellarg($this->loadCommand),
+                ' < ' . escapeshellarg($filepath));
+    }
 
-        $command = "'$this->loadCommand'";
-
-
+    private function _executeMysqlCommand(\Datasource $ds, $command, $append) {
         if ($ds->config['host']) {
-            $command .= " -h '{$ds->config['host']}'";
+            $command .= ' -h ' . escapeshellarg($ds->config['host']);
         }
 
         if ($ds->config['port']) {
-            $command .= " -P '{$ds->config['port']}'";
+            $command .= ' -P ' . escapeshellarg($ds->config['port']);
         }
 
         if ($ds->config['password']) {
-            $command .= " '-p{$ds->config['password']}'";
+            $command .= ' ' . escapeshellarg('-p' . $ds->config['password']);
         }
 
         if ($ds->config['login']) {
-            $command .= " -u '{$ds->config['login']}'";
+            $command .= ' -u ' . escapeshellarg($ds->config['login']);
         }
 
-        $command .= " '{$ds->config['database']}' < '$filepath'";
-
+        $command .= ' ' . escapeshellarg($ds->config['database']);
+        $command .= ' ' . $append;
         exec($command, $output, $return);
 
         if ($return != 0) {
