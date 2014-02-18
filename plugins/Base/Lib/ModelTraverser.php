@@ -18,7 +18,8 @@ class ModelTraverser {
                 } else {
                     throw new Exception("Path continues, but reached a field.");
                 }
-            } else if (self::isBelongsToAssociation($model, $path[0])) {
+            } else if (self::isBelongsToAssociation($model, $path[0]) ||
+                    self::isHasOneAssociation($model, $path[0])) {
                 return self::schema($model->{$path[0]}, self::pathPopFirst($path));
             } else {
                 throw new Exception("Term is not a field or association.");
@@ -122,9 +123,16 @@ class ModelTraverser {
                 } else if ($model) {
                     throw new Exception("Path continues, but next model is null. Path: " . print_r($path, true));
                 }
-            } else if (self::isBelongsToAssociation($model, $path[0])) {
-                if (!isset($row[self::CACHE_KEY][$path[0]])) {                    
-                    $row[self::CACHE_KEY][$path[0]] = self::findBelongsToInstance($model, $path[0], $row);
+            } else if (self::isBelongsToAssociation($model, $path[0]) ||
+                    self::isHasOneAssociation($model, $path[0])) {
+                if (!isset($row[self::CACHE_KEY][$path[0]])) {
+                    if (self::isBelongsToAssociation($model, $path[0])) {
+                        $row[self::CACHE_KEY][$path[0]] = self::findBelongsToInstance($model, $path[0], $row);
+                    }
+                    //self::isHasOneAssociation($model, $path[0])
+                    else {
+                        $row[self::CACHE_KEY][$path[0]] = self::findHasOneInstance($model, $path[0], $row);
+                    }
                 }
 
                 if (count($path) == 1) {
@@ -189,12 +197,40 @@ class ModelTraverser {
     private static function isBelongsToAssociation(Model $model, $alias) {
         return in_array($alias, $model->getAssociated('belongsTo'));
     }
+    
+    /**
+     * Verifica se $alias é uma associação "hasOne" de $model.
+     * @param Model $model
+     * @param string $alias
+     * @return boolean
+     */
+    private static function isHasOneAssociation(Model $model, $alias) {
+        return in_array($alias, $model->getAssociated('hasOne'));
+    }
 
     private static function findBelongsToInstance(Model $model, $alias, $row) {
         return $model->{$alias}->find(
                         'first', array(
                     'conditions' => array(
                         "{$alias}.{$model->{$alias}->primaryKey}" => $row[$model->alias][$model->belongsTo[$alias]['foreignKey']]
+                    ), 'recursive' => -1
+                        )
+        );
+    }
+
+    /**
+     * Recupera a instância da associação "hasOne" de $model com alias $alias
+     * associada com $row.
+     * @param Model $model
+     * @param string $alias
+     * @param array $row
+     * @return array
+     */
+    private static function findHasOneInstance(Model $model, $alias, $row) {
+        return $model->{$alias}->find(
+                        'first', array(
+                    'conditions' => array(
+                        "{$alias}.{$model->hasOne[$alias]['foreignKey']}" => $row[$model->alias][$model->primaryKey]
                     ), 'recursive' => -1
                         )
         );
