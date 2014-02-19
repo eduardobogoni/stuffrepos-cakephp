@@ -53,21 +53,14 @@ class ContextComponent extends Component {
                 'contextCurrentId'
                 , $this->getCurrentId()
         );
+        $controller->set(
+                'contextId'
+                , $this->settings['id']
+        );
     }
 
     public function getCurrentId() {
         return $this->currentId;
-    }
-
-    private function _getContextIdByUrl($url) {
-        if (is_string($url)) {
-            $url = Router::parse($url);
-        }
-        return call_user_func($this->settings['contextIdByUrlFunction'], $url);
-    }
-
-    private function _defaultContextIdByUrlFunction($url) {
-        return $url['pass'][0];
     }
 
 }

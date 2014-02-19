@@ -1,16 +1,26 @@
 <?php
 
+App::uses('Basics', 'Base.Lib');
+
 class Context {
 
     public function getInstanceIdByUrl($url) {
-        if (!is_array($url)) {
-            $url = Router::parse($url);
-        }
-        return $this->_internalGetInstanceIdByUrl($url);
+        return $this->_internalGetInstanceIdByUrl(
+                        Basics::parseUrl($url));
     }
 
     protected function _internalGetInstanceIdByUrl($url) {
-        return $url['pass'][0];
+        return $url[0];
+    }
+
+    public function buildUrl($url, $contextInstanceId) {
+        return $this->_internalBuildUrl(
+                        Basics::parseUrl($url), $contextInstanceId);
+    }
+
+    protected function _internalBuildUrl($url, $contextInstanceId) {
+        $url[0] = $contextInstanceId;
+        return $url;
     }
 
 }

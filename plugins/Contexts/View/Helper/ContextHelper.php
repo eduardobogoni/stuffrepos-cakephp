@@ -94,7 +94,16 @@ EOT;
             throw new Exception('Variável $contextCurrentId não foi setada');
         }
         $url = empty($actionData['url']) ? "/{$controller}/index" : $actionData['url'];
-        return $url . '/' . $this->_View->viewVars['contextCurrentId'];
+        return $this->_getContext()->buildUrl(
+                        $url, $this->_View->viewVars['contextCurrentId']);
+    }
+
+    /**
+     * 
+     * @return Context
+     */
+    private function _getContext() {
+        return Contexts::getContext($this->_View->viewVars['contextId']);
     }
 
     private function _moduleActionCaption($actionData) {
