@@ -5,6 +5,27 @@ App::import('Lib', 'Base.ArrayUtil');
 class Basics {
 
     /**
+     * Converte uma URL para o formato do parâmetro $url
+     * em Router::url().
+     * @param string|array $url
+     * @return array
+     */
+    public function parseUrl($url) {
+        if (!is_array($url)) {
+            $url = Router::parse($url);
+        }
+        foreach (array('named', 'pass') as $urlKey) {
+            if (!empty($url[$urlKey])) {
+                foreach ($url[$urlKey] as $key => $value) {
+                    $url[$key] = $value;
+                }
+            }
+            unset($url[$urlKey]);
+        }
+        return $url;
+    }
+
+    /**
      *
      * @param array $data
      * @param string $field
