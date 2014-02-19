@@ -90,6 +90,9 @@ EOT;
     }
 
     private function _moduleActionUrl($controller, $actionData) {
+        if (empty($this->_View->viewVars['contextCurrentId'])) {
+            throw new Exception('Variável $contextCurrentId não foi setada');
+        }
         $url = empty($actionData['url']) ? "/{$controller}/index" : $actionData['url'];
         return $url . '/' . $this->_View->viewVars['contextCurrentId'];
     }

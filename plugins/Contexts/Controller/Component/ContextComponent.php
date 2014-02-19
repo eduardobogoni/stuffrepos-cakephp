@@ -1,19 +1,28 @@
 <?php
 
 App::uses('Component', 'Controller');
+App::uses('Contexts', 'Contexts.Lib');
 
 class ContextComponent extends Component {
 
     private $currentId;
 
     public function __construct(\ComponentCollection $collection, $settings = array()) {
-        parent::__construct($collection, $settings);
+        parent::__construct($collection,
+                Hash::merge(array(
+                    'id' => false,
+                        ), $settings));
+        if (!$this->settings['id']) {
+            throw new Exception("ID de contexto não informado");
+        }
     }
 
     public function initialize(\Controller $controller) {
         parent::initialize($controller);
 
-        $this->currentId = $controller->request->params['pass'][0];
+        $this->currentId = Contexts::getContext($this->settings['id'])->getInstanceIdByUrl(
+                $controller->request->params
+        );
         $this->_checkChangeContext($controller);
     }
     
@@ -48,6 +57,17 @@ class ContextComponent extends Component {
 
     public function getCurrentId() {
         return $this->currentId;
+    }
+
+    private function _getContextIdByUrl($url) {
+        if (is_string($url)) {
+            $url = Router::parse($url);
+        }
+        return call_user_func($this->settings['contextIdByUrlFunction'], $url);
+    }
+
+    private function _defaultContextIdByUrlFunction($url) {
+        return $url['pass'][0];
     }
 
 }
