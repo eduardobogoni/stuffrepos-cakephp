@@ -6,7 +6,7 @@ class ContextHelper extends AppHelper {
 
     public $helpers = array(
         'ExtendedScaffold.ExtendedForm',
-        'MyActionList' => array(
+        'Widgets.ActionList' => array(
             'beforeAll' => '<div class="ContextMenu"><ul>',
             'afterAll' => '</ul></div>',
             'beforeEach' => '<li>',
@@ -16,7 +16,7 @@ class ContextHelper extends AppHelper {
 
     public function menu($modules) {
         if (array_key_exists($this->params['controller'], $modules)) {
-            return $this->MyActionList->actionList($this->_actions($modules));
+            return $this->ActionList->actionList($this->_actions($modules));
         } else {
             return '';
         }
