@@ -336,7 +336,10 @@ class ControllerMenuHelper extends AppHelper {
                 $url .= "/{$actionUrl['id']}";
             }
         }
-
+        $current = Router::parse($this->request->url);
+        foreach($current['named'] as $key => $value) {
+            $url .= "/$key:$value";
+        }
         return $url;
     }
 
