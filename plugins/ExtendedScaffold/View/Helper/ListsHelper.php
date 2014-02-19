@@ -6,7 +6,7 @@ App::uses('ViewUtilHelper', 'ExtendedScaffold.View/Helper');
 class ListsHelper extends AppHelper {
 
     public $helpers = array(
-        'Widgets.ActionList',
+        'Widgets.ControllerMenu',
         'Paginator',
         'Base.PaginatorUtil',
         'AccessControl.AccessControl',
@@ -292,7 +292,7 @@ class ListsHelper extends AppHelper {
                 'attributes' => array(
                     'class' => array('actions')
                 ),
-                'content' => $this->ActionList->outputObjectMenu($row, $this->controller->name, $this->options['rowActionListOptions'])
+                'content' => $this->ControllerMenu->outputObjectMenu($row, $this->controller->name, $this->options['rowActionListOptions'])
             );
         }
 

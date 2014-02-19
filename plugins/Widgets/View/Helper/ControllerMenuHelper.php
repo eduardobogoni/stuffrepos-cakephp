@@ -8,7 +8,7 @@ App::uses('ControllerInspector', 'Base.Lib');
  * Monta menus automaticamente baseados em convenções ou configurações
  * por controller;
  */
-class ActionListHelper extends AppHelper {
+class ControllerMenuHelper extends AppHelper {
 
     const LAYOUT_LIST = 'line';
     const LAYOUT_TABLE = 'table';
