@@ -285,7 +285,7 @@ class PaginatorUtilComponentFilter {
     public function buildField() {
         $field = array(
             'value' => $this->getValue(),
-            'type' => 'text'
+            'type' => empty($this->options['type']) ? 'text' : $this->options['type']
         );
 
         if ($this->isInputSelectType()) {
@@ -300,7 +300,7 @@ class PaginatorUtilComponentFilter {
             $field = $this->getConfig('fieldOptions') + $field;
         }
         
-        if ($field['type'] == 'date') {
+        if (in_array($field['type'], array('date', 'time', 'datetime'))) {
             $field['selected'] = $field['value'];
         }
 
