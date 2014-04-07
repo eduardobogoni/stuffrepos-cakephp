@@ -238,7 +238,9 @@ class ExtendedFormHelper extends FormHelper {
     }
 
     public function create($model = null, $options = array()) {
-        $this->formId = $this->createNewDomId();
+        $this->formId = empty($options['id']) ? 
+                $this->createNewDomId() :
+                $options['id'];
         $options['id'] = $this->formId;
         $options['onsubmit'] = 'return ExtendedFormHelper.onSubmit(this)';
         $buffer = parent::create($model, $options);
