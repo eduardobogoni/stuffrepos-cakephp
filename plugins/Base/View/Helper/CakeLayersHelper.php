@@ -59,7 +59,7 @@ class CakeLayersHelper extends Helper {
             $modelName = $model;
             $model = ClassRegistry::getObject($modelName);
             if (!$model) {
-                $model = & ClassRegistry::init($modelName);
+                $model = ClassRegistry::init($modelName);
             }
         } else {
             $modelName = $model . ' [' . gettype($model) . ']';
