@@ -16,3 +16,4 @@ if (!defined('CORE_PATH')) {
 require_once(dirname(__FILE__) . DS . 'TempDirectory.php');
 define('TMP', TempDirectory::currentDirectory());
 TempDirectory::checkCurrentDirectory();
+date_default_timezone_set('America/Sao_Paulo');
