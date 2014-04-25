@@ -52,6 +52,13 @@ class CakeLayersHelper extends Helper {
         return $this->getModel($this->getControllerDefaultModelClass($controllerName));
     }
 
+    /**
+     * 
+     * @param Model|string $model
+     * @param boolean $required
+     * @return \Model
+     * @throws Exception
+     */
     public function getModel($model, $required = false) {
         if ($model instanceof Model) {
             return $model;
@@ -356,8 +363,8 @@ class CakeLayersHelper extends Helper {
     private function belongsToAssociationInstance(Model $model, $association, $instance) {
         if (!isset($this->dataCache['belongsToAssociationInstance'][$model->name][$association['alias']][$instance[$association['foreignKey']]])) {
 
-            $associationModel = $this->getModel($association['className']);
             $model = $this->getModel($model, true);
+            $associationModel = $model->{$association['alias']};
 
             if ($associationModel == null) {
                 throw new Exception("Association Model is null");
@@ -385,8 +392,8 @@ class CakeLayersHelper extends Helper {
 
         //debug(compact('modelName', 'association', 'instance'));
         if (!isset($this->dataCache[__METHOD__][$model->name][$association['alias']][$instance[$model->primaryKey]])) {
-            $associationModel = $this->getModel($association['className'], true);
             $model = $this->getModel($model, true);
+            $associationModel = $model->{$association['alias']};
 
             $this->dataCache[__METHOD__][$model->name][$association['alias']][$instance[$model->primaryKey]] = $associationModel->find(
                     'first'
