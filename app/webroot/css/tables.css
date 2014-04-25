@@ -1,0 +1,112 @@
+@charset "utf-8";
+
+/** Tables **/
+table {
+    border-right:0;
+    clear: both;
+    
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+table, table a {
+    color: black;
+}
+
+th {
+    border:0;
+    border-bottom:2px solid #555;
+    text-align: left;
+    padding:4px;
+}
+th a {
+    display: block;
+    padding: 2px 4px;
+    text-decoration: none;
+}
+th a.asc:after {
+    content: ' ⇣';
+}
+th a.desc:after {
+    content: ' ⇡';
+}
+table tr td {
+    padding: 6px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom:1px solid #ddd;
+}
+table tr:nth-child(even) {
+    background: #f9f9f9;
+}
+td.actions {
+    text-align: center;
+    vertical-align: middle;
+    padding: 0;
+    margin: 0;
+    white-space: nowrap;
+}
+
+table.actionListHelperTableLayout td {
+    border: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/** Paging **/
+.paging {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 1em;
+    clear:both;
+    color: #ccc;
+}
+
+.paging a {
+    color: black;
+}
+
+.paging .current,
+.paging .disabled,
+.paging a {
+    text-decoration: none;
+    padding: 2px 4px;
+    display: inline-block
+}
+.paging > span {
+    display: inline-block;
+    
+    
+}
+.paging > span:hover {
+    background: #efefef;
+}
+
+.paging > span.counter:hover {
+    background: inherit;
+}
+
+
+.paging .disabled {
+    color: #ddd;
+}
+.paging .disabled:hover {
+    background: transparent;
+}
+.paging .current {
+    background: #efefef;
+    color: #c73e14;
+}
+
+/* Views */
+table.FieldSetLayoutHelper th {
+    border-bottom-width: thin;
+    border-bottom-color: #DDDDDD;
+    text-align: right;
+}
+
+table.FieldSetLayoutHelper th, table.FieldSetLayoutHelper td {
+    vertical-align: top;
+}
