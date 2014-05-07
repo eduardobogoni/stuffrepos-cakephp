@@ -47,7 +47,7 @@ class ConfigurationKeys {
     public static function getKeyValue($key) {
         self::_throwExceptionIfKeyNotExists($key);
 
-        $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
+        $SettedConfigurationKey = ClassRegistry::init('ConfigurationKeys.SettedConfigurationKey');
         $settedConfigurationKey = $SettedConfigurationKey->findByName($key);
         if ($settedConfigurationKey) {
             return $settedConfigurationKey[$SettedConfigurationKey->alias]['value'];
@@ -63,7 +63,7 @@ class ConfigurationKeys {
     
     public static function getKeyValueSql($key) {
         self::_throwExceptionIfKeyNotExists($key);
-        $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
+        $SettedConfigurationKey = ClassRegistry::init('ConfigurationKeys.SettedConfigurationKey');
         $defaultValue = Sanitize::escape(self::$keys[$key]['defaultValue'], $SettedConfigurationKey->useDbConfig);
         $key = Sanitize::escape($key, $SettedConfigurationKey->useDbConfig);
         return <<<EOT
@@ -81,7 +81,7 @@ EOT;
     public static function setKeyValue($key, $value) {
         self::_throwExceptionIfKeyNotExists($key);
 
-        $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
+        $SettedConfigurationKey = ClassRegistry::init('ConfigurationKeys.SettedConfigurationKey');
         $settedConfigurationKey = $SettedConfigurationKey->findByName($key);
 
         if (empty($settedConfigurationKey)) {
@@ -96,7 +96,7 @@ EOT;
     public static function clearKeyValue($key) {
         self::_throwExceptionIfKeyNotExists($key);
 
-        $SettedConfigurationKey = ClassRegistry::init('SettedConfigurationKey');
+        $SettedConfigurationKey = ClassRegistry::init('ConfigurationKeys.SettedConfigurationKey');
         $settedConfigurationKey = $SettedConfigurationKey->findByName($key);
 
         if (!empty($settedConfigurationKey)) {
