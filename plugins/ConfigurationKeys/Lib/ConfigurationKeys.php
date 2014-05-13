@@ -3,6 +3,8 @@
 App::uses('Sanitize', 'Utility');
 
 class ConfigurationKeys {
+    
+    const LIST_SEPARATOR = '|';
 
     /**
      * @var array(key:string => options:array())
@@ -54,6 +56,12 @@ class ConfigurationKeys {
         } else {
             return self::$keys[$key]['defaultValue'];
         }
+    }
+    
+    public static function getKeyValueAsList($key) {
+        return array_map(function($value) {
+            return trim($value);
+        }, explode(self::LIST_SEPARATOR, self::getKeyValue($key)));
     }
 
     public static function getKeyDefaultValue($key) {
