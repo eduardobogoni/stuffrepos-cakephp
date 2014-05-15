@@ -16,26 +16,6 @@ App::uses('SchedulingTask', 'Scheduling.Lib');
  */
 class Scheduling {
 
-    private static $manager;
-
-    public static function update() {
-        self::_getManager()->update(self::shellCalls());
-    }
-
-    /**
-     * @return \SchedulingManager
-     */
-    private static function _getManager() {
-        if (!self::$manager) {
-            $targetClass = Configure::read('Scheduling.manager_class');
-            if (!$targetClass || trim($targetClass) == '') {
-                throw new Exception("Configuration \"Scheduling.manager_class\" not set.");
-            }
-            self::$manager = ClassSearcher::findInstanceAndInstantiate('Lib' . DS . 'SchedulingManager', $targetClass);
-        }
-        return self::$manager;
-    }
-
     /**
      * 
      * @return array('scheduling' => string, 'shell' => string, args => string[])[]

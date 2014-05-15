@@ -5,17 +5,17 @@ App::uses('SchedulingTask', 'Scheduling.Lib');
 
 class CronSchedulingManager {
 
-    public function update($shellCalls) {
-        $this->_setCrontabUserContents($this->_cronFileContent($shellCalls));
+    public function update() {
+        $this->_setCrontabUserContents($this->_cronFileContent());
     }
 
     private function _getCrontabUserContents() {
-        $command = 'crontab -l';
-        @exec($command, $lines, $result);
-        if ($result !== 0) {
-            throw new Exception("\"$command\" returned \"$result\"");
+        @exec('crontab -l', $lines, $result);
+        if ($result == 0) {
+            return implode("\n", $lines);
+        } else {
+            return '';
         }
-        return implode("\n", $lines);
     }
 
     private function _setCrontabUserContents($contents) {
@@ -32,34 +32,27 @@ class CronSchedulingManager {
      * 
      * @return string
      */
-    private function _cronFileContent($shellCalls) {
-        $content = '';
-        foreach ($shellCalls as $shellCall) {
-            $content .= self::_cronLine($shellCall);
+    private function _cronFileContent() {
+        $lines = array();
+        $appCronLineFound = false;
+        foreach (explode("\n", $this->_getCrontabUserContents()) as $line) {
+            if (trim($line) != '' && !$this->_isAppCronLine($line)) {
+                $lines[] = $line;
+            }
         }
-        return $content;
+        $lines[] = $this->_buildAppCronLine();
+        return implode("\n", $lines);
     }
 
-    /**
-     * 
-     * @param array('scheduling' => string, 'shell' => string, args => string[]) $shellCall
-     * @return string
-     */
-    private function _cronLine($shellCall) {
-        return $shellCall['scheduling']
-                . ' ' . self::_cronLineUser($shellCall)
-                . ' ' . self::_quoteCommand(array_merge(
-                                array(
-                    APP . 'Console' . DS . 'cake',
-                    $shellCall['shell'],
-                                ), $shellCall['args']
-        ));
+    private function _isAppCronLine($line) {
+        return preg_match('/\#\s*APP_ID\:\s*' . preg_quote(APP_ID) . '\s*$/', $line);
     }
 
-    private function _cronLineUser($shellCall) {
-        return empty($shellCall['user']) ?
-                Configure::read('install.apache_user') :
-                $shellCall['user'];
+    private function _buildAppCronLine() {
+        return '*/1 * * * * ' . $this->_quoteCommand(array(
+                    APP . DS . 'Console' . DS . 'cake',
+                    'Scheduling.check_and_run',
+                )) . '# APP_ID: ' . APP_ID . "\n";
     }
 
     /**
@@ -72,7 +65,7 @@ class CronSchedulingManager {
         foreach ($args as $arg) {
             $b .= escapeshellarg($arg) . ' ';
         }
-        return $b . "\n";
+        return $b;
     }
 
 }
