@@ -19,7 +19,7 @@ class Scheduling {
     private static $manager;
 
     public static function update() {
-        self::_getManager()->update(self::_schellCalls());
+        self::_getManager()->update(self::shellCalls());
     }
 
     /**
@@ -40,7 +40,7 @@ class Scheduling {
      * 
      * @return array('scheduling' => string, 'shell' => string, args => string[])[]
      */
-    private static function _schellCalls() {
+    public static function shellCalls() {
         $shellCalls = array();
         foreach (self::_findSchedulingTasksInstances() as $schedulingTask) {
             $shellCalls = array_merge(

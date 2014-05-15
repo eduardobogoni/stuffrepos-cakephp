@@ -7,3 +7,6 @@
 [submodule "plugins/Tools"]
 	path = plugins/Tools
 	url = https://github.com/dereuromark/tools.git
+[submodule "plugins/Scheduling/Vendor/CronExpression"]
+	path = plugins/Scheduling/Vendor/CronExpression
+	url = https://github.com/mtdowling/cron-expression.git
