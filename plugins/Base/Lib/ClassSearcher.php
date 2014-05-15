@@ -16,15 +16,37 @@ class ClassSearcher {
         );
     }
 
-    public static function findInstanceAndInstantiate($path, $className) {
+    public static function findInstances($path) {
+        $instances = array();
+        foreach(self::findClasses($path) as $className => $path) {
+            $instances[] = self::_createInstance($className, $path);
+        }
+        return $instances;
+    }
+    
+    public static function findInstance($path, $className) {
         $classes = self::findClasses($path);
         if (empty($classes[$className])) {
-            throw new Exception("Classe \"$className\" not found");
+            throw new Exception("Class \"$className\" not found");
         } else {
-
-            App::uses($className, $classes[$className]);
-            return new $className();
+            return self::_createInstance($className, $classes[$className]);
         }
+    }
+
+    /**
+     * 
+     * @param type $path
+     * @param type $className
+     * @return type
+     * @deprecated Uses ClassSearcher::findInstance().
+     */
+    public static function findInstanceAndInstantiate($path, $className) {
+        return self::findInstance($path, $className);
+    }
+    
+    private static function _createInstance($className, $path) {
+        App::uses($className, $path);
+        return new $className();
     }
 
     public static function _findClassesOnPlugin($pluginName, $pluginRoot, $path) {

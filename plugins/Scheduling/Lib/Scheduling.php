@@ -1,76 +1,63 @@
 <?php
 
+App::uses('ClassSearcher', 'Base.Lib');
 App::uses('SchedulingTask', 'Scheduling.Lib');
 
+/**
+ * 
+ * interface SchedulingManager {
+ *   public function update($shellCalls);
+ * }
+ * 
+ * interface SchedulingTask {  
+ * @return array('scheduling' => string, 'shell' => string, args => string[])[]
+ *   public function generate();
+ * }
+ */
 class Scheduling {
 
+    private static $manager;
+
     public static function update() {
-        $apache = UbuntuEnv::init(true, Configure::read('install.apache_user'));
-        $root = new UbuntuEnv(true, false, $apache);
-        $root->filePutContents(
-                Configure::read('install.cron_tasks_file')
-                , self::_cronFileContent()
-        );
+        self::_getManager()->update(self::_schellCalls());
     }
 
     /**
-     * 
-     * @return string
+     * @return \SchedulingManager
      */
-    private static function _cronFileContent() {
-        $content = '';
-        foreach (self::_cronShellsCalls() as $shellCall) {
-            $content .= self::_cronLine($shellCall);
+    private static function _getManager() {
+        if (!self::$manager) {
+            $targetClass = Configure::read('Scheduling.manager_class');
+            if (!$targetClass || trim($targetClass) == '') {
+                throw new Exception("Configuration \"Scheduling.manager_class\" not set.");
+            }
+            self::$manager = ClassSearcher::findInstanceAndInstantiate('Lib' . DS . 'SchedulingManager', $targetClass);
         }
-        return $content;
-    }
-
-    /**
-     * 
-     * @param array('scheduling' => string, 'shell' => string, args => string[]) $shellCall
-     * @return string
-     */
-    private static function _cronLine($shellCall) {
-        return $shellCall['scheduling']
-            . ' ' . self::_cronLineUser($shellCall)
-            . ' ' . self::_quoteCommand(array_merge(
-                array(
-                    ROOT . DS . 'cake.sh',
-                    $shellCall['shell'],
-                ), $shellCall['args']
-        ));
-    }
-    
-    private function _cronLineUser($shellCall) {
-        return empty($shellCall['user']) ?
-                Configure::read('install.apache_user') :
-                $shellCall['user'];
-    }
-
-    /**
-     * 
-     * @param array $args
-     * @return string
-     */
-    private static function _quoteCommand($args) {
-        $b = '';
-        foreach ($args as $arg) {
-            $b .= escapeshellarg($arg) . ' ';
-        }
-        return $b . "\n";
+        return self::$manager;
     }
 
     /**
      * 
      * @return array('scheduling' => string, 'shell' => string, args => string[])[]
      */
-    private static function _cronShellsCalls() {
+    private static function _schellCalls() {
         $shellCalls = array();
-        foreach (self::_findCronTasksInstances() as $cronTask) {
+        foreach (self::_findSchedulingTasksInstances() as $schedulingTask) {
             $shellCalls = array_merge(
                     $shellCalls
-                    , $cronTask->generate()
+                    , self::_generateShellCalls($schedulingTask)
             );
+        }
+        return $shellCalls;
+    }
+    
+    private static function _generateShellCalls($schedulingTask) {
+        $shellCalls = array();
+        foreach($schedulingTask->generate() as $shellCall) {
+            if (empty($shellCall['args'])) {
+                $shellCall['args'] = array();
+            }
+            $shellCalls[] = $shellCall;
         }
         return $shellCalls;
     }
@@ -78,29 +65,8 @@ class Scheduling {
     /**
      * @return SchedulingTask[]
      */
-    private static function _findCronTasksInstances() {
-        App::build(array(
-            'SchedulingTask' => array('%s' . self::_cronTasksPath())
-                ), App::REGISTER);
-        $cronTasks = array();
-        foreach (App::objects('SchedulingTask') as $cronTaskName) {
-            App::uses($cronTaskName, self::_cronTasksPath());
-            $cronTask = new $cronTaskName();
-            if ($cronTask instanceof SchedulingTask) {
-                $cronTasks[] = new $cronTaskName();
-            } else {
-                throw new Exception("Classe \"$cronTask\" não implementa \"SchedulingTask\"");
-            }
-        }
-        return $cronTasks;
-    }
-
-    /**
-     * Caminho do diretório de classes CronTask.
-     * @return string
-     */
-    private static function _cronTasksPath() {
-        return 'Lib' . DS . 'SchedulingTasks';
+    private static function _findSchedulingTasksInstances() {
+        return ClassSearcher::findInstances('Lib' . DS . 'SchedulingTask');
     }
 
 }

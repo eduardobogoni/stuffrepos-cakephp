@@ -1,6 +1,10 @@
 <?php
 
 class FileSystem {
+    
+    public static function createTemporaryFile($prefix = '') {
+        return tempnam(sys_get_temp_dir(), $prefix);
+    }
 
     public static function createTemporaryDirectory($prefix = '') {
 
