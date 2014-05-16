@@ -3,9 +3,9 @@
 App::uses('FileSystem', 'Base.Lib');
 App::uses('SchedulingTask', 'Scheduling.Lib');
 
-class CronSchedulingManager {
+class CronSchedulingInstaller {
 
-    public function update() {
+    public function install() {
         $this->_setCrontabUserContents($this->_cronFileContent());
     }
 
