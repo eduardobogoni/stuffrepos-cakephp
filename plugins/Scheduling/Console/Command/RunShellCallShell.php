@@ -17,9 +17,6 @@ class RunShellCallShell extends Shell {
     }
 
     public function main() {
-        App::uses('IncludePath', 'Base.Lib');
-        IncludePath::initAutoload();
-        IncludePath::addPath(CakePlugin::path('Scheduling') . 'Vendor' . DS . 'CronExpression' . DS . 'src');
         $schedulingShellCallLog = $this->SchedulingShellCallLog->findByIdOrThrowException(
                 $this->args[0]
         );

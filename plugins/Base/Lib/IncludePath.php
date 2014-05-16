@@ -25,9 +25,7 @@ class IncludePath {
             $fileName = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
         }
         $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-        if (!@include($fileName)) {
-            throw new Exception("Failed to include '$fileName'");
-        }
+        return @include($fileName);
     }
 
 }
