@@ -13,6 +13,8 @@ if (!defined('CORE_PATH')) {
     define('CORE_PATH', CAKE_CORE_INCLUDE_PATH . DS);
 }
 
+require_once(dirname(__FILE__) . DS . 'AppId.php');
+AppId::fetchAppId();
 require_once(dirname(__FILE__) . DS . 'TempDirectory.php');
 define('TMP', TempDirectory::currentDirectory());
 TempDirectory::checkCurrentDirectory();
