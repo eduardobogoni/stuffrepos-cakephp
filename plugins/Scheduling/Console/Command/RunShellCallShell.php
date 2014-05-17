@@ -21,7 +21,7 @@ class RunShellCallShell extends Shell {
                 $this->args[0]
         );
         $this->_runShellCall($schedulingShellCallLog);
-        $this->_updateLog($schedulingShellCallLog);
+        Scheduling::setNextRun($schedulingShellCallLog['SchedulingShellCallLog']);
     }
 
     private function _runShellCall($schedulingShellCallLog) {
@@ -29,13 +29,6 @@ class RunShellCallShell extends Shell {
                 $schedulingShellCallLog['SchedulingShellCallLog']['shell'] .
                 ' ' . $schedulingShellCallLog['SchedulingShellCallLog']['args']
         );
-    }
-
-    private function _updateLog($schedulingShellCallLog) {
-        $cron = Cron\CronExpression::factory($schedulingShellCallLog['SchedulingShellCallLog']['scheduling']);
-        $schedulingShellCallLog['SchedulingShellCallLog']['next_run'] = $cron->getNextRunDate()->format('Y-m-d H:i:s');
-        unset($schedulingShellCallLog['SchedulingShellCallLog']['modified']);
-        $this->SchedulingShellCallLog->saveOrThrowException($schedulingShellCallLog);
     }
 
 }
