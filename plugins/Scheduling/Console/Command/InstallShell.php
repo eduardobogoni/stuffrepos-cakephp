@@ -12,6 +12,15 @@ class InstallShell extends Shell {
         $manager->install();
         $this->out('<info>Done</info>');
     }
+    
+    public function uninstall() {
+        $this->out('<info>Searching scheduling installer...</info>');
+        $manager = $this->_getInstaller();
+        $this->out('Installer found: '.  get_class($manager));
+        $this->out('<info>Uninstalling...</info>');
+        $manager->uninstall();
+        $this->out('<info>Done</info>');
+    }
 
     /**
      * @return \SchedulingManager

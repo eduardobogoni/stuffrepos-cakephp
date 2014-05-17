@@ -6,7 +6,11 @@ App::uses('SchedulingTask', 'Scheduling.Lib');
 class CronSchedulingInstaller {
 
     public function install() {
-        $this->_setCrontabUserContents($this->_cronFileContent());
+        $this->_setCrontabUserContents($this->_cronFileContent(false));
+    }
+
+    public function uninstall() {
+        $this->_setCrontabUserContents($this->_cronFileContent(true));
     }
 
     private function _getCrontabUserContents() {
@@ -32,15 +36,16 @@ class CronSchedulingInstaller {
      * 
      * @return string
      */
-    private function _cronFileContent() {
+    private function _cronFileContent($uninstall) {
         $lines = array();
-        $appCronLineFound = false;
         foreach (explode("\n", $this->_getCrontabUserContents()) as $line) {
             if (trim($line) != '' && !$this->_isAppCronLine($line)) {
                 $lines[] = $line;
             }
         }
-        $lines[] = $this->_buildAppCronLine();
+        if (!$uninstall) {
+            $lines[] = $this->_buildAppCronLine();
+        }
         return implode("\n", $lines);
     }
 
