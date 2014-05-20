@@ -261,7 +261,10 @@ class CakeLayersHelper extends Helper {
         }
 
         if ($required) {
-            throw new Exception("Model de associação não foi encontrado.");
+            throw new Exception("Model de associação não foi encontrado. " .
+            'Model->name: ' . $model->name .
+            '; Model->alias: ' . $model->alias .
+            '; Association path: [' . implode(', ', $associationPath) . ']');
         } else {
             return null;
         }
