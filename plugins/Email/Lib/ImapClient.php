@@ -1,5 +1,7 @@
 <?php
 
+App::uses('ImapMailBox', 'Email.Lib');
+
 class ImapClient {
 
     /**
@@ -35,27 +37,14 @@ class ImapClient {
 
     /**
      * 
-     * @param Horde_Imap_Client_Socket $client
-     * @return array
-     */
-    public function fetchInboxUnseenIds($sender) {
-        $query = new Horde_Imap_Client_Search_Query();
-        $query->flag(Horde_Imap_Client::FLAG_SEEN, false);
-        $query->headerText('From', $sender);
-        $results = $this->client->search('INBOX', $query);
-        $ids = array();
-        foreach ($results['match'] as $id) {
-            $ids[] = $id;
-        }
-        return $ids;
-    }
-
-    /**
-     * 
      * @return Horde_Imap_Client_Socket
      */
     public function getHordeImapClient() {
         return $this->client;
+    }
+
+    public function createMailBox($mailBoxName) {
+        return new ImapMailBox($this, $mailBoxName);
     }
 
 }
