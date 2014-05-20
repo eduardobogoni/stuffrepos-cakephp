@@ -240,6 +240,11 @@ class CakeLayersHelper extends Helper {
 
             if ($association) {
                 $associationModel = $model->{$association['alias']};
+                switch (get_class($associationModel)) {
+                    case 'AppModel':
+                    case 'Model':
+                        throw new Exception("Association \"{$model->name}->{$association['alias']}\" has " . get_class($associationModel) . " class");
+                }
             }
         }
 
