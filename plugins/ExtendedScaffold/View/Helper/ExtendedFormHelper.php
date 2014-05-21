@@ -108,13 +108,15 @@ class ExtendedFormHelper extends FormHelper {
     }
 
     private function _extendedInputsFieldset($fieldset, $blacklist) {
+        $currentModel = $this->model();
         if (empty($fieldset['listAssociation'])) {
             $f = new ExtendedFieldSet($this, $fieldset, $blacklist);
         } else {
             $f = new ListFieldSet($this, $fieldset, $blacklist);
         }
-
-        return $f->output();
+        $output = $f->output();
+        $this->setEntity($currentModel);        
+        return $output;
     }
 
     public function input($fieldName, $options = array()) {
