@@ -107,9 +107,13 @@ class ControllerMenuHelper extends AppHelper {
         $this->options = $this->_mergeOptions($options);
         $this->currentController = $this->_foundCurrentController();
         $this->targetController = $this->_foundTargetController();
-        $model = &$this->targetController->{
-                $this->targetController->modelClass
-                };
+        if (empty($options['model'])) {
+            $model = $this->targetController->{
+                    $this->targetController->modelClass
+                    };
+        } else {
+            $model = $this->CakeLayers->getModel($options['model']);
+        }
         $options['id'] = $object[$model->alias][$model->primaryKey];
         $options['shortFormat'] = true;
         $options['skipNoRequiredIdActions'] = true;

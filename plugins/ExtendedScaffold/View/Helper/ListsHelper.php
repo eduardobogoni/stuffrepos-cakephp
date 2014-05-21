@@ -288,6 +288,10 @@ class ListsHelper extends AppHelper {
         }
 
         if ($this->showActions) {
+            $rowActionListOptions = $this->options['rowActionListOptions'];
+            if (!empty($this->options['model']) && empty($rowActionListOptions['model'])) {
+                $rowActionListOptions['model'] = $this->options['model'];
+            }
             $cells[] = array(
                 'attributes' => array(
                     'class' => array('actions')
