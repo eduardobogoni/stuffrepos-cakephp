@@ -119,6 +119,9 @@ class ControllerMenuHelper extends AppHelper {
 
     private function _controllerActions(&$controller) {
         $groups = array($this->defaultActions);
+        if (!empty($this->settings['moduleActions'])) {
+            $groups[] = $this->settings['moduleActions'];
+        }
         if (!empty($controller->moduleActions)) {
             $groups[] = $controller->moduleActions;
         }
