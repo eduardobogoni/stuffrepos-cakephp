@@ -7,12 +7,10 @@ abstract class ExtendedHasManyAppModel extends AppModel {
     private $_saveParent = false;
 
     public function __construct($id = false, $table = null, $ds = null, $hasManyUtilsAssociation = array()) {
-        $this->actsAs = array(
-            'Base.HasManyUtils' => array(
-                'associations' => $hasManyUtilsAssociation
-            )
-        );
         parent::__construct($id, $table, $ds);
+        $this->Behaviors->load('Base.HasManyUtils', array(
+            'associations' => $hasManyUtilsAssociation
+        ));
     }
 
     public function save($data = null, $validate = true, $fieldList = array()) {
