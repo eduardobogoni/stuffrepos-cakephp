@@ -62,7 +62,7 @@ EOT
 
     private function _tableOptions() {
         return array(
-            'model' => $this->_model()->name
+            'model' => $this->_model()
             , 'showActions' => false,
             'htmlAttributes' => array(
                 'id' => $this->tableId,
