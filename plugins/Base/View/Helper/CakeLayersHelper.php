@@ -383,7 +383,8 @@ class CakeLayersHelper extends Helper {
                     , array(
                 'conditions' => array(
                     "{$associationModel->alias}.{$associationModel->primaryKey}" => $instance[$association['foreignKey']]
-                )
+                ),
+                            'recursive' => -1,
                     )
             );
         }
