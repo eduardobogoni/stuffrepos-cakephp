@@ -23,10 +23,12 @@ class HasManyUtilsBehavior extends ModelBehavior {
     }
 
     public function afterFind(\Model $model, $results, $primary = false) {
-        foreach ($model->hasMany as $alias => $association) {
-            foreach (array_keys($results) as $k) {
-                if (!empty($results[$k][$alias]) && is_array($results[$k][$alias])) {
-                    $results[$k][$alias] = $this->_applyAfterFind($model->{$alias}, $results[$k][$alias]);
+        if ($results) {
+            foreach ($model->hasMany as $alias => $association) {
+                foreach (array_keys($results) as $k) {
+                    if (!empty($results[$k][$alias]) && is_array($results[$k][$alias])) {
+                        $results[$k][$alias] = $this->_applyAfterFind($model->{$alias}, $results[$k][$alias]);
+                    }
                 }
             }
         }
