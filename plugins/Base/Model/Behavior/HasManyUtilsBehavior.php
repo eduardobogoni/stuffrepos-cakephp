@@ -131,7 +131,7 @@ class HasManyUtilsBehavior extends ModelBehavior {
         foreach (array($model->hasMany, $model->hasAndBelongsToMany) as $collection) {
             foreach ($collection as $alias => $associationData) {
                 if ($alias == $association) {
-                    return $associationData['foreignKey'];
+                    return $alias . '.' . $associationData['foreignKey'];
                 }
             }
         }
