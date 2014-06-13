@@ -33,21 +33,19 @@ class ImapMailBox {
         return $ids;
     }
 
-    public function fetchMessage($messageId, $type) {
+    public function fetchMessage($messageId) {
         $structure = $this->_getStructure($messageId);
-        $htmlTypeIndex = array_search($type, $structure->contentTypeMap());
-        if ($htmlTypeIndex === false) {
-            throw new Exception("$type part not found for uid=$messageId");
-        }
         $query = new Horde_Imap_Client_Fetch_Query();
         $query->envelope();
-        $query->bodyPart($htmlTypeIndex, array(
-            'peek' => true
-        ));
+        foreach (array_keys($structure->contentTypeMap()) as $typeIndex) {
+            $query->bodyPart($typeIndex, array(
+                'peek' => true
+            ));
+        }
         $results = $this->client->getHordeImapClient()->fetch($this->mailBoxName, $query, array(
             'ids' => new Horde_Imap_Client_Ids($messageId)
         ));
-        return $this->_parseFetchData($results[$messageId], $structure, $htmlTypeIndex);
+        return $this->_parseFetchData($results[$messageId], $structure);
     }
 
     public function setAsSeen($messageId) {
@@ -78,10 +76,13 @@ class ImapMailBox {
         return $results[$messageId]->getStructure();
     }
 
-    private function _parseFetchData(Horde_Imap_Client_Data_Fetch $fetchData, Horde_Mime_Part $structure, $htmlTypeIndex) {
-        return array_merge(array(
-            'contents' => $this->_parseFetchDataContents($fetchData, $structure, $htmlTypeIndex)
-                ), $this->_parseFetchDataHeaders($fetchData));
+    private function _parseFetchData(Horde_Imap_Client_Data_Fetch $fetchData, Horde_Mime_Part $structure) {
+        $data = $this->_parseFetchDataHeaders($fetchData);
+        $data['bodies'] = array();
+        foreach ($structure->contentTypeMap() as $typeIndex => $typeMime) {
+            $data['bodies'][$typeMime] = $this->_parseFetchDataContents($fetchData, $structure, $typeIndex);
+        }
+        return $data;
     }
 
     private function _parseFetchDataHeaders(Horde_Imap_Client_Data_Fetch $fetchData) {
