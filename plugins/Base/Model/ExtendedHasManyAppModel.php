@@ -5,6 +5,7 @@ App::uses('AppModel', 'Model');
 abstract class ExtendedHasManyAppModel extends AppModel {
 
     private $_saveParent = false;
+    public $virtualFieldsSchema;
 
     public function __construct($id = false, $table = null, $ds = null, $hasManyUtilsAssociation = array()) {
         parent::__construct($id, $table, $ds);
