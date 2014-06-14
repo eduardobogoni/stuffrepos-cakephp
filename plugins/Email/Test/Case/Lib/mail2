@@ -1,0 +1,46 @@
+                                                                                                                                                                                                                                                               
+Delivered-To: ehbrsmailer@gmail.com
+Received: by 10.64.252.165 with SMTP id zt5csp506549iec;
+        Fri, 13 Jun 2014 18:23:00 -0700 (PDT)
+Return-Path: <eduardobogoni@gmail.com>
+Received-SPF: pass (google.com: domain of eduardobogoni@gmail.com designates 10.140.96.229 as permitted sender) client-ip=10.140.96.229
+Authentication-Results: mr.google.com;
+       spf=pass (google.com: domain of eduardobogoni@gmail.com designates 10.140.96.229 as permitted sender) smtp.mail=eduardobogoni@gmail.com;
+       dkim=pass header.i=@gmail.com
+X-Received: from mr.google.com ([10.140.96.229])
+        by 10.140.96.229 with SMTP id k92mr3505685qge.38.1402708980128 (num_hops = 1);
+        Fri, 13 Jun 2014 18:23:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=mime-version:from:date:message-id:subject:to:content-type;
+        bh=8Ht9kNAOMmaN7gmFqHTS1riqs3y9/FEUBMNs4OnwCpo=;
+        b=sKgKY75wJf6w/LnbqR1tIlG5FWe1bzV94GWJ794MPKlNrQVxgf+6Z8NL3Gv5cZ6rdM
+         dQOrOF+tiqr6TesoaQxQmN0A/R1WBHyuRNrPtZNi3+T4k0LeItlCRqqSnMfS24ZmFsWo
+         UmKqttTDC9JUZhZw4nCFMdMx0OmF1t0hPQw0Mvj+nPd/63vrRBIywP5K5B9Uso+uUtxR
+         IQ6d8QZl+gE/7w+qw7GxXi/a7Sk9Yv5KIDZp5JV/MCWmE/gYq+uUfG7PxB/DaqPBTbO8
+         9tkDMm9mNm31UjAiq8ZizywFHvZtWzBuWPdH5dwvcAuF+hulToZoJr7EPG5kFIvxmbLR
+         5ioQ==
+X-Received: by 10.140.96.229 with SMTP id k92mr3505685qge.38.1402708980116;
+ Fri, 13 Jun 2014 18:23:00 -0700 (PDT)
+MIME-Version: 1.0
+Received: by 10.224.38.208 with HTTP; Fri, 13 Jun 2014 18:22:40 -0700 (PDT)
+From: Eduardo Henrique Bogoni <eduardobogoni@gmail.com>
+Date: Fri, 13 Jun 2014 22:22:40 -0300
+Message-ID: <CAAGzLnbD57Z6BX6SxMbdffgOZ8X3p=oSMx1-RWp=64jsyym6JQ@mail.gmail.com>
+Subject: =?UTF-8?Q?Palavras_com_acentos_=28Acento_no_assunto=3A_=C3=A9=29?=
+To: "Eduardo H. Bogoni" <eduardobogoni@gmail.com>, EHBRS Mailer <ehbrsmailer@gmail.com>
+Content-Type: multipart/alternative; boundary=001a113976607bcf9b04fbc1a26e
+
+--001a113976607bcf9b04fbc1a26e
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+Acento no corpo da mensagem: =C3=A1
+
+--001a113976607bcf9b04fbc1a26e
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Acento no corpo da mensagem: =C3=A1<br></div>
+
+--001a113976607bcf9b04fbc1a26e--

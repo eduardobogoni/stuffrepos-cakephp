@@ -1,0 +1,44 @@
+                                                                                                                                                                                                                                                               
+Delivered-To: ehbrsmailer@gmail.com
+Received: by 10.64.252.165 with SMTP id zt5csp495379iec;
+        Fri, 13 Jun 2014 14:19:02 -0700 (PDT)
+Return-Path: <eduardobogoni@gmail.com>
+Received-SPF: pass (google.com: domain of eduardobogoni@gmail.com designates 10.140.32.197 as permitted sender) client-ip=10.140.32.197
+Authentication-Results: mr.google.com;
+       spf=pass (google.com: domain of eduardobogoni@gmail.com designates 10.140.32.197 as permitted sender) smtp.mail=eduardobogoni@gmail.com;
+       dkim=pass header.i=@gmail.com
+X-Received: from mr.google.com ([10.140.32.197])
+        by 10.140.32.197 with SMTP id h63mr6999691qgh.10.1402694341906 (num_hops = 1);
+        Fri, 13 Jun 2014 14:19:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=mime-version:from:date:message-id:subject:to:content-type;
+        bh=LwUwvqple3+x265hePxCAT0e4orMeTbDK5uiUZmXCpk=;
+        b=YsgtQbcCQ3YryDivtNRcCvYWB8N5GpszZZ6bwflACkWjvskTial8wDUodrDPZf96x4
+         kmJL5euFZooAQiL/tRnA0sMzg//bXLVb0PA8EhrRvfEzBEgV04u5YJ07No/ofx9ygN+l
+         PoRcUHWWaeRqiiO5OkNJEmvoLWzr5C/e6PZkJLoxTh9kbmOTVtUC3GXhgqdU78mEq9rj
+         /eVwACA1pSXTNYAnnRtz+IQRimq+Lp4a8o7BuJ2ZrXdBDBbwGORZkX64XB4Ich4+XO/k
+         mPdsZdZ3u9ox/8swYYozDxSEVoMfUrIm6F/qHcSGEtk95pGZKZtiTM47YMeKdyPZxwX/
+         pRtA==
+X-Received: by 10.140.32.197 with SMTP id h63mr6999691qgh.10.1402694341902;
+ Fri, 13 Jun 2014 14:19:01 -0700 (PDT)
+MIME-Version: 1.0
+Received: by 10.224.38.208 with HTTP; Fri, 13 Jun 2014 14:18:41 -0700 (PDT)
+From: Eduardo Henrique Bogoni <eduardobogoni@gmail.com>
+Date: Fri, 13 Jun 2014 18:18:41 -0300
+Message-ID: <CAAGzLnaN1dn+dAsPeCrCyy5c_dU2ytfQ3qvNmjM7T00QdcLu8A@mail.gmail.com>
+Subject: Hello
+To: EHBRS Mailer <ehbrsmailer@gmail.com>
+Content-Type: multipart/alternative; boundary=001a113a5bd0fa48a904fbbe390f
+
+--001a113a5bd0fa48a904fbbe390f
+Content-Type: text/plain; charset=UTF-8
+
+Hello World!
+
+--001a113a5bd0fa48a904fbbe390f
+Content-Type: text/html; charset=UTF-8
+
+<div dir="ltr">Hello World!<br></div>
+
+--001a113a5bd0fa48a904fbbe390f--
