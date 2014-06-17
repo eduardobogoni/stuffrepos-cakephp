@@ -22,6 +22,9 @@
 App::uses('ArrayUtil', 'Base.Lib');
 App::uses('Basics', 'Base.Lib');
 
+/**
+ * Permite criar filtros nas listagens de registros (Páginas "index").
+ */
 class PaginatorUtilComponent extends Component {
 
     public $components = array('Session');
@@ -312,5 +315,3 @@ class PaginatorUtilComponentFilter {
     }
 
 }
-
-?>
