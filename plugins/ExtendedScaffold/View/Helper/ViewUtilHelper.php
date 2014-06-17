@@ -37,8 +37,17 @@ class ViewUtilHelper extends AppHelper {
         'listSettings' => array(),
     );
     
+    /**
+     *
+     * @var NumberFormatter
+     */
+    private $moneyFormatter;
+    
     public function __construct(\View $View, $settings = array()) {
-        parent::__construct($View, $settings);        
+        parent::__construct($View, $settings);       
+        $this->moneyFormatter = NumberFormatter::create('pt_BR', NumberFormatter::DECIMAL);
+        $this->moneyFormatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, 2);
+        $this->moneyFormatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, 2);
     }
 
     private function _getCurrentController() {
@@ -226,6 +235,10 @@ class ViewUtilHelper extends AppHelper {
 
         return $f->output();
     }
+    
+    public function date($value) {
+        return $this->_isDate($value);
+    }
 
     private function _isDate($value) {
         if (($timestamp = strtotime(strval($value))) && preg_match('/\d/', strval($value))) {
@@ -257,6 +270,13 @@ class ViewUtilHelper extends AppHelper {
         } else {
             return __('No', true);
         }
+    }
+    
+    public function money($value) {        
+        if (!is_float($value)) {
+            $value = floatval($value);
+        }
+        return $this->moneyFormatter->format($value);
     }
 
     public function decimal($value) {
