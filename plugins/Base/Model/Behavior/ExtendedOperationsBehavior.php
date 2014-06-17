@@ -4,6 +4,10 @@ class ExtendedOperationsBehavior extends ModelBehavior {
 
     public function beforeFind(\Model $model, $query) {
         parent::beforeFind($model, $query);
+        $this->applyVirtualFields($model);
+    }
+
+    public function applyVirtualFields(\Model $model) {
         if (empty($model->virtualFieldsSetted)) {
             if (method_exists($model, 'getVirtualFields')) {
                 foreach($this->_parseVirtualFields($model) as $name => $schema) {
