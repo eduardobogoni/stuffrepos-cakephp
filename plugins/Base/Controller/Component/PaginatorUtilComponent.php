@@ -63,20 +63,10 @@ class PaginatorUtilComponent extends Component {
      * @param <type> $controller
      * @return PaginatorUtilComponentFilter[]
      */
-    private function getAllFilters(&$controller) {
-        $filtersData = array();
-
-        if (isset($controller->paginatorUtil['listFilters'])
-                && is_array($controller->paginatorUtil['listFilters'])) {
-            $filtersData = array_merge($filtersData, $controller->paginatorUtil['listFilters']);
-        }
-
-        if (method_exists($controller, 'getPaginatorUtilFilters')) {
-            $filtersData = array_merge(
-                    $filtersData, $controller->getPaginatorUtilFilters()
-            );
-        }
-
+    private function getAllFilters(\Controller $controller) {
+        $filtersData = method_exists($controller, 'getPaginatorUtilFilters') ?
+                $controller->getPaginatorUtilFilters() :
+                array();
         $filters = array();
         foreach ($filtersData as $filterName => $filterData) {
             $filters[] = $this->getFilter($controller, $filterName, $filterData);
@@ -87,7 +77,7 @@ class PaginatorUtilComponent extends Component {
     private function getFilter(&$controller, $filterName, $filterOptions) {
         if (!isset($this->filters[$controller->name][$filterName])) {
             $this->filters[$controller->name][$filterName] = new PaginatorUtilComponentFilter(
-                            $this, $controller, $filterName, $filterOptions
+                    $this, $controller, $filterName, $filterOptions
             );
         }
         return $this->filters[$controller->name][$filterName];
@@ -108,7 +98,7 @@ class PaginatorUtilComponent extends Component {
         }
 
         $controller->request->params['paginatorUtil']['filterFields'] = $fields;
-    }    
+    }
 }
 
 class PaginatorUtilComponentFilter {
@@ -146,8 +136,8 @@ class PaginatorUtilComponentFilter {
      */
     private function hasConfig($config) {
         return ArrayUtil::hasArrayIndex(
-                $this->options
-                , Basics::fieldNameToArray($config)
+                        $this->options
+                        , Basics::fieldNameToArray($config)
         );
     }
 
@@ -170,8 +160,6 @@ class PaginatorUtilComponentFilter {
      */
     public function isInputSelectType() {
         return $this->hasConfig('values') ||
-                $this->hasConfig('valuesFunction') ||
-                $this->hasConfig('conditionsFunction') ||
                 $this->hasConfig('conditionsPerValue');
     }
 
@@ -180,19 +168,13 @@ class PaginatorUtilComponentFilter {
      * @return array
      */
     public function getValuesList() {
-        if ($this->hasConfig('valuesFunction')) {
-            return $this->controller->{$this->getConfig('valuesFunction')}();
-        } else if ($this->hasConfig('values')) {
+        if ($this->hasConfig('values')) {
             return ArrayUtil::keysAsValues(
                             array_keys($this->getConfig('values'))
             );
         } else if ($this->hasConfig('conditionsPerValue')) {
             return ArrayUtil::keysAsValues(
                             array_keys($this->getConfig('conditionsPerValue'))
-            );
-        } else if ($this->hasConfig('conditionsFunction')) {
-            return ArrayUtil::keysAsValues(
-                            array_keys($this->controller->{$this->getConfig('conditionsFunction')}())
             );
         } else {
             return null;
@@ -210,23 +192,12 @@ class PaginatorUtilComponentFilter {
     public function getCurrentCondition() {
         if ($this->hasConfig('conditions')) {
             return $this->getConfig('conditions');
-        } else if ($this->hasConfig('conditionsFunction') || $this->hasConfig('conditionsPerValue')) {
-            if ($this->hasConfig('conditionsFunction')) {
-                $conditions = $this->controller->{$this->getConfig('conditionsFunction')}();
-            } else { // if ($this->hasConfig('conditionsPerValue'))                
-                $conditions = $this->getConfig('conditionsPerValue');
-            }
-
-            $value = $this->getValue();
-            if ($value !== null) {
-                if (isset($conditions[$value])) {
-                    return $conditions[$value];
-                } else {
-                    return null;
-                }
-            } else {
-                return $value;
-            }
+        } else if ($this->hasConfig('conditionsPerValue')) {
+            $conditions = $this->getConfig('conditionsPerValue');
+            $value = $this->getValue();            
+            return $value !== null && isset($conditions[$value]) ?
+                    $conditions[$value] :
+                    null;
         } else {
             throw new Exception("Não foi definido uma condição para o filtro \"{$this->name}\" em \"{$this->controller->name}\".");
         }
@@ -243,12 +214,12 @@ class PaginatorUtilComponentFilter {
 
         if ($update) {
             if (isset($this->controller->params['url'][$this->getSlugedName()]) && trim($this->controller->params['url'][$this->getSlugedName()]) !== '') {
-                $value = trim($this->controller->params['url'][$this->getSlugedName()]);                
+                $value = trim($this->controller->params['url'][$this->getSlugedName()]);
                 if ($this->getConfig('fieldOptions.type') == 'date') {
                     if (strtotime($value) === false) {
                         return $default;
                     }
-                }                
+                }
                 return $value;
             } else {
                 return $default;
@@ -266,12 +237,12 @@ class PaginatorUtilComponentFilter {
 
     private function getSessionPath() {
         return implode(
-                        '.', array(
-                    'PaginatorUtil',
-                    $this->controller->name,
-                    $this->controller->params['action'],
-                    $this->getSlugedName()
-                        )
+                '.', array(
+            'PaginatorUtil',
+            $this->controller->name,
+            $this->controller->params['action'],
+            $this->getSlugedName()
+                )
         );
     }
 
@@ -302,7 +273,7 @@ class PaginatorUtilComponentFilter {
         if ($this->hasConfig('fieldOptions')) {
             $field = $this->getConfig('fieldOptions') + $field;
         }
-        
+
         if (in_array($field['type'], array('date', 'time', 'datetime'))) {
             $field['selected'] = $field['value'];
         }
@@ -311,7 +282,7 @@ class PaginatorUtilComponentFilter {
     }
 
     public function hasConditionValue() {
-        return !$this->hasConfig('conditionsFunction') && !$this->hasConfig('conditionsPerValue');
+        return !$this->hasConfig('conditionsPerValue');
     }
 
 }
