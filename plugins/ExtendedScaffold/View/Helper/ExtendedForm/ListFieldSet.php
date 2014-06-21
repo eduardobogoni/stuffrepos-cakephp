@@ -33,7 +33,7 @@ class ListFieldSet {
 
         $b .= '<div class="actions">';
         $b .= $this->parent->Html->link(
-                __('New', true), '#', array(
+                __d('extended_scaffold','New', true), '#', array(
             'onclick' => <<<EOT
     {$this->javascriptVariable}.addRow();
     return false;
@@ -152,7 +152,7 @@ EOT
         }
 
         $columns['_deleteButton'] = array(
-            'label' => __('Actions', true),
+            'label' => __d('extended_scaffold','Actions', true),
             'valueFunction' => array($this, '_actionsColumnValueFunction'),
         );
 
@@ -172,7 +172,7 @@ EOT
     public function _actionsColumnValueFunction($view, $instance, $fieldData) {
         $b = '<div class="actions">';
         $b .= $this->parent->Html->link(
-                __('Delete', true), '#', array(
+                __d('extended_scaffold','Delete', true), '#', array(
             'onclick' => <<<EOT
    {$this->javascriptVariable}.removeRow(this);    
     return false;

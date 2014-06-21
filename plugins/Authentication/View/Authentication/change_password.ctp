@@ -1,4 +1,4 @@
-<h2><?php echo __('Alteração de Senha'); ?></h2>
+<h2><?php echo __d('authentication','Alteração de Senha'); ?></h2>
 
 <?php
 echo $this->ExtendedForm->create('UserChangePassword');

@@ -20,7 +20,7 @@ class AuthenticationController extends AppController {
             if ($this->Auth->login()) {
                 return $this->redirect($this->Auth->redirect());
             } else {
-                $this->Session->setFlash(__('Username or password is incorrect'), 'default', array(), 'auth');
+                $this->Session->setFlash(__d('authentication','Username or password is incorrect'), 'default', array(), 'auth');
             }
         }
     }
@@ -102,7 +102,7 @@ class AuthenticationController extends AppController {
         $email->emailFormat('html');
         $email->template('Authentication.user_reset_password_request');
         $email->to($user['AuthenticationUser']['email']);
-        $email->subject(__('Reset Password Request'));
+        $email->subject(__d('authentication','Reset Password Request'));
         $email->viewVars(compact('userResetPasswordRequest', 'user'));
         $email->send();
     }

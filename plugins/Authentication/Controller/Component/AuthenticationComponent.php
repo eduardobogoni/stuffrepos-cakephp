@@ -62,10 +62,10 @@ class AuthenticationComponent extends Component {
 
         $email = new CakeEmail('default');
         $email->to($user['email']);
-        $email->subject(__('Your account was created.', true));
+        $email->subject(__d('authentication','Your account was created.', true));
         $email->send(
-                __('Usernamme') . ': ' . $user['username']
-                . "\n" . __('Password') . ': ' . $password);
+                __d('authentication','Usernamme') . ': ' . $user['username']
+                . "\n" . __d('authentication','Password') . ': ' . $password);
     }
     
     public function userId() {

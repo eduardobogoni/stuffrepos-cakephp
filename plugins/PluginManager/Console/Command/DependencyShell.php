@@ -18,19 +18,19 @@ class DependencyShell extends Shell {
                 'pluginName' => array(
                     'short' => 'p',
                     'default' => 'app',
-                    'help' => __("Plugin's name or \"app\".")
+                    'help' => __d('plugin_manager',"Plugin's name or \"app\".")
                 ),
             )
         );
         $parser->addSubcommands(array(
             'tree' => array(
-                'help' => __('Show a dependency tree')
+                'help' => __d('plugin_manager','Show a dependency tree')
             ),
             'inTree' => array(
-                'help' => __('Show plugins in the tree')
+                'help' => __d('plugin_manager','Show plugins in the tree')
             ),
             'notInTree' => array(
-                'help' => __('Show plugins not in the tree')
+                'help' => __d('plugin_manager','Show plugins not in the tree')
             ),
         ));
 

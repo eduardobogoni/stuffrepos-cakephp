@@ -82,7 +82,7 @@ class AccessControlComponent extends Component {
     public static function __callStatic($method, $arguments) {
         if (preg_match('/^sessionUserHasAccessBy(.+)$/', $method, $matches)) {
             if (count($arguments) < 1) {
-                trigger_error(__('Missing argument 1 for %1$s::%2$s', __CLASS__, $method), E_USER_ERROR);
+                trigger_error(__d('access_control','Missing argument 1 for %1$s::%2$s', __CLASS__, $method), E_USER_ERROR);
             }
 
             return self::sessionUserHasAccess(
@@ -91,7 +91,7 @@ class AccessControlComponent extends Component {
         } else if (preg_match('/^userHasAccessBy(.+)$/', $method, $matches)) {
             for ($i = 1; $i <= 2; $i++) {
                 if (count($arguments) < $i) {
-                    trigger_error(__('Missing argument %1$i for %2$s::%3$s', $i, __CLASS__, $method), E_USER_ERROR);
+                    trigger_error(__d('access_control','Missing argument %1$i for %2$s::%3$s', $i, __CLASS__, $method), E_USER_ERROR);
                 }
             }                        
 

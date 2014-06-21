@@ -35,7 +35,7 @@ class ViewUtilExtendedFieldsetHelper extends AppHelper {
     }
 
     private function _fieldLabel($field) {
-        return __(Inflector::humanize($field['name']));
+        return __d('extended_scaffold',Inflector::humanize($field['name']));
     }
 
     private function _fieldValue($field, $scaffoldVars) {

@@ -87,7 +87,7 @@ class ListsHelper extends AppHelper {
             $columns[] = $this->_fieldLabel($_field);
         }
         if ($this->showActions) {
-            $columns[] = __('Actions', true);
+            $columns[] = __d('extended_scaffold','Actions');
         }
 
         $b = "\t<thead><tr>\n";
@@ -163,7 +163,7 @@ class ListsHelper extends AppHelper {
 
         $b .= "<span class='counter'>";
         $b .= $this->Paginator->counter(array(
-            'format' => __('({:page}-{:pages}/{:count})', true)
+            'format' => __d('extended_scaffold','({:page}-{:pages}/{:count})')
                 ));
         $b .= "</span>";
         $b .= '</div>';
@@ -370,7 +370,7 @@ class ListsHelper extends AppHelper {
         if (empty($title)) {
             $title = Inflector::humanize($key);
         }
-        return __($title, true);
+        return __d('extended_scaffold',$title, true);
     }
 
     private function _rowFieldValue($field, $row, $firstField) {

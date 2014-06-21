@@ -18,7 +18,7 @@ class TimeZoneBehavior extends ModelBehavior {
         foreach ($this->config[$model->name] as $field) {
             $model->validate[$this->_timeZoneField($field)]['timezoneFormat'] = array(
                 'rule' => 'isValidTimeZone',
-                'message' => __('It is not a valid Timezone format'),
+                'message' => __d('date_time','It is not a valid Timezone format'),
                 'allowEmpty' => true,
                 'required' => false,
             );

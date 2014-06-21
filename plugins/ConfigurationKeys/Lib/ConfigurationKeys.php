@@ -42,7 +42,7 @@ class ConfigurationKeys {
         if (($value = self::getKeyValue($key))) {
             return $value;
         } else {
-            throw new Exception(sprintf(__('Configuration value not found to key=%s'), $key));
+            throw new Exception(sprintf(__d('configuration_keys','Configuration value not found to key=%s'), $key));
         }
     }
 
@@ -124,7 +124,7 @@ EOT;
 
     private static function _throwExceptionIfKeyNotExists($key) {
         if (!self::hasKey($key)) {
-            throw new Exception(sprintf(__('Key not setted: %s (Keys setted: %s)'), $key, implode(',', self::getKeys())));
+            throw new Exception(sprintf(__d('configuration_keys','Key not setted: %s (Keys setted: %s)'), $key, implode(',', self::getKeys())));
         }
     }
 

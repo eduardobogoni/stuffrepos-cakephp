@@ -1,5 +1,5 @@
 <?php echo $this->Session->flash('auth'); ?>
-<h2><?php echo __('Login', true); ?></h2>
+<h2><?php echo __d('authentication','Login', true); ?></h2>
 
 <?php
 echo $this->Form->create('User');

@@ -1,4 +1,4 @@
-<h2><?php echo __('Reset de senha'); ?></h2>
+<h2><?php echo __d('authentication','Reset de senha'); ?></h2>
 
 <?php
 echo $this->Form->create('UserResetPasswordRequestSubmission');

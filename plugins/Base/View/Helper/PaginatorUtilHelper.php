@@ -37,8 +37,8 @@ class PaginatorUtilHelper extends AppHelper {
                                 ));
             }
 
-            $buffer .= $this->ExtendedForm->submit(__('Filter', true), array('name' => '_update'));
-            $buffer .= $this->ExtendedForm->submit(__('Show All', true), array('name' => '_clear'));
+            $buffer .= $this->ExtendedForm->submit(__d('base','Filter', true), array('name' => '_update'));
+            $buffer .= $this->ExtendedForm->submit(__d('base','Show All', true), array('name' => '_clear'));
             $buffer .= "</fieldset>";
             $buffer .= $this->ExtendedForm->end();
             $buffer .= "</div>";

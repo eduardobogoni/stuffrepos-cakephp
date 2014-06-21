@@ -242,7 +242,7 @@ class ControllerMenuHelper extends AppHelper {
     private function _buildActionLink($action) {
         $linkOptions = empty($action['linkOptions']) ? array() : $action['linkOptions'];        
         $linkOptions['method'] = $this->_isActionPost($action) ? 'post' : 'get';
-        $question = isset($action['question']) ? __($action['question'], true) : false;
+        $question = isset($action['question']) ? __d('widgets',$action['question']) : false;
         return $this->AccessControl->link(
                         $this->_getTitle($action), $this->_buildActionUrl($action), $linkOptions, $question);
     }
@@ -269,7 +269,7 @@ class ControllerMenuHelper extends AppHelper {
 
         //Acesso negado
         if (!$this->AccessControl->hasAccessByUrl($this->_buildActionUrl($targetAction))) {
-            return __('Access denied.', true);
+            return __d('widgets','Access denied.');
         }
 
         $currentUrl = $this->_extractCurrentUrl();
@@ -277,39 +277,39 @@ class ControllerMenuHelper extends AppHelper {
         // Mesma action
         if (($currentUrl['controller'] == $actionUrl['controller']) &&
                 ($currentUrl['action'] == $actionUrl['action'])) {
-            return __('Same controller/action.', true);
+            return __d('widgets','Same controller/action.');
         }
 
         // Formato curto
         if ($this->options['shortFormat'] && !empty($targetAction['skipOnShort'])) {
-            return __('Skip on short format menu.', true);
+            return __d('widgets','Skip on short format menu.');
         }
 
         // Não tem ID requerido
         if ($targetAction['hasId'] && $actionUrl['id'] == null) {
-            return __('Has not required id.', true);
+            return __d('widgets','Has not required id.');
         }
 
         // Não necessita de ID e opção para excluir
         if (!$targetAction['hasId'] && $this->options['skipNoRequiredIdActions']) {
-            return __('Skip no required id actions.', true);
+            return __d('widgets','Skip no required id actions.');
         }
 
         // Negado pelo controller
         if ($this->_deniedAction($actionUrl)) {
-            return __('Denied by controller.', true);
+            return __d('widgets','Denied by controller.');
         }
 
         // Registrado na opção skipActions
         foreach ($this->options['skipActions'] as $skipActionUrl) {
             if ($this->_isUrlEquals($this->_parseUrl($skipActionUrl), $actionUrl)) {
-                return __('Action skipped.', true);
+                return __d('widgets','Action skipped.');
             }
         }
 
         // Método próprio no controller
         if (!$this->_isNavigableControllerMethod($targetAction)) {
-            return __('Navigable method returned false.', true);
+            return __d('widgets','Navigable method returned false.');
         }
 
         return false;
@@ -360,7 +360,7 @@ class ControllerMenuHelper extends AppHelper {
             $title = !empty($action['plural']) ? $actionUrl['controller'] : Inflector::singularize($actionUrl['controller']);
             $title = Inflector::humanize($title);
             $title = str_replace(' ', '', $title);
-            return trim(sprintf($action['format'], __($title, true)));
+            return trim(sprintf($action['format'], __d('widgets',$title)));
         }
     }
 

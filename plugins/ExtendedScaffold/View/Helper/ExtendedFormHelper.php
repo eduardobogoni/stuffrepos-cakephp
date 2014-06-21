@@ -56,11 +56,11 @@ class ExtendedFormHelper extends FormHelper {
             return $this->extendedCreate() .
                     $this->extendedInputs(
                             ExtendedFieldsParser::extractExtendedFields($fields), $blacklist
-                    ) . $this->extendedEnd(__('Submit', true));
+                    ) . $this->extendedEnd(__d('extended_scaffold','Submit', true));
         } else {
             return $this->create(null, array('url' => $this->_currentUrl())) .
                     $this->inputs($fields, $blacklist) .
-                    $this->end(__('Submit', true));
+                    $this->end(__d('extended_scaffold','Submit', true));
         }
     }
 

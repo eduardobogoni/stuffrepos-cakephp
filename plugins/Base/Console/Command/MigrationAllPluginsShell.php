@@ -17,7 +17,7 @@ class MigrationAllPluginsShell extends Shell {
                     'reset' => array(
                         'default' => false,
                         'boolean' => true,
-                        'help' => __('Reset database schema before migrate')
+                        'help' => __d('base','Reset database schema before migrate')
                     )
                 )
         );

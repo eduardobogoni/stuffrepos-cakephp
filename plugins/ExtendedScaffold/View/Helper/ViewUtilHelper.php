@@ -87,7 +87,7 @@ class ViewUtilHelper extends AppHelper {
         }
 
         $buffer = "<tr{$class}>";
-        $buffer .= "\t\t<th>" . __(Inflector::humanize($field['label']), true) . "</th>\n";
+        $buffer .= "\t\t<th>" . __d('extended_scaffold',Inflector::humanize($field['label']), true) . "</th>\n";
         $buffer .= "\t\t<td>\n\t\t\t" . $value . "\n&nbsp;\t\t</td>\n";
         $buffer .= "</tr>";
 
@@ -188,7 +188,7 @@ class ViewUtilHelper extends AppHelper {
                     if ($_field === $_details['foreignKey']) {
                         $isKey = true;
                         $viewFields[] = array(
-                            'label' => __(Inflector::humanize($_alias), true),
+                            'label' => __d('extended_scaffold',Inflector::humanize($_alias), true),
                             'value' => $this->AccessControl->linkOrText(
                                     ModelTraverser::value($this->_getCurrentController()->{$modelClass}, $instance, "$_alias.{$_details['displayField']}")
                                     , array(
@@ -206,7 +206,7 @@ class ViewUtilHelper extends AppHelper {
             }
             if ($isKey !== true) {
                 $viewFields[] = array(
-                    'label' => __(Inflector::humanize($_field), true),
+                    'label' => __d('extended_scaffold',Inflector::humanize($_field), true),
                     'value' => ModelTraverser::value($this->_getCurrentController()->{$modelClass}, $instance, $_field),
                     'fieldName' => $_field,
                 );
@@ -266,9 +266,9 @@ class ViewUtilHelper extends AppHelper {
 
     public function yesNo($value) {        
         if ($value) {
-            return __('Yes', true);
+            return __d('extended_scaffold','Yes', true);
         } else {
-            return __('No', true);
+            return __d('extended_scaffold','No', true);
         }
     }
     

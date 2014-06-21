@@ -1,4 +1,4 @@
-<h1><?php __('Reset Password Request'); ?></h1>
+<h1><?php __d('authentication','Reset Password Request'); ?></h1>
 
 <p>    
     <strong>Nome de usuário: </strong><?php echo $user['AuthenticationUser']['username']; ?>

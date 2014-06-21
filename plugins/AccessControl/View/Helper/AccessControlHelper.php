@@ -13,7 +13,7 @@ class AccessControlHelper extends Helper {
     public function __call($method, $params) {
         if (preg_match('/^hasAccessBy(.+)$/', $method, $matches)) {
             if (count($params) < 1) {
-                trigger_error(__('Missing argument 1 for %1$s::%2$s', get_class($this), $method), E_USER_ERROR);
+                trigger_error(__d('access_control','Missing argument 1 for %1$s::%2$s', get_class($this), $method), E_USER_ERROR);
             }
 
             return AccessControlComponent::sessionUserHasAccess(

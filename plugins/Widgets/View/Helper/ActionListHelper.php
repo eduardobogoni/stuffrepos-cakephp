@@ -115,7 +115,7 @@ class ActionListHelper extends AppHelper {
     private function _buildActionLink($action) {
         $linkOptions = empty($action['linkOptions']) ? array() : $action['linkOptions'];
         $linkOptions['method'] = $action['post'] ? 'post' : 'get';
-        $question = isset($action['question']) ? __($action['question'], true) : false;
+        $question = isset($action['question']) ? __d('widgets',$action['question']) : false;
         return $this->AccessControl->link(
                         $action['caption']
                         , $action['url']

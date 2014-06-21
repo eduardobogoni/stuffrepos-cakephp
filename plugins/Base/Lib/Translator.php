@@ -4,40 +4,50 @@ class Translator {
 
     public static function termsToTranslate() {
         $terms = array();
-
         foreach (self::_findModels() as $model) {
-            $terms[] = $model->name;
-            $terms[] = preg_replace('/([a-z])([A-Z])/', '\1 \2', $model->name);
-            $terms[] = Inflector::pluralize($model->name);
-            $terms[] = Inflector::pluralize(
-                            preg_replace('/([a-z])([A-Z])/', '\1 \2',
-                                    $model->name));
+            $terms[$model->plugin] = empty($terms[$model->plugin]) ?
+                    self::_modelTerms($model) :
+                    array_merge($terms[$model->plugin], self::_modelTerms($model));
+        }
+        $ret = array();
+        foreach ($terms as $plugin => $pluginTerms) {
+            $ret[$plugin] = self::_uniqueTerms($pluginTerms);
+        }
+        ksort($ret);
+        return $ret;
+    }
 
-            if (is_array($model->schema())) {
-                foreach (array_keys($model->schema()) as $field) {
-                    $terms[] = Inflector::humanize(preg_replace('/_id$/', '',
-                                            $field));
-                }
-            }
+    private static function _uniqueTerms($terms) {
+        $ret = array_unique($terms);
+        sort($ret);
+        return $ret;
+    }
 
-            foreach (array_keys($model->virtualFields) as $field) {
+    /**
+     * 
+     * @param \Model $model
+     * @return string[]
+     */
+    private static function _modelTerms(\Model $model) {
+        $terms = array(
+            $model->name,
+            preg_replace('/([a-z])([A-Z])/', '\1 \2', $model->name),
+            Inflector::pluralize($model->name),
+            Inflector::pluralize(
+                    preg_replace('/([a-z])([A-Z])/', '\1 \2', $model->name)),
+        );
+        if (is_array($model->schema())) {
+            foreach (array_keys($model->schema()) as $field) {
                 $terms[] = Inflector::humanize(preg_replace('/_id$/', '', $field));
             }
-
-            if (method_exists($model, 'toTranslation')) {
-                $terms = array_merge($terms, $model->toTranslation());
-            }
         }
-
-        $notRepeatedTerms = array();
-
-        foreach ($terms as $term) {
-            $notRepeatedTerms[$term] = true;
+        foreach (array_keys($model->virtualFields) as $field) {
+            $terms[] = Inflector::humanize(preg_replace('/_id$/', '', $field));
         }
-
-        $notRepeatedTerms = array_keys($notRepeatedTerms);
-        sort($notRepeatedTerms);
-        return $notRepeatedTerms;
+        if (method_exists($model, 'toTranslation')) {
+            $terms = array_merge($terms, $model->toTranslation());
+        }
+        return $terms;
     }
 
     /**

@@ -13,19 +13,48 @@ class TranslatorShell extends Shell {
     public function getOptionParser() {
         $parser = parent::getOptionParser();
         $parser->addSubcommand('i18n_extract');
+        $parser->addSubcommand('terms');
+        $parser->addSubcommand('terms_file');
         return $parser;
     }
 
     public function i18n_extract() {
         $directoryWithTerms = $this->_directoryWithTermsToTranslate();
-        $plugins = dirname(dirname(dirname(dirname(__FILE__))));
+        $plugins = $this->_pluginPaths();
         $shell = 'i18n extract --app ' . APP .
-                ' --paths ' . APP . ',' . $directoryWithTerms . ',' . $plugins .
+                ' --paths ' . APP . ',' . $directoryWithTerms . ',' . implode(',', $plugins) .
                 ' --extract-core no' .
                 ' --merge no' .
                 ' --output ' . APP . 'Locale' .
                 ' --overwrite yes';
         $this->dispatchShell($shell);
+        FileSystem::recursiveRemoveDirectory($directoryWithTerms);
+    }
+
+    public function terms() {
+        foreach (Translator::termsToTranslate() as $plugin => $terms) {
+            foreach ($terms as $term) {
+                $this->out("<info>$plugin</info>|$term|");
+            }
+        }
+    }
+
+    public function terms_file() {
+        echo $this->out($this->_termsToTranslateFileContent());
+    }
+
+    private function _pluginPaths() {
+        $paths = array();
+        foreach (CakePlugin::loaded() as $plugin) {
+            switch ($plugin) {
+                case 'Migrations':
+                    break;
+
+                default:
+                    $paths[] = CakePlugin::path($plugin);
+            }
+        }
+        return $paths;
     }
 
     private function _directoryWithTermsToTranslate() {
@@ -37,8 +66,14 @@ class TranslatorShell extends Shell {
 
     private function _termsToTranslateFileContent() {
         $b = "<?php\n";
-        foreach (Translator::termsToTranslate() as $term) {
-            $b .= "__('$term');\n";
+        foreach (Translator::termsToTranslate() as $plugin => $terms) {
+            foreach ($terms as $term) {
+                if ($plugin == '') {
+                    $b .= '__("' . addslashes($term) . '");' . PHP_EOL;
+                } else {
+                    $b .= '__d("' . $plugin . '","' . addslashes($term) . '");' . PHP_EOL;
+                }
+            }
         }
         return $b;
     }

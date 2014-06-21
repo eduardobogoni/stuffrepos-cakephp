@@ -56,34 +56,34 @@ class DumperShell extends Shell {
                     'short' => 'c',
                     'default' => 'default',
                     'choices' => $this->_optionParserConnectionArgumentChoices(),
-                    'help' => __('Set db config <config>. Uses \'default\' if none is specified.')
+                    'help' => __d('datasources','Set db config <config>. Uses \'default\' if none is specified.')
                 ),
                 'path' => array(
                     'default' => false,
-                    'help' => __('Alternative path to dump')
+                    'help' => __d('datasources','Alternative path to dump')
                 ),
                 'clear' => array(
                     'default' => false,
                     'boolean' => true,
-                    'help' => __('Clear database objects before load')
+                    'help' => __d('datasources','Clear database objects before load')
                 )
             )
         );
         $parser->addSubcommands(array(
             'load' => array(
-                'help' => __('Load a database dump')
+                'help' => __d('datasources','Load a database dump')
             ),
             'show' => array(
-                'help' => __('List all database dumps')
+                'help' => __d('datasources','List all database dumps')
             ),
             'dump' => array(
-                'help' => __('Dump database')
+                'help' => __d('datasources','Dump database')
             ),
             'remove' => array(
-                'help' => __('Delete a dump')
+                'help' => __d('datasources','Delete a dump')
             ),
             'clear' => array(
-                'help' => __('Clear database')
+                'help' => __d('datasources','Clear database')
             )
         ));
 
