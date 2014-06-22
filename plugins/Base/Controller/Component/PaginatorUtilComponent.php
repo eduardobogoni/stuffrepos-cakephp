@@ -169,9 +169,7 @@ class PaginatorUtilComponentFilter {
      */
     public function getValuesList() {
         if ($this->hasConfig('values')) {
-            return ArrayUtil::keysAsValues(
-                            array_keys($this->getConfig('values'))
-            );
+            return $this->getConfig('values');            
         } else if ($this->hasConfig('conditionsPerValue')) {
             return ArrayUtil::keysAsValues(
                             array_keys($this->getConfig('conditionsPerValue'))
