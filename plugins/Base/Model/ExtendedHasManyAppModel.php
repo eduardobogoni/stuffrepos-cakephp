@@ -33,9 +33,11 @@ abstract class ExtendedHasManyAppModel extends AppModel {
         if (!$this->beforeSaveAll($options)) {
             return false;
         }
+        $created = $this->id === false;
         $result = $this->_evaluateSaveAllResult($this->_parentSaveAll(null, $options));
         if ($result) {
             $this->commit();
+            $this->afterSaveAll($created, $options);
         } else {
             $this->rollback();
         }
@@ -44,6 +46,10 @@ abstract class ExtendedHasManyAppModel extends AppModel {
     
     protected function beforeSaveAll($options) {
         return true;
+    }
+
+    protected function afterSaveAll($created, $options) {
+        //Do nothing
     }
 
     public function _parentSaveAll($data = null, $options = array()) {
