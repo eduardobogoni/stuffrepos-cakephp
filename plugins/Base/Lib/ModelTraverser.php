@@ -116,7 +116,7 @@ class ModelTraverser {
             if (self::isField($model, $path[0])) {
                 if (count($path) == 1) {
                     return array(
-                        'all' => isset($row[$model->alias]) ? $row[$model->alias][$path[0]] : null,
+                        'all' => self::_findFieldValue($model, $row, $path[0]),
                         'lastInstance' => $lastInstance,
                         'model' => $model,
                     );
@@ -167,6 +167,24 @@ class ModelTraverser {
             }
         } catch (Exception $ex) {
             throw new ModelTraverserException($ex->getMessage(), $model, $row, $path, $ex);
+        }
+    }
+
+    private static function _findFieldValue(Model $model, $row, $field) {
+        if (array_key_exists($field, $row[$model->alias])) {            
+            return $row[$model->alias][$field];        
+        }
+        else if (empty($row[$model->alias][$model->primaryKey])) {
+            return null;                   
+        }
+        else {
+            $findRow = $model->find('first', array(
+                'recursive' => -1,
+                'conditions' => array(
+                    $model->alias . '.' . $model->primaryKey => $row[$model->alias][$model->primaryKey],
+                ),
+            ));
+            return empty($findRow) ? null : $row[$model->alias][$field];
         }
     }
 
