@@ -24,8 +24,12 @@ class AppId {
             return APP;
         } else if (defined('APP_DIR')) {
             return APP_DIR;
+        } else if (($path = self::_getAppPathFromArgv())) {
+            return $path;
+        } else if (($path = self::_getAppPathFromIndexPath())) {
+            return $path;
         } else {
-            return self::_getAppPathFromArgv();
+            throw new Exception("APP path not found");
         }
     }
 
@@ -36,9 +40,16 @@ class AppId {
                 return $argv[$k + 1];
             }
         }
-        throw new Exception("APP path not found in \$argv");
+        return false;
     }
-    
+
+    private static function _getAppPathFromIndexPath() {
+        $script = realpath(filter_input(INPUT_SERVER, 'SCRIPT_FILENAME'));
+        return basename(dirname($script)) == 'webroot' ?
+                dirname(dirname($script)) :
+                dirname($script);
+    }
+
     private static function _quoteAppId($appId) {
         return preg_replace('/[^a-zA-Z0-9_]/', '_', $appId);
     }

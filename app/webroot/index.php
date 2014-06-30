@@ -4,9 +4,6 @@ if (!defined('ROOT')) {
     define('ROOT', dirname(dirname(dirname(__FILE__))));
 }
 
-if (!defined('APP_DIR')) {
-    define('APP_DIR', basename(dirname(dirname(__FILE__))));
-}
-
-require_once(dirname(__FILE__) . '/../../stuffrepos-cakephp/include.php');
-require_once(dirname(__FILE__) . '/../../stuffrepos-cakephp/cakephp/app/webroot/index.php');
+$ds = DIRECTORY_SEPARATOR;
+require_once(dirname(dirname(dirname(__FILE__))) . $ds . 'stuffrepos-cakephp' . $ds . 'include.php');
+require_once(dirname(dirname(dirname(__FILE__))) . $ds . 'stuffrepos-cakephp' . $ds . 'cakephp' . $ds . 'app' . $ds . 'webroot' . $ds . 'index.php');
