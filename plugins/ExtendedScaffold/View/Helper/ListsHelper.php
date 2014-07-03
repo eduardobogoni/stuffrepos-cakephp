@@ -292,11 +292,12 @@ class ListsHelper extends AppHelper {
             if (!empty($this->options['model']) && empty($rowActionListOptions['model'])) {
                 $rowActionListOptions['model'] = $this->options['model'];
             }
+            $rowActionListOptions['controller'] = $this->controller->name;
             $cells[] = array(
                 'attributes' => array(
                     'class' => array('actions')
                 ),
-                'content' => $this->ControllerMenu->outputObjectMenu($row, $this->controller->name, $this->options['rowActionListOptions'])
+                'content' => $this->ControllerMenu->instanceMenu($row, $rowActionListOptions)
             );
         }
 

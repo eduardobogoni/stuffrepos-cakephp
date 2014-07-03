@@ -6,29 +6,16 @@ App::uses('ControllerInspector', 'Base.Lib');
 
 /**
  * Monta menus automaticamente baseados em convenções ou configurações
- * por controller;
+ * por controller.
  */
 class ControllerMenuHelper extends AppHelper {
 
-    const LAYOUT_LIST = 'line';
-    const LAYOUT_TABLE = 'table';
-
-    public $debug = false;
     public $helpers = array(
         'Html',
         'AccessControl.AccessControl',
         'Base.CakeLayers',
+        'Widgets.ActionList',
     );
-
-    /**
-     * @var AppControler
-     */
-    private $currentController;
-
-    /**
-     * @var AppControler
-     */
-    private $targetController;
 
     /**
      * @var array
@@ -55,86 +42,140 @@ class ControllerMenuHelper extends AppHelper {
     /**
      * @var array
      */
-    private $defaultOptions = array(
-        'beforeAll' => '',
-        'afterAll' => '',
-        'beforeEach' => '',
-        'afterEach' => '',
+    public $settings = array(
+        'listLayoutBeforeAll' => '',
+        'listLayoutAfterAll' => '',
+        'listLayoutBeforeEach' => '',
+        'listLayoutAfterEach' => '',
         'tableLayoutBeforeAll' => '',
         'tableLayoutAfterAll' => '',
         'tableLayoutBeforeEach' => '',
         'tableLayoutAfterEach' => '',
-        'id' => null,
-        'controller' => null,
-        'skipNoRequiredIdActions' => false,
-        'shortFormat' => false,
+        'layout' => ActionListHelper::LAYOUT_LIST,
         'skipActions' => array(),
-        'layout' => self::LAYOUT_LIST
+        'controller' => null,
+        'id' => null,
+        'debug' => false,
     );
-    
-    public function __construct(\View $View, $settings = array()) {
-        parent::__construct($View, $settings);
-        $this->defaultOptions = $settings + $this->defaultOptions;
-    }
 
-    public function outputModuleMenu($options = array()) {
-        $this->options = $this->_mergeOptions($options);
-        $this->currentController = $this->_foundCurrentController();
-        $this->targetController = $this->_foundTargetController();
-        return $this->_outputActions(
-                        $this->_navigableActions(
-                                $this->_controllerActions(
-                                        $this->targetController
-                                )
-                        )
+    /**
+     * @var array
+     */
+    private $moduleMenuDefaultOptions = array(
+        'shortFormat' => false,
+        'skipNoRequiredIdActions' => false,
+        'layout' => ActionListHelper::LAYOUT_LIST,
+    );
+
+    /**
+     * @var array
+     */
+    private $instanceMenuDefaultOptions = array(
+        'shortFormat' => true,
+        'skipNoRequiredIdActions' => true,
+        'layout' => ActionListHelper::LAYOUT_TABLE,
+    );
+
+    /**
+     * 
+     * @param array $options
+     * @return string
+     */
+    public function moduleMenu($options = array()) {
+        $options = $this->_buildOptions($this->moduleMenuDefaultOptions, $options);
+        return $this->_menuByOptions(
+                        $options
         );
     }
 
-    private function _navigableActions($actions) {
+    /**
+     * 
+     * @param array $instance
+     * @param array $options
+     * @return string
+     */
+    public function instanceMenu($instance, $options = array()) {
+        $options = $this->_buildOptions($this->instanceMenuDefaultOptions, $options);
+        $options['id'] = $this->_getInstanceId($instance, $options);
+        return $this->_menuByOptions($options);
+    }
+
+    /**
+     * 
+     * @param array $defaultOptions
+     * @param array $userOptions
+     * @return array
+     */
+    private function _buildOptions($defaultOptions, $userOptions) {
+        $ret = array_merge($this->settings, $defaultOptions, $userOptions);
+        $ret['_currentController'] = $this->CakeLayers->getController($this->params['controller']);
+        $ret['_targetController'] = $this->CakeLayers->getController($ret['controller']);
+        $ret['_targetObjectModel'] = $ret['_targetController']->{$ret['_targetController']->modelClass};
+        return $ret;
+    }
+
+    /**
+     * 
+     * @param array $options
+     * @return string
+     */
+    private function _menuByOptions($options) {
+        $controllerActions = $this->_navigableActions(
+                $this->_moduleActions($options), $options
+        );
+        $actions = array();
+        foreach ($controllerActions as $controllerAction) {            
+            $actions[] = array(
+                'caption' => $this->_getTitle($controllerAction, $options),
+                'post' => array_key_exists('post', $controllerAction) && $controllerAction['post'],
+                'url' => $this->_buildActionUrl($controllerAction, $options),
+                'question' => array_key_exists('question', $controllerAction) ? $controllerAction['question'] : false,
+            );
+        }
+        return $this->ActionList->actionList($actions, $options);
+    }
+
+    /**
+     * 
+     * @param array $instance
+     * @param array $options
+     * @return mixed
+     */
+    private function _getInstanceId($instance, $options) {
+        if (empty($options['model'])) {
+            $model = $options['_targetController']->{
+                    $options['_targetController']->modelClass
+                    };
+        } else {
+            $model = $this->CakeLayers->getModel($options['model']);
+        }
+        return $instance[$model->alias][$model->primaryKey];
+    }
+
+    private function _navigableActions($actions, $options) {
         $navigableActions = array();
         foreach ($actions as $action) {
-            if ($this->_isNavigable($action)) {
+            if ($this->_isNavigable($action, $options)) {
                 $navigableActions[] = $action;
             }
         }
         return $navigableActions;
     }
 
-    public function outputObjectMenu($object, $controller = null, $options = array()) {
-        if ($controller) {
-            $options['controller'] = $controller;
-        }
-        $this->options = $this->_mergeOptions($options);
-        $this->currentController = $this->_foundCurrentController();
-        $this->targetController = $this->_foundTargetController();
-        if (empty($options['model'])) {
-            $model = $this->targetController->{
-                    $this->targetController->modelClass
-                    };
-        } else {
-            $model = $this->CakeLayers->getModel($options['model']);
-        }
-        $options['id'] = $object[$model->alias][$model->primaryKey];
-        $options['shortFormat'] = true;
-        $options['skipNoRequiredIdActions'] = true;
-        $options['layout'] = self::LAYOUT_TABLE;
-        return $this->outputModuleMenu($options);
-    }
-
-    private function _controllerActions(&$controller) {
+    private function _moduleActions($options) {
         $groups = array($this->defaultActions);
-        if (!empty($this->settings['moduleActions'])) {
-            $groups[] = $this->settings['moduleActions'];
+        if (!empty($options['moduleActions'])) {
+            $groups[] = $options['moduleActions'];
         }
-        if (!empty($controller->moduleActions)) {
-            $groups[] = $controller->moduleActions;
+        if (!empty($options['_targetController']->moduleActions)) {
+            $groups[] = $options['_targetController']->moduleActions;
         }
 
         $added = array();
 
         foreach ($groups as $group) {
             foreach ($group as $action) {
-                $url = $this->_extractActionUrl($action);
+                $url = $this->_extractActionUrl($action, $options);
                 $actionPath = $url['controller'] . '/' . $url['action'];
                 $added[$actionPath] = $action;
             }
@@ -143,120 +184,16 @@ class ControllerMenuHelper extends AppHelper {
         return $added;
     }
 
-    public function outputActions($actions, $options = array()) {
-        $this->options = $this->_mergeOptions($options);
-        $this->currentController = $this->_foundCurrentController();
-        $this->targetController = $this->_foundTargetController();
-        return $this->_outputActions($actions);
-    }
-
-    private function _outputActions($actions) {
-        switch ($this->options['layout']) {
-            case self::LAYOUT_LIST:
-                return $this->_outputActionsLine($actions);
-
-            case self::LAYOUT_TABLE:
-                return $this->_outputActionsTable($actions);
-
-            default:
-                throw new Exception("Layout not mapped: \"{$this->options['layout']}\".");
-        }
-    }
-
-    private function _outputActionsLine($actions) {
-        $buffer = $this->options['beforeAll'];
-        foreach ($actions as $action) {
-            $buffer .= $this->options['beforeEach'] . $this->_buildActionLink($action) . $this->options['afterEach'];
-        }
-        $buffer .= $this->options['afterAll'];
-        return $buffer;
-    }
-
-    private function _outputActionsTable($actions) {
-        if (count($actions) >= 4) {
-            $rows = floor(count($actions) / sqrt(count($actions)));
-        } else {
-            $rows = 1;
-        }
-
-        $columns = ceil(count($actions) / $rows);
-        $cellWidth = ($columns == 0 ? '100%' : floor(100 / $columns) . '%');
-
-        $b = $this->options['tableLayoutBeforeAll'];
-        $b .= '<table class="actionListHelperTableLayout">';
-        $cell = 0;
-
-        for ($row = 0; $row < $rows; $row++) {
-            $b .= '<tr>';
-            for ($column = 0; $column < $columns; $column++) {
-                $index = $row * $columns + $column;
-                $b .= "<td style='width: $cellWidth'>";
-                if (!empty($actions[$index])) {
-                    $b .= $this->options['tableLayoutBeforeEach'];
-                    $b .= $this->_buildActionLink($actions[$index]);
-                    $b .= $this->options['tableLayoutAfterEach'];
-                } else {
-                    $b .= '&nbsp;';
-                }
-
-                $b .= '</td>';
-            }
-            $b .= '</tr>';
-        }
-
-        $b .= '</table>';
-        $b .= $this->options['tableLayoutAfterAll'];
-        return $b;
-    }
-
     public function setDefaultOption($key, $value) {
         $this->defaultOptions[$key] = $value;
     }
 
-    private function _mergeOptions($options) {
-        foreach ($this->defaultOptions as $key => $defaultValue) {
-            if (!isset($options[$key])) {
-                $options[$key] = isset($this->settings[$key]) ? $this->settings[$key] : $defaultValue;
-            }
-        }
-
-        return $options;
-    }
-
-    private function _foundCurrentController() {
-        return $this->_getController($this->params['controller']);
-    }
-
-    private function _foundTargetController() {
-        if ($this->options['controller']) {
-            return $this->_getController($this->options['controller']);
-        } else {
-            return $this->currentController;
-        }
-    }
-
-    private function _getController($controllerName) {
-        return $this->CakeLayers->getController($controllerName);
-    }
-
-    private function _buildActionLink($action) {
-        $linkOptions = empty($action['linkOptions']) ? array() : $action['linkOptions'];        
-        $linkOptions['method'] = $this->_isActionPost($action) ? 'post' : 'get';
-        $question = isset($action['question']) ? __d('widgets',$action['question']) : false;
-        return $this->AccessControl->link(
-                        $this->_getTitle($action), $this->_buildActionUrl($action), $linkOptions, $question);
-    }
-
-    private function _isActionPost($action) {
-        return !empty($action['post']);
-    }
-
-    private function _isNavigable($targetAction) {
-        $message = $this->_checkNavigable($targetAction);
+    private function _isNavigable($targetAction, $options) {
+        $message = $this->_checkNavigable($targetAction, $options);
         if ($message == false) {
             return true;
         } else {
-            if ($this->debug) {
+            if ($options['debug']) {
                 debug(array('notNavigable' => compact('message', 'targetAction')));
             }
 
@@ -264,15 +201,15 @@ class ControllerMenuHelper extends AppHelper {
         }
     }
 
-    private function _checkNavigable($targetAction) {
-        $actionUrl = $this->_extractActionUrl($targetAction);
+    private function _checkNavigable($targetAction, $options) {
+        $actionUrl = $this->_extractActionUrl($targetAction, $options);
 
         //Acesso negado
-        if (!$this->AccessControl->hasAccessByUrl($this->_buildActionUrl($targetAction))) {
+        if (!$this->AccessControl->hasAccessByUrl($this->_buildActionUrl($targetAction, $options))) {
             return __d('widgets','Access denied.');
         }
 
-        $currentUrl = $this->_extractCurrentUrl();
+        $currentUrl = $this->_extractCurrentUrl($options);
 
         // Mesma action
         if (($currentUrl['controller'] == $actionUrl['controller']) &&
@@ -281,7 +218,7 @@ class ControllerMenuHelper extends AppHelper {
         }
 
         // Formato curto
-        if ($this->options['shortFormat'] && !empty($targetAction['skipOnShort'])) {
+        if ($options['shortFormat'] && !empty($targetAction['skipOnShort'])) {
             return __d('widgets','Skip on short format menu.');
         }
 
@@ -291,42 +228,42 @@ class ControllerMenuHelper extends AppHelper {
         }
 
         // Não necessita de ID e opção para excluir
-        if (!$targetAction['hasId'] && $this->options['skipNoRequiredIdActions']) {
+        if (!$targetAction['hasId'] && $options['skipNoRequiredIdActions']) {
             return __d('widgets','Skip no required id actions.');
         }
 
         // Negado pelo controller
-        if ($this->_deniedAction($actionUrl)) {
+        if ($this->_deniedAction($actionUrl, $options)) {
             return __d('widgets','Denied by controller.');
         }
 
         // Registrado na opção skipActions
-        foreach ($this->options['skipActions'] as $skipActionUrl) {
+        foreach ($options['skipActions'] as $skipActionUrl) {
             if ($this->_isUrlEquals($this->_parseUrl($skipActionUrl), $actionUrl)) {
                 return __d('widgets','Action skipped.');
             }
         }
 
         // Método próprio no controller
-        if (!$this->_isNavigableControllerMethod($targetAction)) {
+        if (!$this->_isNavigableControllerMethod($targetAction, $options)) {
             return __d('widgets','Navigable method returned false.');
         }
 
         return false;
     }
 
-    private function _deniedAction($actionUrl) {
-        if ($actionUrl['controller'] == $this->_getTargetControllerUri()) {
-            return !ControllerInspector::actionExists($this->targetController, $actionUrl['action']) ||
-                    (isset($this->targetController->notModuleActions) &&
-                    array_search($actionUrl['action'], $this->targetController->notModuleActions) !== false);
+    private function _deniedAction($actionUrl, $options) {
+        if ($actionUrl['controller'] == $this->_getTargetControllerUri($options)) {
+            return !ControllerInspector::actionExists($options['_targetController'], $actionUrl['action']) ||
+                    (isset($options['_targetController']->notModuleActions) &&
+                    array_search($actionUrl['action'], $options['_targetController']->notModuleActions) !== false);
         } else {
             return false;
         }
     }
 
-    private function _buildActionUrl($targetAction) {
-        $actionUrl = $this->_extractActionUrl($targetAction);
+    private function _buildActionUrl($targetAction, $options) {
+        $actionUrl = $this->_extractActionUrl($targetAction, $options);
 
         $url = '';
 
@@ -350,10 +287,10 @@ class ControllerMenuHelper extends AppHelper {
         return $url;
     }
 
-    private function _getTitle($action) {
-        $actionUrl = $this->_extractActionUrl($action);
+    private function _getTitle($action, $options) {
+        $actionUrl = $this->_extractActionUrl($action, $options);
 
-        if ($this->options['shortFormat']) {
+        if ($options['shortFormat']) {
             return trim(sprintf($action['format'], ''));
         } else {
             $title = Inflector::singularize($actionUrl['controller']);
@@ -364,7 +301,7 @@ class ControllerMenuHelper extends AppHelper {
         }
     }
 
-    private function _extractCurrentUrl() {
+    private function _extractCurrentUrl($options) {
         $controller = $this->params['controller'];
         $action = isset($this->params['action']) ? $this->params['action'] : 'index';
         $id = isset($this->params['pass'][0]) ? $this->params['pass'][0] : null;
@@ -377,29 +314,26 @@ class ControllerMenuHelper extends AppHelper {
         return array(
             'controller' => $controller,
             'action' => $action,
-            'id' => ($this->options['id'] ? $this->options['id'] : $id )
+            'id' => ($options['id'] ? $options['id'] : $id )
         );
     }
 
-    private function _getTargetControllerUri() {
-        return Inflector::underscore($this->targetController->name);
+    private function _getTargetControllerUri($options) {
+        return Inflector::underscore($options['_targetController']->name);
     }
 
-    private function _getTargetControllerPluginUri() {
-        return empty($this->targetController->plugin) ? null : Inflector::underscore($this->targetController->plugin);
+    private function _getTargetControllerPluginUri($options) {
+        return empty($options['_targetController']->plugin) ? null : Inflector::underscore($options['_targetController']->plugin);
     }
 
-    private function _extractActionUrl($action) {
+    private function _extractActionUrl($action, $options) {
         $actionUrl = $this->_parseUrl($action['url']);
-
-        $url = array(
-            'plugin' => $actionUrl['plugin'] ? $actionUrl['plugin'] : $this->_getTargetControllerPluginUri(),
-            'controller' => $actionUrl['controller'] ? $actionUrl['controller'] : $this->_getTargetControllerUri(),
+        return array(
+            'plugin' => $actionUrl['plugin'] ? $actionUrl['plugin'] : $this->_getTargetControllerPluginUri($options),
+            'controller' => $actionUrl['controller'] ? $actionUrl['controller'] : $this->_getTargetControllerUri($options),
             'action' => isset($actionUrl['action']) ? $actionUrl['action'] : 'index',
-            'id' => $this->_extractActionId($action)
+            'id' => $this->_extractActionId($action, $options)
         );
-
-        return $url;
     }
 
     private function _parseUrl($url) {
@@ -414,28 +348,22 @@ class ControllerMenuHelper extends AppHelper {
         return $url;
     }
 
-    private function _extractActionId($action) {
-        $currentUrl = $this->_extractCurrentUrl();
+    private function _extractActionId($action, $options) {
+        $currentUrl = $this->_extractCurrentUrl($options);
 
         if ($action['hasId']) {
             if (isset($action['field']) && $action['field']) {
                 $obj = $this->_getTargetControllerObject($currentUrl['id']);
                 $model = $this->_getTargetObjectModel();
-                if ($obj && $model) {
-                    return $this->_getObjectFieldValue($model->name, $obj, $action['field']);
-                } else {
-                    return $this->_getCurrentActionFieldValue($action['field']);
-                }
+                return $obj && $model ?
+                        $this->_getObjectFieldValue($model->name, $obj, $action['field']) :
+                        $this->_getCurrentActionFieldValue($action['field']);
             } else {
                 return $currentUrl['id'];
             }
         } else {
             return null;
         }
-    }
-
-    private function _getTargetObjectModel() {
-        return $this->targetController->{$this->targetController->modelClass};
     }
 
     private function _getTargetControllerObject($primaryKeyValue) {
@@ -481,14 +409,14 @@ class ControllerMenuHelper extends AppHelper {
                 && $url1['action'] == $url2['action'];
     }
 
-    private function _isNavigableControllerMethod($targetAction) {
-        $actionUrl = $this->_extractActionUrl($targetAction);
+    private function _isNavigableControllerMethod($targetAction, $options) {
+        $actionUrl = $this->_extractActionUrl($targetAction, $options);
         $methodName = '__' . Inflector::variable("is_navigable_" . $actionUrl['action']);
-        $controller = $this->_getController($actionUrl['controller']);
+        $controller = $this->CakeLayers->getController($actionUrl['controller']);
 
         if (method_exists($controller, $methodName)) {
             return call_user_func(array($controller, $methodName), array(
-                        'options' => $this->options,
+                        'options' => $options,
                         'currentUrl' => $this->_extractCurrentUrl(),
                         'targetAction' => $targetAction,
                         'targetActionUrl' => $actionUrl,

@@ -5,36 +5,34 @@ App::uses('AppHelper', 'View/Helper');
 
 /**
  * Cria listas de links.
+ * 
+ * Action:
+ * - post
+ * - caption
+ * - linkOptions
+ * - url
  */
 class ActionListHelper extends AppHelper {
 
-    const LAYOUT_LIST = 'line';
+    const LAYOUT_LIST = 'list';
     const LAYOUT_TABLE = 'table';
 
-    public $debug = false;
     public $helpers = array(
-        'Html',
         'AccessControl.AccessControl',
-        'Base.CakeLayers',
     );
 
     /**
      * @var array
      */
     public $settings = array(
-        'beforeAll' => '',
-        'afterAll' => '',
-        'beforeEach' => '',
-        'afterEach' => '',
+        'listLayoutBeforeAll' => '',
+        'listLayoutAfterAll' => '',
+        'listLayoutBeforeEach' => '',
+        'listLayoutAfterEach' => '',
         'tableLayoutBeforeAll' => '',
         'tableLayoutAfterAll' => '',
         'tableLayoutBeforeEach' => '',
         'tableLayoutAfterEach' => '',
-        'id' => null,
-        'controller' => null,
-        'skipNoRequiredIdActions' => false,
-        'shortFormat' => false,
-        'skipActions' => array(),
         'layout' => self::LAYOUT_LIST
     );
 
@@ -44,16 +42,17 @@ class ActionListHelper extends AppHelper {
      * @return string
      * @throws Exception
      */
-    public function actionList($actions) {
-        switch ($this->settings['layout']) {
+    public function actionList($actions, $options = array()) {
+        $options = array_merge($this->settings, $options);
+        switch ($options['layout']) {
             case self::LAYOUT_LIST:
-                return $this->_outputActionsLine($this->_parseActions($actions));
+                return $this->_outputActionsList($this->_parseActions($actions), $options);
 
             case self::LAYOUT_TABLE:
-                return $this->_outputActionsTable($this->_parseActions($actions));
+                return $this->_outputActionsTable($this->_parseActions($actions), $options);
 
             default:
-                throw new Exception("Layout not mapped: \"{$this->settings['layout']}\".");
+                throw new Exception("Layout not mapped: \"{$options['layout']}\".");
         }
     }
 
@@ -66,16 +65,27 @@ class ActionListHelper extends AppHelper {
         }, $actions);
     }
 
-    private function _outputActionsLine($actions) {
-        $buffer = $this->settings['beforeAll'];
+    /**
+     * 
+     * @param array $actions
+     * @param array $options
+     * @return string
+     */
+    private function _outputActionsList($actions, $options) {
+        $buffer = $options['listLayoutBeforeAll'];
         foreach ($actions as $action) {
-            $buffer .= $this->settings['beforeEach'] . $this->_buildActionLink($action) . $this->settings['afterEach'];
+            $buffer .= $options['listLayoutBeforeEach'] . $this->_buildActionLink($action) . $options['listLayoutAfterEach'];
         }
-        $buffer .= $this->settings['afterAll'];
+        $buffer .= $options['listLayoutAfterAll'];
         return $buffer;
     }
 
-    private function _outputActionsTable($actions) {
+    /**
+     * 
+     * @param array $actions
+     * @return string
+     */
+    private function _outputActionsTable($actions, $options) {
         if (count($actions) >= 4) {
             $rows = floor(count($actions) / sqrt(count($actions)));
         } else {
@@ -85,9 +95,8 @@ class ActionListHelper extends AppHelper {
         $columns = ceil(count($actions) / $rows);
         $cellWidth = ($columns == 0 ? '100%' : floor(100 / $columns) . '%');
 
-        $b = $this->settings['tableLayoutBeforeAll'];
+        $b = $options['tableLayoutBeforeAll'];
         $b .= '<table class="actionListHelperTableLayout">';
-        $cell = 0;
 
         for ($row = 0; $row < $rows; $row++) {
             $b .= '<tr>';
@@ -95,9 +104,9 @@ class ActionListHelper extends AppHelper {
                 $index = $row * $columns + $column;
                 $b .= "<td style='width: $cellWidth'>";
                 if (!empty($actions[$index])) {
-                    $b .= $this->settings['tableLayoutBeforeEach'];
+                    $b .= $options['tableLayoutBeforeEach'];
                     $b .= $this->_buildActionLink($actions[$index]);
-                    $b .= $this->settings['tableLayoutAfterEach'];
+                    $b .= $options['tableLayoutAfterEach'];
                 } else {
                     $b .= '&nbsp;';
                 }
@@ -108,10 +117,15 @@ class ActionListHelper extends AppHelper {
         }
 
         $b .= '</table>';
-        $b .= $this->settings['tableLayoutAfterAll'];
+        $b .= $options['tableLayoutAfterAll'];
         return $b;
     }
 
+    /**
+     * 
+     * @param array $action
+     * @return string
+     */
     private function _buildActionLink($action) {
         $linkOptions = empty($action['linkOptions']) ? array() : $action['linkOptions'];
         $linkOptions['method'] = $action['post'] ? 'post' : 'get';
