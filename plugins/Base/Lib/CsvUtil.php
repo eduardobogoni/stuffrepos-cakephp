@@ -27,6 +27,29 @@ class CsvUtil {
         return $ret;
     }
 
+    public static function contentToArray($content, $delimiter = ',',
+            $enclosure = '"') {
+        $lines = array();
+        foreach (explode(PHP_EOL, $content) as $k => $sourceLine) {
+            if (trim($sourceLine) == '') {
+                continue;
+            }
+            $lines[] = str_getcsv($sourceLine, $delimiter, $enclosure);
+        }
+        return $lines;
+    }
+
+    public static function arrayToFile($filePath, $lines) {
+        if (($handle = fopen($filePath, "w")) !== FALSE) {
+            foreach ($lines as $line) {
+                fputcsv($handle, $line);
+            }
+            fclose($handle);
+        } else {
+            throw new Exception("Failed to open file \"$filePath\"");
+        }
+    }
+
     private static function _rawRowToAssociativeRow($row, $columns,
             $convertFunction) {
         $ret = array();
