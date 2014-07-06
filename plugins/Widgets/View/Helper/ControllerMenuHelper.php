@@ -417,7 +417,7 @@ class ControllerMenuHelper extends AppHelper {
         if (method_exists($controller, $methodName)) {
             return call_user_func(array($controller, $methodName), array(
                         'options' => $options,
-                        'currentUrl' => $this->_extractCurrentUrl(),
+                        'currentUrl' => $this->_extractCurrentUrl($options),
                         'targetAction' => $targetAction,
                         'targetActionUrl' => $actionUrl,
                     ));
