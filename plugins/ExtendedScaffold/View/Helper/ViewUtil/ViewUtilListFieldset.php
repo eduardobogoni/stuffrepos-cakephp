@@ -12,7 +12,7 @@ class ViewUtilListFieldset {
     private $settings;
 
     public function __construct(
-            ViewUtilHelper $parent
+            DetailHelper $parent
             , $data
             , &$scaffoldVars
             , $settings
