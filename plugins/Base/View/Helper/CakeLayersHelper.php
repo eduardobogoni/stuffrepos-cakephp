@@ -51,6 +51,13 @@ class CakeLayersHelper extends Helper {
     public function getControllerDefaultModel($controllerName = null) {
         return $this->getModel($this->getControllerDefaultModelClass($controllerName));
     }
+    
+    public function getControllerByModel($model) {
+        if ($model instanceof Model) {
+            $model = $model->name;
+        }
+        return $this->getController(Inflector::underscore(Inflector::pluralize($model)));
+    }
 
     /**
      * 

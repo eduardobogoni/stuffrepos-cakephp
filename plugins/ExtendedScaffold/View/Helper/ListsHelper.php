@@ -116,10 +116,12 @@ class ListsHelper extends AppHelper {
     }
 
     public function _setup($options) {
-        if (empty($options['controller'])) {
-            $this->controller = $this->CakeLayers->getController();
-        } else {
+        if (!empty($options['controller'])) {
             $this->controller = $this->CakeLayers->getController($options['controller']);
+        } else if (!empty($options['model'])) {
+            $this->controller = $this->CakeLayers->getControllerByModel($options['model']);
+        } else {
+            $this->controller = $this->CakeLayers->getController();
         }
 
         if (isset($options['model'])) {
@@ -384,16 +386,11 @@ class ListsHelper extends AppHelper {
         } else {
             if (!empty($field['association'])) {
                 if (!empty($row[$this->model->alias][$field['association']['foreignKey']])) {
-                    $link = array('controller' => $field['association']['controller'], 'action' => 'view',
-                        $row[$this->model->alias][$field['association']['foreignKey']]);
+                    $link = $this->_associationLinkUrl($field, $row);
                 }
             } else {
                 if ($this->model && $firstField && $this->firstColumnViewLink) {
-                    $link = array(
-                        'controller' => Inflector::underscore($this->controller->name),
-                        'action' => 'view',
-                        $row[$this->model->alias][$this->model->primaryKey]
-                    );
+                    $link = $this->_selfLinkUrl($row);
                 }
             }
             
@@ -422,6 +419,28 @@ class ListsHelper extends AppHelper {
         } else {
             return $this->AccessControl->linkOrText($value, $link);
         }
+    }
+        
+    /**
+     * Retorna uma URL de link de associação.
+     * @param array $field
+     * @param array $row
+     * @return array
+     */
+    private function _associationLinkUrl($field, $row) {
+        return array(
+            'controller' => $field['association']['controller']
+            , 'action' => 'view'
+            , $row[$this->model->alias][$field['association']['foreignKey']]
+        );
+    }
+    
+    private function _selfLinkUrl($row) {
+        return array(
+            'controller' => Inflector::underscore($this->controller->name),
+            'action' => 'view',
+            $row[$this->model->alias][$this->model->primaryKey]
+        );
     }
 
     private function _formatValueAsList($value) {
