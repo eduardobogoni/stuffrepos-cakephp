@@ -41,6 +41,30 @@ class ModelTraverser {
         return $result['all'];
     }
 
+    public static function displayValue(Model $model, $row, $path) {
+        $originalPath = $path;
+        $result = self::find($model, $row, $path, $row);
+        if (!is_array($path)) {
+            $path = explode('.', $path);
+        }
+        end($path);
+        $pathLastPart = current($path);
+        $association = self::oneToManyAssociationByForeignKey($result['model'], $pathLastPart);
+        if ($association) {
+            if ($result['all']) {
+                return self::value(
+                    $result['model']
+                    , $result['lastInstance']
+                    , array($association, $result['model']->{$association}->displayField)
+                );
+            } else {
+                return null;
+            }
+        } else {
+            return $result['all'];
+        }
+    }
+
     public static function lastInstance(Model $model, $row, $path) {
         $result = self::find($model, $row, $path, $row);
         return $result['lastInstance'];

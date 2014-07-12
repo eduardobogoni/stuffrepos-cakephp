@@ -39,7 +39,7 @@ class ViewUtilExtendedFieldsetHelper extends AppHelper {
     }
 
     private function _fieldValue($field, $scaffoldVars) {
-        return $this->ViewUtil->autoFormat(ModelTraverser::value(
+        return $this->ViewUtil->autoFormat(ModelTraverser::displayValue(
                                 $this->_model($scaffoldVars),
                                 $scaffoldVars['instance'], $field['name']
         ));
