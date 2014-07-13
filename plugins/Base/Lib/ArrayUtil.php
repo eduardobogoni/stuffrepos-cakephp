@@ -100,14 +100,15 @@ class ArrayUtil {
         $ref = $value;
     }
 
-    public static function orderBy() {
+    public static function orderBy($array) {
         $args = func_get_args();
         $data = array_shift($args);
         foreach ($args as $n => $field) {
-            if (is_string($field)) {
+            if (is_string($field) || is_array($field)) {                
                 $tmp = array();
-                foreach ($data as $key => $row)
-                    $tmp[$key] = $row[$field];
+                foreach ($data as $key => $row) {
+                    $tmp[$key] = self::arrayIndex($row, self::arraylize($field));
+                }
                 $args[$n] = $tmp;
             }
         }
