@@ -40,6 +40,11 @@ class ExtendedOperationsBehavior extends ModelBehavior {
         parent::beforeFind($model, $query);
         $this->applyVirtualFields($model);
     }
+    
+    public function getVirtualFieldQuery(\Model $model, $virtualFieldName) {
+        $this->applyVirtualFields($model);
+        return $model->virtualFields[$virtualFieldName];
+    }
 
     public function applyVirtualFields(\Model $model) {
         if (empty($model->virtualFieldsSetted)) {
