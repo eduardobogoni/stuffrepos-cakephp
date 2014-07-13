@@ -1,6 +1,40 @@
 <?php
 
+/**
+ * Operações comuns de model que geram exceção caso não sejam executadas
+ * com sucesso (As operações nativas correspondentes retornam com valor
+ * falso):
+ * <ul>
+ *  <li>saveOrThrowException</li>
+ *  <li>saveAllOrThrowException</li>
+ *  <li>findByIdOrThrowException</li>
+ * </ul>
+ * 
+ * Como em controllers, utilize o atributo \$uses para autocarregamento
+ * de modelos:
+ * <pre>
+ * class MyModel {
+ * 
+ *  public $actsAs = array(
+ *      'Base.ExtendedOperations',
+ *  );  
+ * 
+ *  public $uses = array(
+ *      'OtherModel',
+ *  );
+ * 
+ * }
+ * 
+ * $myModel = ClassRegistry::init('MyModel');
+ * $myModel->OtherModel->find(...);
+ * </pre>
+ */
 class ExtendedOperationsBehavior extends ModelBehavior {
+    
+    public function setup(\Model $model, $config = array()) {
+        parent::setup($model, $config);
+        $this->_setupUses($model);
+    }
 
     public function beforeFind(\Model $model, $query) {
         parent::beforeFind($model, $query);
@@ -65,6 +99,14 @@ class ExtendedOperationsBehavior extends ModelBehavior {
             $ret[$name] = $data;
         }
         return $ret;
+    }
+    
+    private function _setupUses(\Model $model) {
+        if (isset($model->uses)) {
+            foreach($model->uses as $modelName) {
+                $model->{$modelName} = ClassRegistry::init($modelName);
+            }
+        }
     }
 
 }
