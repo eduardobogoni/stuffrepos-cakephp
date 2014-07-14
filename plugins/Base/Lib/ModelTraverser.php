@@ -65,54 +65,6 @@ class ModelTraverser {
         }
     }
 
-    public static function lastInstance(Model $model, $row, $path) {
-        $result = self::find($model, $row, $path, $row);
-        return $result['lastInstance'];
-    }
-
-    public static function lastInstancePrimaryKeyValue(Model $model, $row, $path) {
-        $result = self::find($model, $row, $path, $row);
-        return isset($result['lastInstance'][$result['model']->alias][$result['model']->primaryKey]) ?
-            $result['lastInstance'][$result['model']->alias][$result['model']->primaryKey] :
-            null;
-    }
-
-    public static function lastInstanceAssociationDisplayFieldValue(Model $model, $row, $path) {
-        $result = self::find($model, $row, $path, $row);
-
-        $associationAlias = self::oneToManyAssociationByForeignKey(
-                        $model, $path[count($path) - 1]
-        );
-
-        if (!$associationAlias) {
-            throw new ModelTraverserException("Association not found for foreingKey: \"{$path[count($path) - 1]}\"", $model, $row, $path);
-        }
-
-        $associationInstance = self::oneToManyAssociationInstanceByPrimaryKey(
-                        $model
-                        , $associationAlias
-                        , $result['all']
-        );
-
-        return $associationInstance[$model->{$associationAlias}->alias][$model->{$associationAlias
-                }
-                ->displayField];
-    }
-
-    private static function oneToManyAssociationInstanceByPrimaryKey(
-    $model
-    , $associationAlias
-    , $primaryKeyValue
-    ) {
-        return $model->{$associationAlias}->find(
-                        'first', array(
-                    'conditions' => array(
-                        "$associationAlias.{$model->{$associationAlias}->primaryKey}" => $primaryKeyValue
-                    )
-                        )
-        );
-    }
-
     private static function oneToManyAssociationByForeignKey(Model $model, $foreignKey) {
         foreach ($model->getAssociated() as $associationAlias => $type) {
             switch ($type) {
@@ -148,31 +100,8 @@ class ModelTraverser {
                     throw new Exception("Path continues, but next model is null. Path: " . print_r($path, true));
                 }
             } else if (self::isBelongsToAssociation($model, $path[0]) ||
-                    self::isHasOneAssociation($model, $path[0])) {
-                if (!isset($row[self::CACHE_KEY][$path[0]])) {
-                    if (self::isBelongsToAssociation($model, $path[0])) {
-                        $row[self::CACHE_KEY][$path[0]] = self::findBelongsToInstance($model, $path[0], $row);
-                    }
-                    //self::isHasOneAssociation($model, $path[0])
-                    else {
-                        $row[self::CACHE_KEY][$path[0]] = self::findHasOneInstance($model, $path[0], $row);
-                    }
-                }
-
-                if (count($path) == 1) {
-                    return array(
-                        'all' => $row[self::CACHE_KEY][$path[0]],
-                        'lastInstance' => $row[self::CACHE_KEY][$path[0]],
-                        'model' => $model->{$path[0]},
-                    );
-                } else {
-                    return self::find(
-                                    $model->{$path[0]}
-                                    , $row[self::CACHE_KEY][$path[0]]
-                                    , self::pathPopFirst($path)
-                                    , $row[self::CACHE_KEY][$path[0]]
-                    );
-                }
+                    self::isHasOneAssociation($model, $path[0])) {      
+                return self::_findOneToOneAssociation($model, $row, $path, $lastInstance);
             } else if (self::isHasManyAssociation($model, $path[0])) {
                 if (!isset($row->{$path[0]})) {
                     $row[self::CACHE_KEY][$path[0]] = self::findHasManyInstance($model, $path[0], $row);
@@ -194,14 +123,57 @@ class ModelTraverser {
         }
     }
 
+    private static function _findOneToOneAssociation(Model $model, &$row, $path,
+            &$lastInstance = null) {
+        if (array_key_exists($path[0], $row)) {
+            if (count($path) == 1) {
+                return array(
+                    'all' => $row[$path[0]],
+                    'lastInstance' => $row[$path[0]],
+                    'model' => $model->{$path[0]},
+                );
+            } else {
+                return self::find(
+                                $model->{$path[0]}
+                                , $row[$path[0]]
+                                , self::pathPopFirst($path)
+                                , $row[$path[0]]
+                );
+            }
+        }
+        if (!isset($row[self::CACHE_KEY][$path[0]])) {
+            if (self::isBelongsToAssociation($model, $path[0])) {
+                $row[self::CACHE_KEY][$path[0]] = self::findBelongsToInstance($model, $path[0], $row);
+            }
+            //self::isHasOneAssociation($model, $path[0])
+            else {
+                $row[self::CACHE_KEY][$path[0]] = self::findHasOneInstance($model, $path[0], $row);
+            }
+        }
+        if (count($path) == 1) {
+            return array(
+                'all' => $row[self::CACHE_KEY][$path[0]],
+                'lastInstance' => $row[self::CACHE_KEY][$path[0]],
+                'model' => $model->{$path[0]},
+            );
+        } else {
+            return self::find(
+                            $model->{$path[0]}
+                            , $row[self::CACHE_KEY][$path[0]]
+                            , self::pathPopFirst($path)
+                            , $row[self::CACHE_KEY][$path[0]]
+            );
+        }
+    }
+
     private static function _findFieldValue(Model $model, $row, $field) {
-        if (array_key_exists($field, $row[$model->alias])) {            
-            return $row[$model->alias][$field];        
-        }
-        else if (empty($row[$model->alias][$model->primaryKey])) {
-            return null;                   
-        }
-        else {
+        if (array_key_exists($field, $row)) {           
+            return $row[$field];
+        } else if (array_key_exists($field, $row[$model->alias])) {
+            return $row[$model->alias][$field];
+        } else if (empty($row[$model->alias][$model->primaryKey])) {
+            return null;
+        } else {
             $findRow = $model->find('first', array(
                 'recursive' => -1,
                 'conditions' => array(
@@ -251,13 +223,14 @@ class ModelTraverser {
     }
 
     private static function findBelongsToInstance(Model $model, $alias, $row) {
-        return $model->{$alias}->find(
+        $ret = $model->{$alias}->find(
                         'first', array(
                     'conditions' => array(
                         "{$alias}.{$model->{$alias}->primaryKey}" => $row[$model->alias][$model->belongsTo[$alias]['foreignKey']]
                     ), 'recursive' => -1
                         )
         );
+        return $ret[$alias];
     }
 
     /**

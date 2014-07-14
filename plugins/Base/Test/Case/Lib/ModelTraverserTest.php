@@ -1,5 +1,7 @@
 <?php
 
+App::import('ModelTraverser', 'Base.Lib');
+
 class ModelTraverserTest extends CakeTestCase {
 
     public $fixtures = array(
@@ -9,7 +11,6 @@ class ModelTraverserTest extends CakeTestCase {
 
     public function setUp() {
         parent::setUp();
-        App::import('Lib', 'Base.ModelTraverser');
         $this->Article = ClassRegistry::init('BaseArticle');
         $this->Author = ClassRegistry::init('BaseAuthor');
     }
@@ -71,64 +72,26 @@ class ModelTraverserTest extends CakeTestCase {
         }
     }
 
-    public function testLastInstanceBelongsTo() {
-        $articles = $this->Article->find('all');
-
-        foreach ($articles as $article) {
-            $author = $this->Author->find(
-                    'first', array(
-                'conditions' => array(
-                    'id' => ModelTraverser::value($this->Article, $article, 'author_id')
-                ),
-                'recursive' => 0,
-                    )
-            );
-
-            if ($article[$this->Article->alias]['author_id']) {
-                $this->assertNotEqual($author, false);
-                $this->assertNotEqual($author, array());
-            } else {
-                $this->assertEqual($author, array());
-            }
-
-            foreach (array_keys($this->Author->schema()) as $authorField) {
-                $this->assertEquals(
-                        ModelTraverser::lastInstance(
-                                $this->Article
-                                , $article
-                                , $this->Article->Author->alias . '.' . $authorField
-                        )
-                        , $author
-                );
-            }
-        }
-    }
-
-    public function testBelongsToAssociationLastInstancePrimaryKey() {
-        $articles = $this->Article->find('all');
-
-        foreach ($articles as $article) {
+    public function testDisplayValue() {        
+        foreach ($this->Article->find('all') as $article) {
             $author = $this->Author->findById(
-                    ModelTraverser::value($this->Article, $article, 'author_id')
+                    $article[$this->Article->alias]['author_id']
             );
-
-            if ($article[$this->Article->alias]['author_id']) {
+            if ($article[$this->Article->alias]['author_id']) {                
                 $this->assertNotEqual($author, false);
                 $this->assertNotEqual($author, array());
-            } else {
+            }
+            else {
                 $this->assertEqual($author, array());
             }
-
-            foreach (array_keys($this->Author->schema()) as $authorField) {
-                $this->assertEquals(
-                        ModelTraverser::lastInstancePrimaryKeyValue(
-                                $this->Article
-                                , $article
-                                , $this->Article->Author->alias . '.' . $authorField
-                        )
-                        , isset($author[$this->Author->alias][$this->Author->primaryKey]) ? $author[$this->Author->alias][$this->Author->primaryKey] : null
-                );
-            }
+            $this->assertEquals(
+                    ModelTraverser::displayValue(
+                            $this->Article
+                            , $article
+                            , 'author_id'
+                    )
+                    , isset($author[$this->Author->alias][$this->Author->displayField]) ? $author[$this->Author->alias][$this->Author->displayField] : null
+            );
         }
     }
 
