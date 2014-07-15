@@ -22,8 +22,8 @@ class AppId {
     private static function _getAppPath() {
         if (defined('APP')) {
             return APP;
-        } else if (defined('APP_DIR')) {
-            return APP_DIR;
+        } else if (defined('ROOT') && defined('APP_DIR')) {
+            return ROOT . DS . APP_DIR;
         } else if (($path = self::_getAppPathFromArgv())) {
             return $path;
         } else if (($path = self::_getAppPathFromIndexPath())) {
