@@ -7,16 +7,21 @@ class TempDirectory {
      * corrente.
      * @return string
      */
-    public static function currentDirectory() {
+    public static function currentDirectory($uid = null) {
         if (defined('TMP')) {
             return TMP;
         } else {
-            return self::_rootDirectory() . self::_appId() . DS;
+            return self::_rootDirectory($uid) . self::_appId() . DS;
         }
     }
 
     private static function _appId() {
-        return defined('APP_ID') ? APP_ID : 'undefined-app-id';
+        if (defined('APP_ID') ) {
+            return APP_ID;
+        }
+        else {
+            throw new Exception("Constant 'APP_ID' not definend");
+        }
     }
 
     /**
@@ -24,7 +29,7 @@ class TempDirectory {
      * de aplicações.     
      * @return string
      */
-    private static function _rootDirectory() {
+    private static function _rootDirectory($uid) {
         return self::_homeDirectory() . DS . '.cakephp-tmp' . DS;
     }
 
@@ -40,9 +45,9 @@ class TempDirectory {
      * 
      * @return string
      */
-    private static function _homeDirectory() {
+    private static function _homeDirectory($uid = null) {
         if (function_exists('posix_getuid')) {
-            return self::_posixHomeDirectory(posix_getuid());
+            return self::_posixHomeDirectory($uid);
         } else {
             return sys_get_temp_dir();
         }
@@ -54,17 +59,15 @@ class TempDirectory {
      * @return string
      */
     private static function _posixHomeDirectory($uid) {
+        if (!$uid) {
+            $uid = posix_getuid();
+        }
         if (is_int($uid)) {
             $userConfig = posix_getpwuid($uid);
         } else {
             $userConfig = posix_getpwnam($uid);
         }
         return (empty($userConfig['dir']) ? sys_get_temp_dir() : $userConfig['dir']);
-    }
-
-    // Configuração de diretório de temporários por usuário.
-    public static function cakephpAppTemporaryDirectory($uid) {
-        return cakephpRootTemporaryDirectory($uid) . (defined('APP_ID') ? APP_ID : 'undefined-app-id') . DS;
     }
 
     private static function _removeStringPrefix($prefix, $string) {
