@@ -1,4 +1,4 @@
-<?php echo $this->ActionList->outputModuleMenu(); ?>
+<?php echo $this->ControllerMenu->moduleMenu(); ?>
 <?php echo sprintf(__("Edit %s", true), $singularHumanName); ?> 
 <?php
 

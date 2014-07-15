@@ -9,8 +9,8 @@ class AppController extends Controller {
         'ExtendedScaffold.ExtendedForm',
         'ExtendedScaffold.Lists',
         'ExtendedScaffold.ViewUtil',
-        'Widgets.ActionList' => array(
-            'beforeAll' => '<div class="moduleMenu">',
+        'Widgets.ControllerMenu' => array(
+            'beforeAll' => '<div class="ControllerMenu">',
             'afterAll' => '</div>',
             'beforeEach' => '',
             'afterEach' => '',

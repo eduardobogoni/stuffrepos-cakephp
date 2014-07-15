@@ -3,6 +3,7 @@
 App::uses('ArrayUtil', 'Base.Lib');
 App::uses('AppHelper', 'View/Helper');
 App::uses('ControllerInspector', 'Base.Lib');
+App::uses('ActionListHelper', 'Widgets.View/Helper');
 
 /**
  * Monta menus automaticamente baseados em convenções ou configurações
