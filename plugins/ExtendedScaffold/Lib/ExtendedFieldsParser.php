@@ -7,7 +7,7 @@ class ExtendedFieldsParser {
         static $instance = array();
 
         if (!$instance) {
-            $instance[0] = & new ExtendedFieldsParser();
+            $instance[0] = new ExtendedFieldsParser();
         }
         return $instance[0];
     }
