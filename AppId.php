@@ -3,7 +3,9 @@
 class AppId {
 
     public static function fetchAppId() {
-        define('APP_ID', self::_getFetchAppId());
+        if (!defined('APP_ID')) {
+            define('APP_ID', self::_getFetchAppId());
+        }
     }
 
     private static function _getFetchAppId() {
