@@ -160,18 +160,22 @@ class CakeLayersHelper extends Helper {
         return $this->_View;
     }
 
+    /**
+     * 
+     * @param mixed $model Model ou string.
+     * @param array $instance
+     * @param mixed $field string ou array.
+     * @param boolean $toDisplay
+     * @return mixed
+     * @deprecated Utilize ModelTraverser::displayValue() ou ModelTraverser::value().
+     */
     public function modelInstanceField($model, $instance, $field, $toDisplay = false) {
-        if (is_string($field)) {
-            $field = explode('.', $field);
+        if (!($model instanceof Model)) {
+            $model = ClassRegistry::init($model);
         }
-
-        if (count($field) == 1) {
-            $field = array_merge(
-                    array($model), $field
-            );
-        }
-
-        return $this->modelInstanceFieldByPath($model, $instance, $field, $toDisplay);
+        return $toDisplay ?
+                ModelTraverser::displayValue($model, $instance, $field) :
+                ModelTraverser::value($model, $instance, $field);
     }
 
     public function modelInstanceFieldByPath($model, $instance, $path, $toDisplay = false) {
