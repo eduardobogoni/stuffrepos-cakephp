@@ -128,7 +128,7 @@ class ModelTraverser {
             }
             return $stack;
         } catch (Exception $ex) {
-            throw new ModelTraverserException($ex->getMessage(), compact('model','row', 'path', 'leftPath', 'stack', 'currentModel', 'currentRow', 'currentNode', 'currentNodeType'), $ex);
+            throw new ModelTraverserException($ex->getMessage(), compact('model', 'row', 'path', 'leftPath', 'stack', 'currentModel', 'currentRow', 'currentNode', 'currentNodeType'), $ex);
         }
     }
 
@@ -341,6 +341,8 @@ class ModelTraverserException extends Exception {
     private static function _buildDebug($var) {
         if ($var instanceof Model) {
             return get_class($var) . " ({$var->name}/{$var->alias})";
+        } else if (is_object($var)) {
+            return 'Object ' . get_class($var);
         } else if (is_array($var)) {
             $ret = array();
             foreach ($var as $key => $value) {
