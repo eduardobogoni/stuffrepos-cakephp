@@ -394,9 +394,7 @@ class ListsHelper extends AppHelper {
                 }
             }
             
-            $value = $this->CakeLayers->modelInstanceFieldByPath(
-                $this->model, $row, $field['path'], true
-            );
+            $value = ModelTraverser::displayValue($this->model, $row, $field['path']);
 
             if (is_array($value)) {
                 $value = $this->_formatValueAsList($value);
