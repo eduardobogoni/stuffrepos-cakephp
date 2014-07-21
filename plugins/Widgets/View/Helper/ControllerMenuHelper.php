@@ -354,8 +354,8 @@ class ControllerMenuHelper extends AppHelper {
 
         if ($action['hasId']) {
             if (isset($action['field']) && $action['field']) {
-                $obj = $this->_getTargetControllerObject($currentUrl['id']);
-                $model = $this->_getTargetObjectModel();
+                $obj = $this->_getTargetControllerObject($currentUrl['id'], $options);
+                $model = $options['_targetObjectModel'];
                 return $obj && $model ?
                         $this->_getObjectFieldValue($model->name, $obj, $action['field']) :
                         $this->_getCurrentActionFieldValue($action['field']);
@@ -367,8 +367,8 @@ class ControllerMenuHelper extends AppHelper {
         }
     }
 
-    private function _getTargetControllerObject($primaryKeyValue) {
-        $model = $this->_getTargetObjectModel();
+    private function _getTargetControllerObject($primaryKeyValue, $options) {
+        $model = $options['_targetObjectModel'];
         return $model->find(
                         'first', array(
                     'conditions' => array(
