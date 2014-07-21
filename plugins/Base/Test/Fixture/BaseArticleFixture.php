@@ -1,5 +1,7 @@
 <?php
 
+App::uses('Model', 'Model');
+
 class BaseArticleFixture extends CakeTestFixture {
 
     public $fields = array(

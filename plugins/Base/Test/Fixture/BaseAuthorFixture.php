@@ -1,5 +1,7 @@
 <?php
 
+App::uses('Model', 'Model');
+
 class BaseAuthorFixture extends CakeTestFixture {
 
     public $fields = array(
@@ -15,8 +17,6 @@ class BaseAuthorFixture extends CakeTestFixture {
 
 class BaseAuthor extends Model {
 
-    public $alias = 'Author';
-    
     public $hasMany = array(
         'Article' => array(
             'className' => 'BaseArticle',
