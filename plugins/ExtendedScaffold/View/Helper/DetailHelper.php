@@ -144,7 +144,10 @@ class DetailHelper extends AppHelper {
         $b = '';
 
         foreach ($fieldsets as $fieldset) {
-            $b .= $this->_scaffoldExtendedViewFieldListFieldset($fieldset, compact('instance', 'associations', 'modelClass'));
+            $fieldSetResult = $this->_scaffoldExtendedViewFieldListFieldset($fieldset, compact('instance', 'associations', 'modelClass'));
+            if ($fieldSetResult) {
+                $b .= $fieldSetResult;
+            }
         }
 
         return $b;

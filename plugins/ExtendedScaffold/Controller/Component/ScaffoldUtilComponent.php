@@ -21,6 +21,7 @@
 
 App::uses('Component', 'Controller');
 App::uses('ExtendedFieldsParser', 'ExtendedScaffold.Lib');
+App::uses('ExtendedFieldsAccessControl', 'ExtendedScaffold.Lib');
 App::uses('Basics', 'Base.Lib');
 
 /**
@@ -70,8 +71,10 @@ class ScaffoldUtilComponent extends Component {
     private function _buildScaffoldFields(\Controller $controller) {
         if ($this->_getActionOption('setFields')) {
             $scaffoldFields = $this->_getActionOption('setFields');
-        } else {
+        } else if (array_key_exists ('scaffoldFields', $controller->viewVars)){
             $scaffoldFields = $controller->viewVars['scaffoldFields'];
+        } else {
+            return array();
         }
 
         if ($this->_getActionOption('appendFields')) {
@@ -108,18 +111,18 @@ class ScaffoldUtilComponent extends Component {
 
     private function _shouldRemoveData(\Controller $controller, $modelAlias, $field) {
         $scaffolfFields = $this->_buildScaffoldFields($controller);
-        $definition = ExtendedFieldsParser::parseFieldsets($scaffolfFields);
+        $definition = ExtendedFieldsParser::parseFieldsets($scaffolfFields);        
         foreach ($definition as $fieldSet) {
             foreach ($fieldSet['lines'] as $line) {
                 foreach ($line as $extendedFieldsParserField) {
                     if ($this->_fieldNameEquals($controller, $extendedFieldsParserField, "$modelAlias.$field")) {
-                        return !$this->_hasFieldAccess($extendedFieldsParserField)
-                                || !$this->_hasFieldSetAccess($fieldSet);
+                        return !ExtendedFieldsAccessControl::sessionUserHasFieldAccess($extendedFieldsParserField)
+                                || !ExtendedFieldsAccessControl::sessionUserHasFieldSetAccess($fieldSet);
                     }
                 }
             }
         }
-        return true;
+        return false;
     }
 
     private function _fieldNameEquals(\Controller $controller, $extendedFieldsParserField, $name) {
@@ -128,24 +131,6 @@ class ScaffoldUtilComponent extends Component {
                 $controller->{$controller->uses[0]}->alias;
         return Basics::fieldFullName($extendedFieldsParserField['name'], $defaultModel) ==
         Basics::fieldFullName($name, $defaultModel);
-    }
-
-    private function _hasFieldAccess($extendedFieldsParserField) {
-        return $this->_hasFieldSetAccess($extendedFieldsParserField['options']);
-    }
-    
-    private function _hasFieldSetAccess($extendedFieldsParserFieldSet) {
-        if (!empty($extendedFieldsParserFieldSet['accessObject'])) {
-            if (empty($extendedFieldsParserFieldSet['accessObjectType'])) {
-                return AccessControlComponent::sessionUserHasAccess($extendedFieldsParserFieldSet['accessObject']);
-            }
-            else {
-                return AccessControlComponent::sessionUserHasAccess($extendedFieldsParserFieldSet['accessObject'], $extendedFieldsParserFieldSet['accessObjectType']);
-            }           
-        }
-        else {
-            return true;
-        }
     }
 
     private function _fetchRefererFromRequest(\Controller $controller) {

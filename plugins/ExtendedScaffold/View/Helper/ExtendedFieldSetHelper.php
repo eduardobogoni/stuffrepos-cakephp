@@ -11,27 +11,37 @@ class ExtendedFieldSetHelper extends AppHelper {
     );
 
     public function fieldSet($data, $scaffoldVars) {
-        $b = '';
-        if (!empty($data['legend'])) {
-            $b .= "<h3>{$data['legend']}</h3>";
+        if (!ExtendedFieldsAccessControl::sessionUserHasFieldSetAccess($data)) {
+            return false;
+        } else if ($lines = $this->_lines($data, $scaffoldVars)) {
+            $b = '';
+            if (!empty($data['legend'])) {
+                $b .= "<h3>{$data['legend']}</h3>";
+            }
+            return $b . $this->FieldSetLayout->fieldSet($lines);
+        } else {
+            return false;
         }
-        $b .= $this->FieldSetLayout->fieldSet(
-                $this->_lines($data, $scaffoldVars)
-        );
-        return $b;
     }
 
     private function _lines($data, $scaffoldVars) {
         $lines = array();
         foreach ($data['lines'] as $scaffoldLine) {
-            $line = array();
-            foreach ($scaffoldLine as $field) {
-                $line[$this->_fieldLabel($field)] = $this->_fieldValue(
-                        $field, $scaffoldVars);
+            $line = $this->_line($scaffoldLine, $scaffoldVars);
+            if (!empty($line)) {
+                $lines[] = $line;
             }
-            $lines[] = $line;
         }
         return $lines;
+    }
+
+    private function _line($scaffoldLine, $scaffoldVars) {
+        $line = array();
+        foreach ($scaffoldLine as $field) {
+            $line[$this->_fieldLabel($field)] = $this->_fieldValue(
+                    $field, $scaffoldVars);
+        }
+        return $line;
     }
 
     private function _fieldLabel($field) {
