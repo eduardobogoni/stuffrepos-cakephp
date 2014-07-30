@@ -5,7 +5,6 @@ App::import('Lib', 'Base.ModelTraverser');
 App::import('Lib', 'Base.Basics');
 App::uses('ExtendedField', 'ExtendedScaffold.View/Helper/ViewUtil');
 App::uses('ExtendedLine', 'ExtendedScaffold.View/Helper/ViewUtil');
-App::uses('ViewUtilListFieldset', 'ExtendedScaffold.View/Helper/ViewUtil');
 
 class ViewUtilHelper extends AppHelper {
     const VALUE_TYPE_UNKNOWN = 'unknown';

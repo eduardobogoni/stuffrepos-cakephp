@@ -10,6 +10,7 @@ class DetailHelper extends AppHelper {
         'ExtendedScaffold.Lists',
         'ExtendedScaffold.ViewUtil',
         'ExtendedScaffold.ExtendedFieldSet',
+        'ExtendedScaffold.ListFieldSet',
     );
 
     /**
@@ -151,13 +152,9 @@ class DetailHelper extends AppHelper {
 
     private function _scaffoldExtendedViewFieldListFieldset($fieldset,
             $scaffoldVars) {
-        if (empty($fieldset['listAssociation'])) {
-            return $this->ExtendedFieldSet->fieldSet($fieldset, $scaffoldVars);
-        } else {
-            $f = new ViewUtilListFieldset($this, $fieldset, $scaffoldVars, $this->settings['listSettings']);
-        }
-
-        return $f->output();
+        return empty($fieldset['listAssociation']) ?
+            $this->ExtendedFieldSet->fieldSet($fieldset, $scaffoldVars):
+            $this->ListFieldSet->fieldSet($fieldset, $scaffoldVars, $this->settings['listSettings']);
     }
 
     private function _getCurrentController() {
