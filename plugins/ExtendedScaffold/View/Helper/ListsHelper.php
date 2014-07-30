@@ -42,6 +42,8 @@ class ListsHelper extends AppHelper {
         'staticValue' => null,
         'mask' => null,
         'link' => null,
+        'accessObjectType' => null,
+        'accessObject' => null,
     );
 
     public function listElement($fields, $rows, $options = array()) {
@@ -177,10 +179,17 @@ class ListsHelper extends AppHelper {
         $result = array();
 
         foreach ($fields as $key => $value) {
-            $result[] = $this->_extractField($key, $value);
+            $field = $this->_extractField($key, $value);
+            if ($this->_hasFieldAccess($field)) {
+                $result[] = $field;    
+            }
         }
 
         return $result;
+    }
+    
+    private function _hasFieldAccess($extractedField) {
+        return ExtendedFieldsAccessControl::sessionUserHasFieldSetAccess($extractedField);
     }
 
     private function _extractField($key, $value) {
