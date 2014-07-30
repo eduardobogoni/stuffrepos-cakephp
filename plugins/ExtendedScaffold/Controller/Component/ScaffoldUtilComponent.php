@@ -20,6 +20,8 @@
  */
 
 App::uses('Component', 'Controller');
+App::uses('ExtendedFieldsParser', 'ExtendedScaffold.Lib');
+App::uses('Basics', 'Base.Lib');
 
 /**
  * 
@@ -44,48 +46,103 @@ class ScaffoldUtilComponent extends Component {
         } else {
             $this->defaultOptions = array();
         }
+        $this->_removeDeniedData($controller);
         $this->_fetchRefererFromRequest($controller);
     }
 
     public function beforeRender(Controller $controller) {
         parent::beforeRender($controller);
-        $this->currentAction = $controller->params['action'];        
-        if (isset($controller->viewVars['scaffoldFields'])) {
-
-            if ($this->_getActionOption('setFields')) {
-                $scaffoldFields = $this->_getActionOption('setFields');
-            } else {
-                $scaffoldFields = $controller->viewVars['scaffoldFields'];
-            }
-
-            if ($this->_getActionOption('appendFields')) {
-                $scaffoldFields = array_merge(
-                        $scaffoldFields, $this->_getActionOption('appendFields')
-                );
-            }
-
-            if (empty($scaffoldFields['_extended'])) {
-                if ($this->_getActionOption('unsetFields')) {
-                    $tempFields = array();
-                    foreach ($scaffoldFields as $key => $value) {
-                        $field = is_array($value) ? $key : $value;
-                        if (!in_array($field, $this->_getActionOption('unsetFields'))) {
-                            $tempFields[$key] = $value;
-                        }
-                    }
-                    $scaffoldFields = $tempFields;
-                }
-            }
-
-            $controller->set('scaffoldFields', $scaffoldFields);
-        }
+        $this->currentAction = $controller->params['action'];
+        $this->_interceptScaffoldFields($controller);
         $this->_setRefererOnData($controller);
     }
-    
+
     public function referer() {
         return $this->referer;
     }
-    
+
+    private function _interceptScaffoldFields(\Controller $controller) {
+        if (isset($controller->viewVars['scaffoldFields'])) {
+            $controller->set('scaffoldFields', $this->_buildScaffoldFields($controller));
+        }
+    }
+
+    private function _buildScaffoldFields(\Controller $controller) {
+        if ($this->_getActionOption('setFields')) {
+            $scaffoldFields = $this->_getActionOption('setFields');
+        } else {
+            $scaffoldFields = $controller->viewVars['scaffoldFields'];
+        }
+
+        if ($this->_getActionOption('appendFields')) {
+            $scaffoldFields = array_merge(
+                    $scaffoldFields, $this->_getActionOption('appendFields')
+            );
+        }
+
+        if (empty($scaffoldFields['_extended'])) {
+            if ($this->_getActionOption('unsetFields')) {
+                $tempFields = array();
+                foreach ($scaffoldFields as $key => $value) {
+                    $field = is_array($value) ? $key : $value;
+                    if (!in_array($field, $this->_getActionOption('unsetFields'))) {
+                        $tempFields[$key] = $value;
+                    }
+                }
+                $scaffoldFields = $tempFields;
+            }
+        }
+        return $scaffoldFields;
+    }
+
+    private function _removeDeniedData(\Controller $controller) {
+        foreach ($controller->request->data as $modelAlias => $fields) {
+            foreach (array_keys($fields) as $field) {
+
+                if ($this->_shouldRemoveData($controller, $modelAlias, $field)) {
+                    unset($controller->request->data[$modelAlias][$field]);
+                }
+            }
+        }
+    }
+
+    private function _shouldRemoveData(\Controller $controller, $modelAlias, $field) {
+        $scaffolfFields = $this->_buildScaffoldFields($controller);
+        $definition = ExtendedFieldsParser::parseFieldsets($scaffolfFields);
+        foreach ($definition as $fieldSet) {
+            foreach ($fieldSet['lines'] as $line) {
+                foreach ($line as $extendedFieldsParserField) {
+                    if ($this->_fieldNameEquals($controller, $extendedFieldsParserField, "$modelAlias.$field")) {
+                        return !$this->_hasFieldAccess($extendedFieldsParserField);
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private function _fieldNameEquals(\Controller $controller, $extendedFieldsParserField, $name) {
+        $defaultModel = empty($controller->uses[0]) ?
+                null :
+                $controller->{$controller->uses[0]}->alias;
+        return Basics::fieldFullName($extendedFieldsParserField['name'], $defaultModel) ==
+        Basics::fieldFullName($name, $defaultModel);
+    }
+
+    private function _hasFieldAccess($extendedFieldsParserField) {
+        if (!empty($extendedFieldsParserField['options']['accessObject'])) {
+            if (empty($extendedFieldsParserField['options']['accessObjectType'])) {
+                return AccessControlComponent::sessionUserHasAccess($extendedFieldsParserField['options']['accessObject']);
+            }
+            else {
+                return AccessControlComponent::sessionUserHasAccess($extendedFieldsParserField['options']['accessObject'], $extendedFieldsParserField['options']['accessObjectType']);
+            }           
+        }
+        else {
+            return true;
+        }
+    }
+
     private function _fetchRefererFromRequest(\Controller $controller) {
         if (empty($controller->request->data['_ScaffoldUtil']['referer'])) {
             $this->referer = $controller->referer();

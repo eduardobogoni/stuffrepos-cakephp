@@ -33,7 +33,7 @@ class AccessControlComponent extends Component {
     public function startup(\Controller $controller) {
         parent::startup($controller);
         $this->loadFilters();
-        self::$request = $controller->request;
+        self::setRequest($controller->request);
 
         if (!self::sessionUserHasAccessByUrl(self::$request->params)) {            
             $this->Session->setFlash('Acesso Negado');
@@ -51,6 +51,10 @@ class AccessControlComponent extends Component {
             App::uses($class, $location);
             $this->addFilter(new $class());
         }
+    }
+    
+    public static function setRequest(\CakeRequest $request) {
+        self::$request = $request;
     }
 
     public static function clearFilters() {
