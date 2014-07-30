@@ -2,7 +2,7 @@
 
 App::uses('ViewUtilHelper', 'ExtendedScaffold.View/Helper');
 
-class ViewUtilExtendedFieldsetHelper extends AppHelper {
+class ExtendedFieldSetHelper extends AppHelper {
 
     public $helpers = array(
         'Base.CakeLayers',
