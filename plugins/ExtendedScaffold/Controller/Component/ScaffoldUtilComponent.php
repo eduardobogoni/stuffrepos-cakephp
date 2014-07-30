@@ -113,7 +113,8 @@ class ScaffoldUtilComponent extends Component {
             foreach ($fieldSet['lines'] as $line) {
                 foreach ($line as $extendedFieldsParserField) {
                     if ($this->_fieldNameEquals($controller, $extendedFieldsParserField, "$modelAlias.$field")) {
-                        return !$this->_hasFieldAccess($extendedFieldsParserField);
+                        return !$this->_hasFieldAccess($extendedFieldsParserField)
+                                || !$this->_hasFieldSetAccess($fieldSet);
                     }
                 }
             }
@@ -130,12 +131,16 @@ class ScaffoldUtilComponent extends Component {
     }
 
     private function _hasFieldAccess($extendedFieldsParserField) {
-        if (!empty($extendedFieldsParserField['options']['accessObject'])) {
-            if (empty($extendedFieldsParserField['options']['accessObjectType'])) {
-                return AccessControlComponent::sessionUserHasAccess($extendedFieldsParserField['options']['accessObject']);
+        return $this->_hasFieldSetAccess($extendedFieldsParserField['options']);
+    }
+    
+    private function _hasFieldSetAccess($extendedFieldsParserFieldSet) {
+        if (!empty($extendedFieldsParserFieldSet['accessObject'])) {
+            if (empty($extendedFieldsParserFieldSet['accessObjectType'])) {
+                return AccessControlComponent::sessionUserHasAccess($extendedFieldsParserFieldSet['accessObject']);
             }
             else {
-                return AccessControlComponent::sessionUserHasAccess($extendedFieldsParserField['options']['accessObject'], $extendedFieldsParserField['options']['accessObjectType']);
+                return AccessControlComponent::sessionUserHasAccess($extendedFieldsParserFieldSet['accessObject'], $extendedFieldsParserFieldSet['accessObjectType']);
             }           
         }
         else {

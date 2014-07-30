@@ -98,6 +98,8 @@ class ScaffoldUtilComponentTest extends CakeTestCase {
                 'field1' => 'value1',
                 'field2' => 'value2',
                 'field3' => 'value3',
+                'field4' => 'value4',
+                'field5' => 'value5',
             )
         );
         $request->params['action'] = 'add';
@@ -140,7 +142,23 @@ class ScaffoldUtilComponentTest extends CakeTestCase {
                                 'accessObject' => 'allow',
                             ),
                         )
-                    )
+                    ),
+                    array(
+                        'label' => 'Denied Form',
+                        'accessObjectType' => 'service',
+                        'accessObject' => 'deny',
+                        'lines' => array(
+                            'field4',
+                        )
+                    ),
+                    array(
+                        'label' => 'Allowed Form',
+                        'accessObjectType' => 'service',
+                        'accessObject' => 'allow',
+                        'lines' => array(
+                            'field5',
+                        )
+                    ),
                 ),
             )
                 )
@@ -152,6 +170,7 @@ class ScaffoldUtilComponentTest extends CakeTestCase {
             'MyModel' => array(
                 'field1' => 'value1',
                 'field3' => 'value3',
+                'field5' => 'value5',
             )
         ));
     }

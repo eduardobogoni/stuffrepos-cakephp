@@ -59,19 +59,14 @@ class ExtendedFieldsParser {
 
     private function _parseFieldsetData($key, $value, $defaultModel = null) {
         $_this = & self::getInstance();
-        $listAssociation = $legend = false;
+        $listAssociation = $legend = $accessObject = $accessObjectType = false;
         if (is_array($value)) {
-
-            if (!empty($value['legend'])) {
-                $legend = $value['legend'];
-                unset($value['legend']);
+            foreach(array('legend','listAssociation', 'accessObject','accessObjectType') as $field) {
+                if (!empty($value[$field])) {
+                    ${$field}= $value[$field];
+                    unset($value[$field]);
+                }
             }
-
-            if (!empty($value['listAssociation'])) {
-                $listAssociation = $value['listAssociation'];
-                unset($value['listAssociation']);
-            }
-
             if (!empty($value['lines'])) {
                 $lines = $_this->_parseLinesData($value['lines'], $defaultModel);
                 unset($value['lines']);
@@ -82,7 +77,7 @@ class ExtendedFieldsParser {
             $lines = array($_this->_parseLineData($value, $defaultModel));
         }
 
-        return compact('legend', 'lines', 'listAssociation');
+        return compact('legend', 'lines', 'listAssociation', 'accessObject','accessObjectType');
     }
 
     private function _parseLinesData($value, $defaultModel = null) {
