@@ -1,6 +1,7 @@
 <?php
 
 App::uses('ViewUtilHelper', 'ExtendedScaffold.View/Helper');
+App::uses('ExtendedField', 'ExtendedScaffold.Lib');
 
 class ListFieldSetHelper extends AppHelper {
 
@@ -9,29 +10,32 @@ class ListFieldSetHelper extends AppHelper {
         'Base.CakeLayers',
     );
 
-    public function fieldSet($fieldSet, $scaffoldVars, $options) {
+    public function fieldSet(\ExtendedFieldSet $fieldSet, $scaffoldVars, $options) {
+        if (!$fieldSet->getListAssociation()) {
+            throw new Exception('$fieldSet->getListAssociation() is empty: '.print_r($fieldSet->getOptions(), true));
+        }
         $b = '';
-        if (!empty($fieldSet['legend'])) {
-            $b .= "<h3>{$fieldSet['legend']}</h3>";
+        if ($fieldSet->getLabel()) {
+            $b .= "<h3>{$fieldSet->getLabel()}</h3>";
         }
         $b .= $this->Lists->rowsTable(
                 $this->_fields($fieldSet)
-                , $this->_rows($scaffoldVars, $fieldSet['listAssociation'])
+                , $this->_rows($scaffoldVars, $fieldSet->getListAssociation())
                 , Hash::merge($this->settings, array(
-                    'model' => $this->_model($scaffoldVars, $fieldSet['listAssociation'])
+                    'model' => $this->_model($scaffoldVars, $fieldSet->getListAssociation())
                     , 'showActions' => false
-                    , 'controller' => $this->_controller($scaffoldVars, $fieldSet['listAssociation'])
+                    , 'controller' => $this->_controller($scaffoldVars, $fieldSet->getListAssociation())
                 ))
         );
 
         return $b;
     }
 
-    private function _fields($fieldSet) {
+    private function _fields(\ExtendedFieldSet $fieldSet) {
         $ret = array();
-        foreach ($fieldSet['lines'] as $fields) {
-            foreach ($fields as $field) {
-                $ret[$field['name']] = $field['options'];
+        foreach ($fieldSet->getLines() as $line) {
+            foreach($line->getFields() as $field) {
+                $ret[$field->getName()] = $field->getOptions();
             }
         }
         return $ret;

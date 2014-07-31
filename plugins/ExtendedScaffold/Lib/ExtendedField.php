@@ -1,0 +1,42 @@
+<?php
+
+class ExtendedField {
+
+    /**
+     * 
+     * @param string $name
+     * @param array $options
+     */
+    public function __construct($name, $options) {
+        $this->name = $name;
+        $this->options = array_merge(array(
+            'accessObject' => false,
+            'accessObjectType' => false,
+                ), $options);
+    }
+
+    /**
+     * 
+     * @return string
+     */
+    public function getName() {
+        return $this->name;
+    }
+
+    public function getAccessObject() {
+        return $this->options['accessObject'];
+    }
+
+    public function getAccessObjectType() {
+        return $this->options['accessObjectType'];
+    }
+
+    /**
+     * 
+     * @return array
+     */
+    public function getOptions() {
+        return $this->options;
+    }
+
+}

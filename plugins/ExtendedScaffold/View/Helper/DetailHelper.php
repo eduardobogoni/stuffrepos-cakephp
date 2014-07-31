@@ -1,6 +1,7 @@
 <?php
 
 App::uses('AppHelper', 'View/Helper');
+App::uses('ExtendedFieldsAccessControl', 'ExtendedScaffold.Lib');
 
 class DetailHelper extends AppHelper {
 
@@ -57,7 +58,10 @@ class DetailHelper extends AppHelper {
 
         if (ExtendedFieldsParser::isExtendedFieldsDefinition($fields)) {
             return $this->_scaffoldExtendedFieldList(
-                            $instance, ExtendedFieldsParser::parseFieldsets($fields), $associations, $modelClass
+                            $instance
+                            , ExtendedFieldsAccessControl::parseFieldsets($fields)
+                            , $associations
+                            , $modelClass
             );
         } else {
             return $this->_scaffoldCommonFieldList($instance, $fields, $associations, $modelClass);
@@ -153,11 +157,11 @@ class DetailHelper extends AppHelper {
         return $b;
     }
 
-    private function _scaffoldExtendedViewFieldListFieldset($fieldset,
+    private function _scaffoldExtendedViewFieldListFieldset(\ExtendedFieldSet $fieldset, 
             $scaffoldVars) {
-        return empty($fieldset['listAssociation']) ?
-            $this->ExtendedFieldSet->fieldSet($fieldset, $scaffoldVars):
-            $this->ListFieldSet->fieldSet($fieldset, $scaffoldVars, $this->settings['listSettings']);
+        return $fieldset->getListAssociation() ?
+                $this->ListFieldSet->fieldSet($fieldset, $scaffoldVars, $this->settings['listSettings']) :
+                $this->ExtendedFieldSet->fieldSet($fieldset, $scaffoldVars);
     }
 
     private function _getCurrentController() {

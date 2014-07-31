@@ -1,5 +1,8 @@
 <?php
 
+App::uses('ExtendedField', 'ExtendedScaffold.Lib');
+App::uses('ExtendedFieldsLine', 'ExtendedScaffold.Lib');
+
 class ExtendedFieldsParser {
     const EXTENDED_KEY = '_extended';
 
@@ -16,6 +19,12 @@ class ExtendedFieldsParser {
         return isset($fields[self::EXTENDED_KEY]);
     }
 
+    /**
+     * 
+     * @param array $fields
+     * @return ExtendedFieldSet[]
+     * @throws Exception
+     */
     public static function extractExtendedFields($fields) {
         $_this = & self::getInstance();
         if ($_this->isExtendedFieldsDefinition($fields)) {
@@ -77,7 +86,7 @@ class ExtendedFieldsParser {
             $lines = array($_this->_parseLineData($value, $defaultModel));
         }
 
-        return compact('legend', 'lines', 'listAssociation', 'accessObject','accessObjectType');
+        return new ExtendedFieldSet($lines, compact('legend', 'listAssociation', 'accessObject', 'accessObjectType'));
     }
 
     private function _parseLinesData($value, $defaultModel = null) {
@@ -91,29 +100,38 @@ class ExtendedFieldsParser {
 
     private function _parseLineData($key, $value, $defaultModel = null) {
         if (($field = $this->_parseFieldData($key, $value, $defaultModel))) {
-            $lineData = array($field);
+            $fields = array($field);
         } else {
-            $lineData = array();
+            $fields = array();
             foreach ($value as $subKey => $subValue) {
-                $lineData[] = $this->_parseFieldData($subKey, $subValue, $defaultModel);
+                $fields[] = $this->_parseFieldData($subKey, $subValue, $defaultModel);
             }
         }
-        return $lineData;
+        return new ExtendedFieldsLine($fields);
     }
 
+    /**
+     * 
+     * @param type $key
+     * @param type $value
+     * @param type $defaultModel
+     * @return ExtendedField
+     */
     private function _parseFieldData($key, $value, $defaultModel = null) {
         if ((is_int($key) && preg_match('/^\d+$/', $key) && is_string($value))) {
-            $field = array('name' => $value, 'options' => array());
+            $name = $value;
+            $options = array();
         } else if (is_string($key) && preg_match('/^[^\d]/', $key) && is_array($value)) {
-            $field = array('name' => $key, 'options' => $value);
+            $name = $key;
+            $options = $value;
         } else {
             return false;
         }
-        $nameParts = explode('.', $field['name']);
+        $nameParts = explode('.', $name);
         if (count($nameParts) == 1 && $defaultModel) {
-            $field['name'] = "$defaultModel.{$nameParts[0]}";
+            $name = "$defaultModel.{$nameParts[0]}";
         }
-        return $field;
+        return new ExtendedField($name, $options);
     }
 
 }

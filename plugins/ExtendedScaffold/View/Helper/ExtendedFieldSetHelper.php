@@ -10,49 +10,46 @@ class ExtendedFieldSetHelper extends AppHelper {
         'ExtendedScaffold.ViewUtil',
     );
 
-    public function fieldSet($data, $scaffoldVars) {
-        if (!ExtendedFieldsAccessControl::sessionUserHasFieldSetAccess($data)) {
-            return false;
-        } else if ($lines = $this->_lines($data, $scaffoldVars)) {
-            $b = '';
-            if (!empty($data['legend'])) {
-                $b .= "<h3>{$data['legend']}</h3>";
-            }
-            return $b . $this->FieldSetLayout->fieldSet($lines);
-        } else {
-            return false;
+    public function fieldSet(\ExtendedFieldSet $fieldSet, $scaffoldVars) {
+        $b = '';
+        if ($fieldSet->getLabel()) {
+            $b .= "<h3>{$fieldSet->getLabel()}</h3>";
         }
+        return $b . $this->FieldSetLayout->fieldSet($this->_lines($fieldSet, $scaffoldVars));
     }
 
-    private function _lines($data, $scaffoldVars) {
+    private function _lines(\ExtendedFieldSet $fieldSet, $scaffoldVars) {
         $lines = array();
-        foreach ($data['lines'] as $scaffoldLine) {
-            $line = $this->_line($scaffoldLine, $scaffoldVars);
-            if (!empty($line)) {
-                $lines[] = $line;
+        foreach ($fieldSet->getLines() as $fieldsLine) {
+            $fieldsLineResult = $this->_line($fieldsLine, $scaffoldVars);
+            if (!empty($fieldsLineResult)) {
+                $lines[] = $fieldsLineResult;
             }
         }
         return $lines;
     }
 
-    private function _line($scaffoldLine, $scaffoldVars) {
-        $line = array();
-        foreach ($scaffoldLine as $field) {
-            $line[$this->_fieldLabel($field)] = $this->_fieldValue(
+    private function _line(\ExtendedFieldsLine $line, $scaffoldVars) {
+        $ret = array();
+        foreach ($line->getFields() as $field) {
+            $ret[$this->_fieldLabel($field)] = $this->_fieldValue(
                     $field, $scaffoldVars);
         }
-        return $line;
+        return $ret;
     }
 
     private function _fieldLabel($field) {
-        return __d('extended_scaffold',Inflector::humanize($field['name']));
+        return __d('extended_scaffold', Inflector::humanize($field->getName()));
     }
 
-    private function _fieldValue($field, $scaffoldVars) {
-        return $this->ViewUtil->autoFormat(ModelTraverser::displayValue(
-                                $this->_model($scaffoldVars),
-                                $scaffoldVars['instance'], $field['name']
-        ));
+    private function _fieldValue(\ExtendedField $field, $scaffoldVars) {
+        return $this->ViewUtil->autoFormat(
+                        ModelTraverser::displayValue(
+                                $this->_model($scaffoldVars)
+                                , $scaffoldVars['instance']
+                                , $field->getName()
+                        )
+        );
     }
 
     private function _model($scaffoldVars) {

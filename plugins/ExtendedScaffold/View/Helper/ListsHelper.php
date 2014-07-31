@@ -189,7 +189,18 @@ class ListsHelper extends AppHelper {
     }
     
     private function _hasFieldAccess($extractedField) {
-        return ExtendedFieldsAccessControl::sessionUserHasFieldSetAccess($extractedField);
+        if ($extractedField['accessObject']) {
+            return $extractedField['accessObjectType'] ?
+                    AccessControlComponent::sessionUserHasAccess(
+                            $extractedField['accessObject']
+                            , $extractedField['accessObjectType']
+                    ) :
+                    AccessControlComponent::sessionUserHasAccess(
+                            $extractedField['accessObject']
+            );
+        } else {
+            return true;
+        }
     }
 
     private function _extractField($key, $value) {
