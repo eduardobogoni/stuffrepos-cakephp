@@ -4,7 +4,7 @@ class ListFieldSet {
 
     /**
      *
-     * @var array
+     * @var FieldSetDefinition
      */
     private $fieldsetData;
 
@@ -14,7 +14,7 @@ class ListFieldSet {
      */
     private $parent;
 
-    public function __construct(ExtendedFormHelper $parent, $fieldsetData) {
+    public function __construct(ExtendedFormHelper $parent, \FieldSetDefinition $fieldsetData) {
         $this->parent = $parent;
         $this->fieldsetData = $fieldsetData;
         $this->javascriptVariable = 'ExtendedFormHelper_ListFieldset_' . $this->parent->createNewDomId();
@@ -24,16 +24,12 @@ class ListFieldSet {
 
     public function output() {
 
-        $b = '';
-        if ($this->_legend()) {
-            $b .= "<h3>{$this->_legend()}</h3>";
-        }
-
+        $b = $this->_legend();
         $b .= $this->_newRowPrototype();
 
         $b .= '<div class="actions">';
         $b .= $this->parent->Html->link(
-                __d('extended_scaffold','New', true), '#', array(
+                __d('extended_scaffold', 'New', true), '#', array(
             'onclick' => <<<EOT
     {$this->javascriptVariable}.addRow();
     return false;
@@ -71,7 +67,9 @@ EOT
     }
 
     private function _legend() {
-        return empty($this->fieldsetData['legend']) ? null : $this->fieldsetData['legend'];
+        return $this->fieldsetData->getLabel() ?
+                "<h3>{$this->fieldsetData->getLabel()}</h3>" :
+                '';
     }
 
     private function _instances() {
@@ -117,7 +115,7 @@ EOT
     }
 
     private function _listAssociation() {
-        return $this->fieldsetData['listAssociation'];
+        return $this->fieldsetData->getListAssociation();
     }
 
     private function _parentModel() {
@@ -126,8 +124,8 @@ EOT
 
     private function _fields() {
         $fields = array();
-        foreach ($this->fieldsetData['lines'] as $line) {
-            foreach ($line as $field) {
+        foreach ($this->fieldsetData->getLines() as $line) {
+            foreach ($line->getFields() as $field) {
                 $fields[] = $field;
             }
         }
@@ -141,14 +139,14 @@ EOT
                 'valueFunction' => array($this, '_fieldColumnCallback'),
                 'escapeHtml' => false,
                 'extraData' => array(
-                    'fieldOptions' => $field['options']
+                    'fieldOptions' => $field->getOptions()
                 )
             );
-            if (!empty($field['options']['label'])) {
-                $options['label'] = $field['options']['label'];
+            if (!empty($options['extraData']['fieldOptions']['label'])) {
+                $options['label'] = $options['extraData']['fieldOptions']['label'];
             }
 
-            $columns[$field['name']] = $options;
+            $columns[$field->getName()] = $options;
         }
 
         $columns['_deleteButton'] = array(

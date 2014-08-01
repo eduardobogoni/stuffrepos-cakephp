@@ -2,7 +2,7 @@
 
 App::uses('AccessControlComponent', 'AccessControl.Controller/Component');
 App::uses('ExtendedFieldsParser', 'ExtendedScaffold.Lib');
-App::uses('ExtendedFieldSet', 'ExtendedScaffold.Lib');
+App::uses('FieldSetDefinition', 'ExtendedScaffold.Lib');
 
 class ExtendedFieldsAccessControl {
 

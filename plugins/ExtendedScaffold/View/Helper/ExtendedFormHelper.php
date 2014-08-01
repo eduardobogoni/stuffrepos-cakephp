@@ -80,7 +80,7 @@ class ExtendedFormHelper extends FormHelper {
 
     public function extendedInputs($data, $blacklist = array(), $defaultModel = null) {
         $b = "\n<div class='scaffoldInputsLine'>\n";
-        foreach (ExtendedFieldsParser::parseFieldsets($data, $defaultModel) as $fieldset) {
+        foreach (ExtendedFieldsAccessControl::parseFieldsets($data, $defaultModel) as $fieldset) {
 
             $fieldsetOut = $this->_extendedInputsFieldset(
                     $fieldset, $blacklist
@@ -107,12 +107,12 @@ class ExtendedFormHelper extends FormHelper {
         }
     }
 
-    private function _extendedInputsFieldset($fieldset, $blacklist) {
+    private function _extendedInputsFieldset(\FieldSetDefinition $fieldset, $blacklist) {
         $currentModel = $this->model();
-        if (empty($fieldset['listAssociation'])) {
-            $f = new ExtendedFieldSet($this, $fieldset, $blacklist);
-        } else {
+        if ($fieldset->getListAssociation()) {
             $f = new ListFieldSet($this, $fieldset, $blacklist);
+        } else {
+            $f = new ExtendedFieldSet($this, $fieldset, $blacklist);
         }
         $output = $f->output();
         $this->setEntity($currentModel);        

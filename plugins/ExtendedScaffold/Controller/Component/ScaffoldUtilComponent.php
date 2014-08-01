@@ -113,8 +113,8 @@ class ScaffoldUtilComponent extends Component {
         $scaffolfFields = $this->_buildScaffoldFields($controller);
         $definition = ExtendedFieldsParser::parseFieldsets($scaffolfFields);        
         foreach ($definition as $fieldSet) {
-            foreach ($fieldSet['lines'] as $line) {
-                foreach ($line as $extendedFieldsParserField) {
+            foreach ($fieldSet->getLines() as $line) {
+                foreach ($line->getFields() as $extendedFieldsParserField) {
                     if ($this->_fieldNameEquals($controller, $extendedFieldsParserField, "$modelAlias.$field")) {
                         return !ExtendedFieldsAccessControl::sessionUserHasFieldAccess($extendedFieldsParserField)
                                 || !ExtendedFieldsAccessControl::sessionUserHasFieldSetAccess($fieldSet);
@@ -125,11 +125,11 @@ class ScaffoldUtilComponent extends Component {
         return false;
     }
 
-    private function _fieldNameEquals(\Controller $controller, $extendedFieldsParserField, $name) {
+    private function _fieldNameEquals(\Controller $controller, \FieldDefinition $extendedFieldsParserField, $name) {
         $defaultModel = empty($controller->uses[0]) ?
                 null :
                 $controller->{$controller->uses[0]}->alias;
-        return Basics::fieldFullName($extendedFieldsParserField['name'], $defaultModel) ==
+        return Basics::fieldFullName($extendedFieldsParserField->getName(), $defaultModel) ==
         Basics::fieldFullName($name, $defaultModel);
     }
 

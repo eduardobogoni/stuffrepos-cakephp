@@ -4,6 +4,10 @@ App::uses('AccessControlComponent', 'AccessControl.Controller/Component');
 
 class ExtendedFieldSet {
 
+    /**
+     *
+     * @var \FieldSetDefinition
+     */
     private $fieldsetData;
 
     /**
@@ -12,7 +16,7 @@ class ExtendedFieldSet {
      */
     private $parent;
 
-    public function __construct(ExtendedFormHelper $parent, $fieldsetData, $blacklist) {
+    public function __construct(ExtendedFormHelper $parent, \FieldSetDefinition $fieldsetData, $blacklist) {
         $this->parent = $parent;
         $this->fieldsetData = $fieldsetData;
         $this->blacklist = $blacklist;
@@ -27,11 +31,9 @@ class ExtendedFieldSet {
     }
 
     private function _legend() {
-        if (empty($this->fieldsetData['legend'])) {
-            return '';
-        } else {
-            return $this->parent->Html->tag('legend', $this->fieldsetData['legend']);
-        }
+        return $this->fieldsetData->getLabel() ?
+                $this->parent->Html->tag('legend', $this->fieldsetData->getLabel()) :
+                '';
     }
 
     private function _inputs() {
@@ -42,7 +44,7 @@ class ExtendedFieldSet {
 
     private function _lines() {
         $lines = array();
-        foreach ($this->fieldsetData['lines'] as $line) {
+        foreach ($this->fieldsetData->getLines() as $line) {
             $line = $this->_line($line);
             if (!empty($line)) {
                 $lines[] = $line;
@@ -51,9 +53,9 @@ class ExtendedFieldSet {
         return $lines;
     }
 
-    private function _line($line) {
+    private function _line(\FieldRowDefinition $line) {
         $columns = array();
-        foreach ($line as $field) {
+        foreach ($line->getFields() as $field) {
             $column = $this->_column($field);
             if (!empty($column)) {
                 list($label, $content) = $column;
@@ -63,37 +65,22 @@ class ExtendedFieldSet {
         return $columns;
     }
 
-    private function _column($field) {
-        if ($this->_hasAccess($field)) {
-            return array(
-                $this->_fieldLabel($field),
-                $this->_fieldInput($field)
-            );
-        } else {
-            return false;
-        }
+    private function _column(\FieldDefinition $field) {
+        return array(
+            $this->_fieldLabel($field),
+            $this->_fieldInput($field)
+        );
     }
 
-    private function _fieldLabel($field) {
-        return __d('extended_scaffold',Inflector::humanize($field['name']));
+    private function _fieldLabel(\FieldDefinition $field) {
+        return __d('extended_scaffold', Inflector::humanize($field->getName()));
     }
 
-    private function _fieldInput($field) {
-        $options = $field['options'];
+    private function _fieldInput(\FieldDefinition $field) {
+        $options = $field->getOptions();
         $options['div'] = false;
         $options['label'] = false;
-        return $this->parent->input($field['name'], $options);
-    }
-
-    private function _hasAccess($fieldData) {        
-        foreach ($fieldData['options'] as $key => $value) {
-            if (($accessObjectType = AccessControlComponent::parseHasAccessByMethodName('hasAccessBy', $key)) !== false) {                
-                if (!$this->parent->AccessControl->{'hasAccessBy' . Inflector::camelize($accessObjectType)}($value)) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return $this->parent->input($field->getName(), $options);
     }
 
 }
