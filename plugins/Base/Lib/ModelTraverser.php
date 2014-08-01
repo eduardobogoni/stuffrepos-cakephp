@@ -53,7 +53,15 @@ class ModelTraverser {
         $association = self::oneToManyAssociationByForeignKey($top['model'], $pathLastPart);
         if ($association) {            
             array_pop($stack);
-            $subTop = self::_pathLastNode($stack);
+            if (empty($stack)) {
+                $subTop = array(
+                    'model' => $model,
+                    'value' => $row,
+                );
+            }
+            else {
+                $subTop = self::_pathLastNode($stack);
+            }
             $subPath = array($association, $subTop['model']->{$association}->displayField);
             return self::value(
                             $subTop['model']
@@ -304,12 +312,20 @@ class ModelTraverser {
         return $newPath;
     }
 
+    /**
+     * 
+     * @param mixed $path
+     * @return mixed
+     */
     private static function _pathLastNode($path) {
-        if (!is_array($path)) {
-            $path = explode('.', $path);
+        $arrayPath = is_array($path) ?
+                $path :
+                explode('.', $path);
+        if (empty($arrayPath)) {
+            throw new ModelTraverserException("Path is empty", compact('path'));
         }
-        end($path);
-        return current($path);
+        end($arrayPath);
+        return current($arrayPath);
     }
 
 }

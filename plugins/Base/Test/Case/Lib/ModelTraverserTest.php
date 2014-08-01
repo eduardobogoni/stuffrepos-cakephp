@@ -278,6 +278,32 @@ class ModelTraverserTest extends CakeTestCase {
         }
     }
 
+    /**
+     * @dataProvider findArticlesProvider
+     * depends testFieldValueWithSelfAlias
+     * depends testFieldValueWithoutSelfAlias
+     */
+    public function testDisplayValueWithoutAlias($article) {
+        foreach (array_keys($this->Article->schema()) as $field) {
+            $actual = ModelTraverser::displayValue($this->Article, $article, $field);
+            if ($field == 'author_id') {
+                $this->assertEqual(
+                        $actual
+                        , (
+                        empty($article[$this->Article->Author->alias][$this->Article->Author->displayField]) ?
+                                null :
+                                $article[$this->Article->Author->alias][$this->Article->Author->displayField]
+                        )
+                );
+            } else {
+                $this->assertEqual(
+                        $actual
+                        , $article[$this->Article->alias][$field]
+                );
+            }
+        }
+    }
+
     public function testSchemaByPath() {
         foreach ($this->Article->schema() as $field => $schema) {
             $this->assertEqual(ModelTraverser::schema($this->Article, $field), $schema);
