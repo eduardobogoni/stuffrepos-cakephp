@@ -1,7 +1,8 @@
 <?php
 
-App::uses('ExtendedField', 'ExtendedScaffold.Lib');
-App::uses('ExtendedFieldsLine', 'ExtendedScaffold.Lib');
+App::uses('FieldDefinition', 'ExtendedScaffold.Lib');
+App::uses('FieldRowDefinition', 'ExtendedScaffold.Lib');
+App::uses('FieldSetDefinition', 'ExtendedScaffold.Lib');
 
 class ExtendedFieldsParser {
     const EXTENDED_KEY = '_extended';
@@ -22,7 +23,7 @@ class ExtendedFieldsParser {
     /**
      * 
      * @param array $fields
-     * @return ExtendedFieldSet[]
+     * @return FieldSetDefinition[]
      * @throws Exception
      */
     public static function extractExtendedFields($fields) {
@@ -86,7 +87,7 @@ class ExtendedFieldsParser {
             $lines = array($_this->_parseLineData($value, $defaultModel));
         }
 
-        return new ExtendedFieldSet($lines, compact('legend', 'listAssociation', 'accessObject', 'accessObjectType'));
+        return new FieldSetDefinition($lines, compact('legend', 'listAssociation', 'accessObject', 'accessObjectType'));
     }
 
     private function _parseLinesData($value, $defaultModel = null) {
@@ -107,7 +108,7 @@ class ExtendedFieldsParser {
                 $fields[] = $this->_parseFieldData($subKey, $subValue, $defaultModel);
             }
         }
-        return new ExtendedFieldsLine($fields);
+        return new FieldRowDefinition($fields);
     }
 
     /**
@@ -115,7 +116,7 @@ class ExtendedFieldsParser {
      * @param type $key
      * @param type $value
      * @param type $defaultModel
-     * @return ExtendedField
+     * @return FieldDefinition
      */
     private function _parseFieldData($key, $value, $defaultModel = null) {
         if ((is_int($key) && preg_match('/^\d+$/', $key) && is_string($value))) {
@@ -131,7 +132,7 @@ class ExtendedFieldsParser {
         if (count($nameParts) == 1 && $defaultModel) {
             $name = "$defaultModel.{$nameParts[0]}";
         }
-        return new ExtendedField($name, $options);
+        return new FieldDefinition($name, $options);
     }
 
 }

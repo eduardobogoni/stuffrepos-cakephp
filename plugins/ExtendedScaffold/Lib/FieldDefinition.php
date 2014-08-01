@@ -1,6 +1,6 @@
 <?php
 
-class ExtendedField {
+class FieldDefinition {
 
     /**
      * 

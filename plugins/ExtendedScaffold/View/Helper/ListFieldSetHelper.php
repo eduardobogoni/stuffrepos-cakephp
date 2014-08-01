@@ -10,7 +10,7 @@ class ListFieldSetHelper extends AppHelper {
         'Base.CakeLayers',
     );
 
-    public function fieldSet(\ExtendedFieldSet $fieldSet, $scaffoldVars, $options) {
+    public function fieldSet(\FieldSetDefinition $fieldSet, $scaffoldVars, $options) {
         if (!$fieldSet->getListAssociation()) {
             throw new Exception('$fieldSet->getListAssociation() is empty: '.print_r($fieldSet->getOptions(), true));
         }
@@ -31,7 +31,7 @@ class ListFieldSetHelper extends AppHelper {
         return $b;
     }
 
-    private function _fields(\ExtendedFieldSet $fieldSet) {
+    private function _fields(\FieldSetDefinition $fieldSet) {
         $ret = array();
         foreach ($fieldSet->getLines() as $line) {
             foreach($line->getFields() as $field) {

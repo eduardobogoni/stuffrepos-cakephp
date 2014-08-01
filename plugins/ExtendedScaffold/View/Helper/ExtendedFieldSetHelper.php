@@ -10,7 +10,7 @@ class ExtendedFieldSetHelper extends AppHelper {
         'ExtendedScaffold.ViewUtil',
     );
 
-    public function fieldSet(\ExtendedFieldSet $fieldSet, $scaffoldVars) {
+    public function fieldSet(\FieldSetDefinition $fieldSet, $scaffoldVars) {
         $b = '';
         if ($fieldSet->getLabel()) {
             $b .= "<h3>{$fieldSet->getLabel()}</h3>";
@@ -18,7 +18,7 @@ class ExtendedFieldSetHelper extends AppHelper {
         return $b . $this->FieldSetLayout->fieldSet($this->_lines($fieldSet, $scaffoldVars));
     }
 
-    private function _lines(\ExtendedFieldSet $fieldSet, $scaffoldVars) {
+    private function _lines(\FieldSetDefinition $fieldSet, $scaffoldVars) {
         $lines = array();
         foreach ($fieldSet->getLines() as $fieldsLine) {
             $fieldsLineResult = $this->_line($fieldsLine, $scaffoldVars);
@@ -29,7 +29,7 @@ class ExtendedFieldSetHelper extends AppHelper {
         return $lines;
     }
 
-    private function _line(\ExtendedFieldsLine $line, $scaffoldVars) {
+    private function _line(\FieldRowDefinition $line, $scaffoldVars) {
         $ret = array();
         foreach ($line->getFields() as $field) {
             $ret[$this->_fieldLabel($field)] = $this->_fieldValue(
@@ -42,7 +42,7 @@ class ExtendedFieldSetHelper extends AppHelper {
         return __d('extended_scaffold', Inflector::humanize($field->getName()));
     }
 
-    private function _fieldValue(\ExtendedField $field, $scaffoldVars) {
+    private function _fieldValue(\FieldDefinition $field, $scaffoldVars) {
         return $this->ViewUtil->autoFormat(
                         ModelTraverser::displayValue(
                                 $this->_model($scaffoldVars)

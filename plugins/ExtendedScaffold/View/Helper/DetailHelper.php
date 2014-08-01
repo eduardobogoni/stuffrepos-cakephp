@@ -157,7 +157,7 @@ class DetailHelper extends AppHelper {
         return $b;
     }
 
-    private function _scaffoldExtendedViewFieldListFieldset(\ExtendedFieldSet $fieldset, 
+    private function _scaffoldExtendedViewFieldListFieldset(\FieldSetDefinition $fieldset, 
             $scaffoldVars) {
         return $fieldset->getListAssociation() ?
                 $this->ListFieldSet->fieldSet($fieldset, $scaffoldVars, $this->settings['listSettings']) :

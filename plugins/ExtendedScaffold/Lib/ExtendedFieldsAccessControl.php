@@ -6,14 +6,14 @@ App::uses('ExtendedFieldSet', 'ExtendedScaffold.Lib');
 
 class ExtendedFieldsAccessControl {
 
-    public static function sessionUserHasFieldAccess(\ExtendedField $field) {
+    public static function sessionUserHasFieldAccess(\FieldDefinition $field) {
         return self::_sessionUserHasAccess(
                         $field->getAccessObject()
                         , $field->getAccessObjectType()
         );
     }
 
-    public static function sessionUserHasFieldSetAccess(\ExtendedFieldSet $fieldSet) {
+    public static function sessionUserHasFieldSetAccess(\FieldSetDefinition $fieldSet) {
         return self::_sessionUserHasAccess(
                         $fieldSet->getAccessObject()
                         , $fieldSet->getAccessObjectType()
@@ -46,7 +46,7 @@ class ExtendedFieldsAccessControl {
         return $ret;
     }
 
-    private static function _buildFieldSet(\ExtendedFieldSet $fieldSet) {
+    private static function _buildFieldSet(\FieldSetDefinition $fieldSet) {
         if (!self::sessionUserHasFieldSetAccess($fieldSet)) {
             return null;
         }
@@ -59,10 +59,10 @@ class ExtendedFieldsAccessControl {
         }
         return empty($lines) ?
                 false :
-                new ExtendedFieldSet($lines, $fieldSet->getOptions());
+                new FieldSetDefinition($lines, $fieldSet->getOptions());
     }
 
-    private static function _buildLine(\ExtendedFieldsLine $line) {
+    private static function _buildLine(\FieldRowDefinition $line) {
         $acFields = array();
         foreach ($line->getFields() as $field) {
             if (self::sessionUserHasFieldAccess($field)) {

@@ -1,6 +1,6 @@
 <?php
 
-class ExtendedFieldSet {
+class FieldSetDefinition {
 
     public function __construct($lines, $options) {
         $this->lines = $lines;

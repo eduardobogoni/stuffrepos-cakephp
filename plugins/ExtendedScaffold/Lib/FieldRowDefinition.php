@@ -1,6 +1,6 @@
 <?php
 
-class ExtendedFieldsLine {
+class FieldRowDefinition {
 
     public function __construct($fields) {
         $this->fields = $fields;
@@ -8,7 +8,7 @@ class ExtendedFieldsLine {
 
     /**
      * 
-     * @return ExtendedField[]
+     * @return FieldDefinition[]
      */
     public function getFields() {
         return $this->fields;
