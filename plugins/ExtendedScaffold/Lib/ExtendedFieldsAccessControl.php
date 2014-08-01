@@ -40,7 +40,7 @@ class ExtendedFieldsAccessControl {
         $ret = array();
         foreach ($fieldSets as $fieldSet) {
             if ($acFieldSet = self::_buildFieldSet($fieldSet)) {
-                $ret[] = $fieldSet;
+                $ret[] = $acFieldSet;
             }
         }
         return $ret;
@@ -52,8 +52,7 @@ class ExtendedFieldsAccessControl {
         }
         $lines = array();
         foreach ($fieldSet->getLines() as $line) {
-            $acLine = self::_buildLine($line);
-            if (!empty($acLine)) {
+            if ($acLine = self::_buildLine($line)) {
                 $lines[] = $acLine;
             }
         }
@@ -69,7 +68,9 @@ class ExtendedFieldsAccessControl {
                 $acFields[] = $field;
             }
         }
-        return $acFields;
+        return empty($acFields) ?
+                false :
+                new FieldRowDefinition($acFields);
     }
 
 }
