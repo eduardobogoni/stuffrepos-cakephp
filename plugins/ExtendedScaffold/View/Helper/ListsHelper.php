@@ -436,11 +436,13 @@ class ListsHelper extends AppHelper {
     }
     
     private function _selfLinkUrl($row) {
-        return array(
+        return $this->controller ?
+                array(
             'controller' => Inflector::underscore($this->controller->name),
             'action' => 'view',
             $row[$this->model->alias][$this->model->primaryKey]
-        );
+                ) :
+                null;
     }
 
     private function _formatValueAsList($value) {
