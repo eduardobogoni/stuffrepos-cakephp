@@ -7,8 +7,11 @@ abstract class ExtendedHasManyAppModel extends AppModel {
     private $_saveParent = false;
     public $virtualFieldsSchema;
 
-    public function __construct($id = false, $table = null, $ds = null, $hasManyUtilsAssociation = array()) {
+    public function __construct($id = false, $table = null, $ds = null, $hasManyUtilsAssociation = false) {
         parent::__construct($id, $table, $ds);
+        if ($hasManyUtilsAssociation === false) {
+            $hasManyUtilsAssociation = array_keys($this->hasMany);
+        }
         $this->Behaviors->load('Base.HasManyUtils', array(
             'associations' => $hasManyUtilsAssociation
         ));
