@@ -11,6 +11,7 @@ class FieldDefinition {
         $this->name = $name;
         $this->options = array_merge(array(
             'accessObject' => false,
+            'readAccessObject' => false,
             'accessObjectType' => false,
                 ), $options);
     }

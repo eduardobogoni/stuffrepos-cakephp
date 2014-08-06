@@ -59,7 +59,7 @@ class DetailHelper extends AppHelper {
         if (ExtendedFieldsParser::isExtendedFieldsDefinition($fields)) {
             return $this->_scaffoldExtendedFieldList(
                             $instance
-                            , ExtendedFieldsAccessControl::parseFieldsets($fields)
+                            , ExtendedFieldsAccessControl::parseFieldsets($fields, true)
                             , $associations
                             , $modelClass
             );

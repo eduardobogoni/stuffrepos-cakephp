@@ -80,7 +80,7 @@ class ExtendedFormHelper extends FormHelper {
 
     public function extendedInputs($data, $blacklist = array(), $defaultModel = null) {
         $b = "\n<div class='scaffoldInputsLine'>\n";
-        foreach (ExtendedFieldsAccessControl::parseFieldsets($data, $defaultModel) as $fieldset) {
+        foreach (ExtendedFieldsAccessControl::parseFieldsets($data, false, $defaultModel) as $fieldset) {
 
             $fieldsetOut = $this->_extendedInputsFieldset(
                     $fieldset, $blacklist

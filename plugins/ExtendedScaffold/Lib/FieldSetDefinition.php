@@ -2,13 +2,14 @@
 
 class FieldSetDefinition {
 
-    public function __construct($lines, $options) {
+    public function __construct($lines, $options = array()) {
         $this->lines = $lines;
         $this->options = array_merge(array(
             'listAssociation' => false,
             'label' => false,
             'legend' => false,
             'accessObject' => false,
+            'readAccessObject' => false,
             'accessObjectType' => false,
                 ), $options);
        

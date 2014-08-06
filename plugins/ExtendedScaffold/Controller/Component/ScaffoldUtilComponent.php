@@ -116,8 +116,8 @@ class ScaffoldUtilComponent extends Component {
             foreach ($fieldSet->getLines() as $line) {
                 foreach ($line->getFields() as $extendedFieldsParserField) {
                     if ($this->_fieldNameEquals($controller, $extendedFieldsParserField, "$modelAlias.$field")) {
-                        return !ExtendedFieldsAccessControl::sessionUserHasFieldAccess($extendedFieldsParserField)
-                                || !ExtendedFieldsAccessControl::sessionUserHasFieldSetAccess($fieldSet);
+                        return !ExtendedFieldsAccessControl::sessionUserHasFieldAccess($extendedFieldsParserField, false)
+                                || !ExtendedFieldsAccessControl::sessionUserHasFieldSetAccess($fieldSet, false);
                     }
                 }
             }

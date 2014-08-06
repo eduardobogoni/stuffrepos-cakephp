@@ -2,6 +2,8 @@
 
 App::uses('ExtendedFieldsAccessControl', 'ExtendedScaffold.Lib');
 App::uses('FieldDefinition', 'ExtendedScaffold.Lib');
+App::uses('FieldRowDefinition', 'ExtendedScaffold.Lib');
+App::uses('FieldSetDefinition', 'ExtendedScaffold.Lib');
 App::uses('AccessControlComponent', 'AccessControl.Controller/Component');
 App::uses('AccessControlFilter', 'AccessControl.Controller/Component/AccessControl');
 App::uses('Controller', 'Controller');
@@ -44,69 +46,102 @@ class ExtendedFieldsAccessControlTest extends CakeTestCase {
         );
     }
 
-    public function testSessionUserHasFieldAccess() {
-        $this->assertEqual(
-                true
-                , ExtendedFieldsAccessControl::sessionUserHasFieldAccess(new FieldDefinition('field1', array(
-                    'accessObjectType' => null,
-                    'accessObject' => null
-                )))
-        );
-        $this->assertEqual(
-                false
-                , ExtendedFieldsAccessControl::sessionUserHasFieldAccess(new FieldDefinition('field2', array(
-                    'accessObjectType' => null,
-                    'accessObject' => 'deny'
-                )))
-        );
-        $this->assertEqual(
-                true
-                , ExtendedFieldsAccessControl::sessionUserHasFieldAccess(new FieldDefinition('field3', array(
-                    'accessObjectType' => null,
-                    'accessObject' => 'allow'
-                )))
+    public function fieldAccessProvider() {
+        return array(
+            array(
+                'allow',
+                'allow',
+                true,
+                true,
+            ),
+            array(
+                'allow',
+                'deny',
+                true,
+                true,
+            ),
+            array(
+                'allow',
+                null,
+                true,
+                true,
+            ),
+            array(
+                'deny',
+                'allow',
+                false,
+                true,
+            ),
+            array(
+                'deny',
+                'deny',
+                false,
+                false,
+            ),
+            array(
+                'deny',
+                null,
+                false,
+                false,
+            ),
+            array(
+                null,
+                'allow',
+                true,
+                true,
+            ),
+            array(
+                null,
+                'deny',
+                false,
+                false,
+            ),
+            array(
+                null,
+                null,
+                true,
+                true,
+            ),
         );
     }
 
-    public function testParserFields() {
-        AccessControlComponent::setRequest(new CakeRequest());
-        AccessControlComponent::clearFilters();
-        AccessControlComponent::addFilter(new ExtendedFieldsAccessControlTest_AccessControlFilter());
+    /**
+     * @dataProvider fieldAccessProvider
+     */
+    public function testSessionUserHasFieldAccess($accessObject, $readAccessObject, $writeAccess, $readAccess) {
+        $field = new FieldDefinition('fieldXYZ', compact('accessObject', 'readAccessObject'));
+        $this->assertEqual($writeAccess, ExtendedFieldsAccessControl::sessionUserHasFieldAccess($field, false), 'Write access');
+        $this->assertEqual($readAccess, ExtendedFieldsAccessControl::sessionUserHasFieldAccess($field, true), 'Read access');
+    }
 
+    public function testParserFields() {
+        $readLines = array();
+        $writeLines = array();
+        $fieldSet = array('lines' => array());
+        foreach ($this->fieldAccessProvider() as $i => $fieldData) {
+            list($accessObject, $readAccessObject, $writeAccess, $readAccess) = $fieldData;
+            $field = new FieldDefinition('field' . $i, compact('accessObject', 'readAccessObject'));
+            $fieldSet['lines'][$field->getName()] = $field->getOptions();
+            if ($readAccess) {
+                $readLines[] = new FieldRowDefinition((array($field)));
+            }
+            if ($writeAccess) {
+                $writeLines[] = new FieldRowDefinition((array($field)));
+            }
+        }
+        $input = array('_extended' => array($fieldSet));
+
+        $write = array(new FieldSetDefinition($writeLines));
+        $result = ExtendedFieldsAccessControl::parseFieldsets($input, false);
         $this->assertEqual(
-                ExtendedFieldsAccessControl::parseFieldsets(array(
-                    '_extended' => array(
-                        array(
-                            'lines' => array(
-                                'field1',
-                                'field2' => array(
-                                    'accessObjectType' => null,
-                                    'accessObject' => 'deny'
-                                ),
-                                'field3' => array(
-                                    'accessObjectType' => null,
-                                    'accessObject' => 'allow'
-                                ),
-                            )
-                        )
-                    )
-                ))
-                , array(
-            new FieldSetDefinition(array(
-                new FieldRowDefinition(array(
-                    new FieldDefinition('field1', array(
-                        'accessObjectType' => null,
-                        'accessObject' => null
-                            )),
-                        )),
-                new FieldRowDefinition(array(
-                    new FieldDefinition('field3', array(
-                        'accessObjectType' => null,
-                        'accessObject' => 'allow'
-                            )),
-                        )),
-                    ), array())
-                )
+                $result
+                , $write
+        );
+
+        $read = array(new FieldSetDefinition($readLines));
+        $this->assertEqual(
+                ExtendedFieldsAccessControl::parseFieldsets($input, true)
+                , $read
         );
     }
 
