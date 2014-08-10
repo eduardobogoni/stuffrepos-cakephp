@@ -30,6 +30,9 @@ abstract class ExtendedHasManyAppModel extends AppModel {
     }
 
     public function saveAll($data = null, $options = array()) {
+        if (!empty($options['selfOnly'])) {
+            return parent::save($data);
+        }
         $this->begin();
         $this->set($data);
         $options['atomic'] = false;
