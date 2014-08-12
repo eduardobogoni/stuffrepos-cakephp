@@ -55,7 +55,7 @@ class ExtendedFormHelper extends FormHelper {
         if (ExtendedFieldsParser::isExtendedFieldsDefinition($fields)) {
             return $this->extendedCreate() .
                     $this->extendedInputs(
-                            ExtendedFieldsParser::extractExtendedFields($fields), $blacklist
+                            $fields, $blacklist
                     ) . $this->extendedEnd(__d('extended_scaffold','Submit', true));
         } else {
             return $this->create(null, array('url' => $this->_currentUrl())) .

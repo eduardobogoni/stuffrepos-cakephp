@@ -40,14 +40,18 @@ class ExtendedFieldsParser {
 
         if ($_this->isExtendedFieldsDefinition($fieldsData)) {
             $fieldsData = $_this->extractExtendedFields($fieldsData);
+            $fieldsets = array();
+            foreach ($fieldsData as $dataKey => $dataValue) {
+                $fieldsets[] = $_this->_parseFieldsetData($dataKey, $dataValue, $defaultModel);
+            }
+            return $fieldsets;
+        } else {
+            return array(
+                $_this->_parseFieldsetData(0, array(
+                    'lines' => $fieldsData
+                        ), $defaultModel)
+            );
         }
-
-        $fieldsets = array();
-
-        foreach ($fieldsData as $dataKey => $dataValue) {
-            $fieldsets[] = $_this->_parseFieldsetData($dataKey, $dataValue, $defaultModel);
-        }
-        return $fieldsets;
     }
 
     public function fieldInDefinition($fieldsData, $field, $defaultModel = null) {
@@ -102,11 +106,17 @@ class ExtendedFieldsParser {
     private function _parseLineData($key, $value, $defaultModel = null) {
         if (($field = $this->_parseFieldData($key, $value, $defaultModel))) {
             $fields = array($field);
-        } else {
+        } else if (is_array($value)) {
             $fields = array();
             foreach ($value as $subKey => $subValue) {
-                $fields[] = $this->_parseFieldData($subKey, $subValue, $defaultModel);
+                $field = $this->_parseFieldData($subKey, $subValue, $defaultModel);
+                if ($field === false) {
+                    throw new Exception("Error on parse field: " . print_r(compact('key', 'value'), true));
+                }
+                $fields[] = $field;
             }
+        } else {
+            throw new Exception("Error on parse line: " . print_r(compact('key', 'value'), true));
         }
         return new FieldRowDefinition($fields);
     }
