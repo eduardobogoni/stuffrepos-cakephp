@@ -234,7 +234,13 @@ class ListsHelper extends AppHelper {
         return array($path, $model);
     }
 
-    private function _fieldType($path, \Model $model) {
+    /**
+     * 
+     * @param string[] $path
+     * @param Model $model
+     * @return string
+     */
+    private function _fieldType($path, $model) {
         if ($model) {
             $modelSchema = $model->schema();
             if (!empty($modelSchema[$path[1]])) {
@@ -414,7 +420,12 @@ class ListsHelper extends AppHelper {
                 }
             }
             
-            $value = ModelTraverser::displayValue($this->model, $row, $field['path']);
+            if ($this->model) {
+                $value = ModelTraverser::displayValue($this->model, $row, $field['path']);
+            }
+            else {
+                $value = ArrayUtil::arrayIndex($row, $field['path']);
+            }
 
             if (is_array($value)) {
                 $value = $this->_formatValueAsList($value);
