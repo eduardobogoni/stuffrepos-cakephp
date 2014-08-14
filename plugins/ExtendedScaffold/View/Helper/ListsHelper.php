@@ -465,6 +465,9 @@ class ListsHelper extends AppHelper {
     }
     
     private function _selfLinkUrl($row) {
+        if (!$this->controller) {
+            return null;
+        }
         $id = !empty($row[$this->model->alias][$this->model->primaryKey]) ?
                 $row[$this->model->alias][$this->model->primaryKey] :
                 $row[$this->model->primaryKey];

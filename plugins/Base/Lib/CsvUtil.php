@@ -30,7 +30,7 @@ class CsvUtil {
     public static function contentToArray($content, $delimiter = ',',
             $enclosure = '"') {
         $lines = array();
-        foreach (explode(PHP_EOL, $content) as $k => $sourceLine) {
+        foreach (preg_split ('/\R/', $content) as $k => $sourceLine) {
             if (trim($sourceLine) == '') {
                 continue;
             }

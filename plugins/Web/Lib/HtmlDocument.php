@@ -7,7 +7,7 @@ class HtmlDocument {
      * @var DOMDocument
      */
     private $document;
-    
+
     /**
      *
      * @var DOMNode
@@ -48,6 +48,12 @@ class HtmlDocument {
         return new HtmlDocument($this->document, $node);
     }
 
+    /**
+     * 
+     * @param string $xpathQuery
+     * @return DOMNodeList
+     * @throws Exception
+     */
     public function queryNodes($xpathQuery) {
         $xpath = new DOMXPath($this->document);
         $xpathQuery = str_replace('x:', '', $xpathQuery);
@@ -84,7 +90,7 @@ class HtmlDocument {
 
         return null;
     }
-    
+
     /**
      * 
      * @return DOMDocument
@@ -92,7 +98,7 @@ class HtmlDocument {
     public function getDocument() {
         return $this->document;
     }
-    
+
     /**
      * 
      * @return DOMNode
@@ -101,6 +107,6 @@ class HtmlDocument {
         return $this->contextNode;
     }
 
-}
+    }
 
 ?>

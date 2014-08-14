@@ -52,6 +52,9 @@ class ExtendedOperationsBehavior extends ModelBehavior {
                 foreach($this->_parseVirtualFields($model) as $name => $schema) {
                     $model->virtualFields[$name] = $schema['query'];
                     unset($schema['query']);
+                    if (!isset($model->virtualFieldsSchema)) {
+                        $model->virtualFieldsSchema = array();
+                    }
                     $model->virtualFieldsSchema[$name] = $schema;
                 }
             }
