@@ -38,9 +38,12 @@ class HasManyUtilsBehavior extends ModelBehavior {
 
     private function _applyAfterFind(\Model $model, $subresults) {
         foreach ($model->Behaviors->enabled() as $behaviorName) {
-            $subresults = $model->Behaviors->{$behaviorName}->afterFind(
+            $behaviorResults = $model->Behaviors->{$behaviorName}->afterFind(
                     $model, $subresults, false
             );
+            if (is_array($behaviorResults)) {
+                $subresults = $behaviorResults;            
+            }
         }
 
         $subresults = $model->afterFind($subresults, false);
