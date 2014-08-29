@@ -53,6 +53,7 @@ class Make {
 
     public function execute($name) {
         $this->_execute($name, array(), array());
+        $this->_fireListeners('onMakeAfterExecuteAll', array());
     }
 
     public function addListener(MakeListener $listener) {
