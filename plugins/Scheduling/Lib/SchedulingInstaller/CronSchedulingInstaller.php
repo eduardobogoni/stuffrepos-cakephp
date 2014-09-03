@@ -1,9 +1,9 @@
 <?php
 
 App::uses('FileSystem', 'Base.Lib');
-App::uses('SchedulingTask', 'Scheduling.Lib');
+App::uses('SchedulingInstaller', 'Scheduling.Lib');
 
-class CronSchedulingInstaller {
+class CronSchedulingInstaller implements SchedulingInstaller {
 
     public function install() {
         $this->_setCrontabUserContents($this->_cronFileContent(false));
@@ -11,6 +11,15 @@ class CronSchedulingInstaller {
 
     public function uninstall() {
         $this->_setCrontabUserContents($this->_cronFileContent(true));
+    }
+
+    public function isInstalled() {
+        foreach (explode("\n", $this->_getCrontabUserContents()) as $line) {
+            if ($this->_isAppCronLine($line)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function _getCrontabUserContents() {
