@@ -10,6 +10,25 @@ class AssociationIntegrityBehavior extends ModelBehavior {
         }
     }
 
+    public function beforeDelete(\Model $model, $cascade = true) {
+        $parentResult = parent::beforeDelete($model, $cascade);
+        if (!$parentResult) {
+            return $parentResult;
+        }
+        foreach ($model->hasMany as $alias => $config) {
+            if ($this->__hasHasManyAssociations($model, $alias)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function __hasHasManyAssociations(\Model $model, $alias) {
+        return $model->{$alias}->hasAny(array(
+                    $alias . '.' . $model->hasMany[$alias]['foreignKey'] => $model->id
+        ));
+    }
+
     private function __currentFieldValue(\Model $model, $field) {
         if (array_key_exists($model->alias, $model->data) && array_key_exists($field, $model->data[$model->alias])) {
             return $model->data[$model->alias][$field];

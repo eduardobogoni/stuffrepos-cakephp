@@ -15,6 +15,7 @@ class AssociationIntegrityBehaviorTest extends CakeTestCase {
         parent::setUp();
         $this->Article = ClassRegistry::init('BaseArticle');
         $this->Article->Behaviors->load('Base.AssociationIntegrity');
+        $this->Article->Category->Behaviors->load('Base.AssociationIntegrity');
     }
 
     public function tearDown() {
@@ -89,6 +90,29 @@ class AssociationIntegrityBehaviorTest extends CakeTestCase {
         $result = $this->Article->save($article);
         $this->assertEqual($result, false);
         $this->assertEqual(array_key_exists('category_id', $this->Article->validationErrors), true);
+    }
+
+    public function testDeleteWithAssociations() {
+        $category = $this->Article->Category->find('first');
+        $this->assertEqual(empty($category), false);
+        $this->assertEqual($this->Article->hasAny(array(
+                    $this->Article->alias . '.category_id' => $category['Category']['id']
+                )), true);
+        $this->assertNotEqual($this->Article->Category->delete($category['Category']['id']), true);
+        $this->assertNotEqual($this->Article->Category->exists($category['Category']['id']), false);
+    }
+
+    public function testDeleteWithoutAssociations() {
+        $category = $this->Article->Category->find('first');
+        $this->assertEqual(empty($category), false);
+        $this->Article->deleteAll(array(
+            $this->Article->alias . '.category_id' => $category['Category']['id']
+        ));
+        $this->assertEqual($this->Article->hasAny(array(
+                    $this->Article->alias . '.category_id' => $category['Category']['id']
+                )), false);
+        $this->assertEqual($this->Article->Category->delete($category['Category']['id']), true);
+        $this->assertEqual($this->Article->Category->exists($category['Category']['id']), false);
     }
 
 }
