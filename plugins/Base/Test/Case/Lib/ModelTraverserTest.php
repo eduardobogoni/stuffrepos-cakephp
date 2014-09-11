@@ -9,6 +9,8 @@ class ModelTraverserTest extends CakeTestCase {
     public $fixtures = array(
         'plugin.Base.BaseArticle',
         'plugin.Base.BaseAuthor',
+        'plugin.Base.BaseBook',
+        'plugin.Base.BaseCategory',
     );
 
     public function setUp() {

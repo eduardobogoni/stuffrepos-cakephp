@@ -18,8 +18,8 @@ class BaseCategoryFixture extends CakeTestFixture {
 class BaseCategory extends Model {
 
     public $hasMany = array(
-        'Article' => array(
-            'className' => 'BaseArticle',
+        'Book' => array(
+            'className' => 'BaseBook',
             'foreignKey' => 'category_id',
         )
     );

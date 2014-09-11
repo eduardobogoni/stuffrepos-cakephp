@@ -1,11 +1,12 @@
 <?php
 
 /**
- * @property \BaseArticle $Article
+ * @property \BaseBook $Book
  */
 class AssociationIntegrityBehaviorTest extends CakeTestCase {
 
     public $fixtures = array(
+        'plugin.Base.BaseBook',
         'plugin.Base.BaseArticle',
         'plugin.Base.BaseAuthor',
         'plugin.Base.BaseCategory',
@@ -13,106 +14,106 @@ class AssociationIntegrityBehaviorTest extends CakeTestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->Article = ClassRegistry::init('BaseArticle');
-        $this->Article->Behaviors->load('Base.AssociationIntegrity');
-        $this->Article->Category->Behaviors->load('Base.AssociationIntegrity');
+        $this->Book = ClassRegistry::init('BaseBook');
+        $this->Book->Behaviors->load('Base.AssociationIntegrity');
+        $this->Book->Category->Behaviors->load('Base.AssociationIntegrity');
     }
 
     public function tearDown() {
-        unset($this->Article);
+        unset($this->Book);
         parent::tearDown();
     }
 
     public function testCreateWithEmptyData() {
-        $this->Article->create();
-        $result = $this->Article->save(array($this->Article->alias => array()));
+        $this->Book->create();
+        $result = $this->Book->save(array($this->Book->alias => array()));
         $this->assertEqual($result, false);
-        $this->assertEqual(array_key_exists('author_id', $this->Article->validationErrors), false);
-        $this->assertEqual(array_key_exists('category_id', $this->Article->validationErrors), false);
+        $this->assertEqual(array_key_exists('author_id', $this->Book->validationErrors), false);
+        $this->assertEqual(array_key_exists('category_id', $this->Book->validationErrors), false);
     }
 
     public function testCreateWithoutForeignKey() {
-        $this->Article->create();
-        $result = $this->Article->save(array($this->Article->alias => array(
+        $this->Book->create();
+        $result = $this->Book->save(array($this->Book->alias => array(
                 'title' => 'Teste',
         )));
         $this->assertEqual($result, false);
-        $this->assertEqual(array_key_exists('author_id', $this->Article->validationErrors), false);
-        $this->assertEqual(array_key_exists('category_id', $this->Article->validationErrors), true);
+        $this->assertEqual(array_key_exists('author_id', $this->Book->validationErrors), false);
+        $this->assertEqual(array_key_exists('category_id', $this->Book->validationErrors), true);
     }
 
     public function testCreateWithNoExistingForeignKey() {
-        $this->Article->create();
-        $result = $this->Article->save(array($this->Article->alias => array(
+        $this->Book->create();
+        $result = $this->Book->save(array($this->Book->alias => array(
                 'title' => 'Teste',
                 'author_id' => 4567,
                 'category_id' => 12345
         )));
         $this->assertEqual($result, false);
-        $this->assertEqual(array_key_exists('author_id', $this->Article->validationErrors), true);
-        $this->assertEqual(array_key_exists('category_id', $this->Article->validationErrors), true);
+        $this->assertEqual(array_key_exists('author_id', $this->Book->validationErrors), true);
+        $this->assertEqual(array_key_exists('category_id', $this->Book->validationErrors), true);
     }
 
     public function testCreateWithValidForeignKey() {
-        $this->Article->Category->create();
-        $result = $this->Article->Category->save(array('Category' => array(
+        $this->Book->Category->create();
+        $result = $this->Book->Category->save(array('Category' => array(
                 'title' => 'Category Teste'
         )));
         $this->assertNotEqual($result, false);
-        $this->Article->create();
-        $result = $this->Article->save(array($this->Article->alias => array(
+        $this->Book->create();
+        $result = $this->Book->save(array($this->Book->alias => array(
                 'title' => 'Teste',
-                'category_id' => $this->Article->Category->id,
+                'category_id' => $this->Book->Category->id,
         )));
         $this->assertNotEqual($result, false);
-        $this->assertEqual(array_key_exists('category_id', $this->Article->validationErrors), false);
+        $this->assertEqual(array_key_exists('category_id', $this->Book->validationErrors), false);
     }
 
     /**
      * @depends testCreateWithValidForeignKey
      */
     public function testEditWithoutForeignKey() {
-        $article = $this->Article->find('first');
-        $this->assertEqual(empty($article), false);
-        unset($article[$this->Article->alias]['category_id']);
-        $result = $this->Article->save($article);
+        $book = $this->Book->find('first');
+        $this->assertEqual(empty($book), false);
+        unset($book[$this->Book->alias]['category_id']);
+        $result = $this->Book->save($book);
         $this->assertNotEqual($result, false);
-        $this->assertEqual(array_key_exists('category_id', $this->Article->validationErrors), false);
+        $this->assertEqual(array_key_exists('category_id', $this->Book->validationErrors), false);
     }
 
     /**
      * @depends testEditWithoutForeignKey
      */
     public function testEditWithNullForeignKey() {
-        $article = $this->Article->find('first');
-        $this->assertEqual(empty($article), false);
-        $article[$this->Article->alias]['category_id'] = null;
-        $result = $this->Article->save($article);
+        $book = $this->Book->find('first');
+        $this->assertEqual(empty($book), false);
+        $book[$this->Book->alias]['category_id'] = null;
+        $result = $this->Book->save($book);
         $this->assertEqual($result, false);
-        $this->assertEqual(array_key_exists('category_id', $this->Article->validationErrors), true);
+        $this->assertEqual(array_key_exists('category_id', $this->Book->validationErrors), true);
     }
 
     public function testDeleteWithAssociations() {
-        $category = $this->Article->Category->find('first');
+        $category = $this->Book->Category->find('first');
         $this->assertEqual(empty($category), false);
-        $this->assertEqual($this->Article->hasAny(array(
-                    $this->Article->alias . '.category_id' => $category['Category']['id']
+        $this->assertEqual($this->Book->hasAny(array(
+                    $this->Book->alias . '.category_id' => $category['Category']['id']
                 )), true);
-        $this->assertNotEqual($this->Article->Category->delete($category['Category']['id']), true);
-        $this->assertNotEqual($this->Article->Category->exists($category['Category']['id']), false);
+        $this->assertNotEqual($this->Book->Category->delete($category['Category']['id']), true);
+        $this->assertNotEqual($this->Book->Category->exists($category['Category']['id']), false);
     }
 
     public function testDeleteWithoutAssociations() {
-        $category = $this->Article->Category->find('first');
+        $category = $this->Book->Category->find('first');
         $this->assertEqual(empty($category), false);
-        $this->Article->deleteAll(array(
-            $this->Article->alias . '.category_id' => $category['Category']['id']
+        $this->Book->deleteAll(array(
+            $this->Book->alias . '.category_id' => $category['Category']['id']
         ));
-        $this->assertEqual($this->Article->hasAny(array(
-                    $this->Article->alias . '.category_id' => $category['Category']['id']
+        $this->assertEqual($this->Book->hasAny(array(
+                    $this->Book->alias . '.category_id' => $category['Category']['id']
                 )), false);
-        $this->assertEqual($this->Article->Category->delete($category['Category']['id']), true);
-        $this->assertEqual($this->Article->Category->exists($category['Category']['id']), false);
+        $this->assertEqual($this->Book->Category->delete($category['Category']['id']), true);
+        $this->assertEqual($this->Book->Category->exists($category['Category']['id']), false);
     }
 
 }
