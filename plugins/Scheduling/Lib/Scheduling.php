@@ -68,6 +68,21 @@ class Scheduling {
         }
     }
     
+    /**
+     * 
+     * @return SchedulingInstaller
+     * @throws Exception
+     */
+    public static function getInstaller($schedulingInstallerClass = null) {
+        if (!$schedulingInstallerClass) {
+            $schedulingInstallerClass = Configure::read('Scheduling.installer_class');
+            if (!$schedulingInstallerClass || trim($schedulingInstallerClass) == '') {
+                throw new Exception("Configuration \"Scheduling.installer_class\" not set.");
+            }
+        }
+        return ClassSearcher::findInstanceAndInstantiate('Lib' . DS . 'SchedulingInstaller', $schedulingInstallerClass);
+    }
+
     private static function _generateShellCalls($schedulingTask) {
         $shellCalls = array();
         foreach($schedulingTask->generate() as $shellCall) {

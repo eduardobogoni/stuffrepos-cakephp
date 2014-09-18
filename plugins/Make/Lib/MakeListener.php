@@ -7,4 +7,6 @@ interface MakeListener {
     public function onMakeAfterExecute($taskName);
 
     public function onMakeAfterCheck($taskName, $result, $returnedValue, $expectedValue);
+
+    public function onMakeAfterExecuteAll();
 }

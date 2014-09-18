@@ -155,7 +155,7 @@ class ModelTraverser {
         }
     }
 
-    public static function _findField(Model $model, $row, $field) {
+    public static function _findField(Model $model, $row, $field, $required = true) {
         if (array_key_exists($model->alias, $row) && array_key_exists($field, $row[$model->alias])) {
             return $row[$model->alias][$field];
         } else if (array_key_exists($field, $row)) {
@@ -170,12 +170,19 @@ class ModelTraverser {
                 ),
             ));
             if (empty($findRow)) {
-                throw new Exception("Row not found");
+                if ($required) {
+                    throw new Exception("Row not found");
+                }
+                else {
+                    return null;
+                }
             }
             if (array_key_exists($model->alias, $findRow) && array_key_exists($field, $findRow[$model->alias])) {
                 return $findRow[$model->alias][$field];
-            } else {
+            } else if ($required) {
                 throw new Exception("Field \"$field\" not found for \"{$model->name}\" record: " . print_r($findRow, true));
+            } else {
+                return null;            
             }
         }
     }

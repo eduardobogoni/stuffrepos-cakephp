@@ -11,7 +11,7 @@ class TempDirectory {
         if (defined('TMP')) {
             return TMP;
         } else {
-            return self::_rootDirectory($uid) . self::_appId() . DS;
+            return self::userRootDirectory($uid) . self::_appId() . DS;
         }
     }
 
@@ -29,8 +29,8 @@ class TempDirectory {
      * de aplicações.     
      * @return string
      */
-    private static function _rootDirectory($uid) {
-        return self::_homeDirectory() . DS . '.cakephp-tmp' . DS;
+    public static function userRootDirectory($uid) {
+        return self::_homeDirectory($uid) . DS . '.cakephp-tmp' . DS;
     }
 
     public static function checkCurrentDirectory() {

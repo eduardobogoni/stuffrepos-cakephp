@@ -7,7 +7,7 @@ class BaseArticleFixture extends CakeTestFixture {
     public $fields = array(
         'id' => array('type' => 'integer', 'key' => 'primary'),
         'title' => array('type' => 'string', 'length' => 255, 'null' => false),
-        'author_id' => array('type' => 'integer'),
+        'author_id' => array('type' => 'integer', 'null' => true),
     );
     public $records = array(
         array('id' => 1, 'title' => 'First Article', 'author_id' => 1),
@@ -24,7 +24,7 @@ class BaseArticle extends Model {
         'Author' => array(
             'className' => 'BaseAuthor',
             'foreignKey' => 'author_id',
-        )
+        ),
     );
 
 }

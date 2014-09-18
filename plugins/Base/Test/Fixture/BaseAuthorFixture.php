@@ -21,7 +21,11 @@ class BaseAuthor extends Model {
         'Article' => array(
             'className' => 'BaseArticle',
             'foreignKey' => 'author_id',
-        )
+        ),
+        'Book' => array(
+            'className' => 'BaseBook',
+            'foreignKey' => 'author_id',
+        ),
     );
 
 }
