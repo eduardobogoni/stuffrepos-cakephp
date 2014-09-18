@@ -1,5 +1,7 @@
 <?php
 
+App::uses('ModelTraverser', 'Base.Lib');
+
 class AssociationIntegrityBehavior extends ModelBehavior {
 
     public function beforeValidate(\Model $model, $options = array()) {
@@ -30,28 +32,7 @@ class AssociationIntegrityBehavior extends ModelBehavior {
     }
 
     private function __currentFieldValue(\Model $model, $field) {
-        if (array_key_exists($model->alias, $model->data) && array_key_exists($field, $model->data[$model->alias])) {
-            return $model->data[$model->alias][$field];
-        }
-        if (array_key_exists($model->alias, $model->data) && array_key_exists($model->foreignKey, $model->data[$model->alias])) {
-            $id = $model->data[$model->alias][$this->foreignKey];
-        } else {
-            $id = $model->id;
-        }
-        if ($id) {
-            $row = $model->find('first', array(
-                'conditions' => array(
-                    "{$model->alias}.{$model->primaryKey}" => $id,
-                )
-            ));
-            if (empty($row)) {
-                return null;
-            } else {
-                return $row[$model->alias][$field];
-            }
-        } else {
-            return null;
-        }
+        return ModelTraverser::_findField($model, $model->data, $field, false);        
     }
 
     private function __setupAssociationValidate(\Model $model, $alias, $foreignKey) {
