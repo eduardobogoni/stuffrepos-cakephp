@@ -55,7 +55,7 @@ class CronSchedulingInstaller implements SchedulingInstaller {
         if (!$uninstall) {
             $lines[] = $this->_buildAppCronLine();
         }
-        return implode("\n", $lines);
+        return implode("\n", $lines) . "\n";
     }
 
     private function _isAppCronLine($line) {
