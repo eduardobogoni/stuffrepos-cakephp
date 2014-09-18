@@ -72,4 +72,15 @@ class MailParserTest extends CakeTestCase {
         );
     }
 
+    public function testMultiBody() {
+        $mailData = MailParser::parseFile(dirname(__FILE__) . DS . 'multibody-source');
+        $this->assertEqual(count($mailData['bodies']), 2);
+        $k = 0;
+        foreach ($mailData['bodies'] as $bodyType => $bodyContent) {
+            $expectedValue = file_get_contents(dirname(__FILE__) . DS . 'multibody-' . ($k++));
+            $this->assertEqual($bodyContent, $expectedValue);
+            
+        }
+    }
+
 }

@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+	<head>
+		<title>.: Bradesco :.</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	</head>
+	<body>
+		<table border="0" cellpadding="0" cellspacing="0" width="555" style="background-color: #E4E4E4;">
+			<tr>
+				<td>
+					<table border="0" cellpadding="0" cellspacing="0" width="100%">
+						<tr>
+							<td align="center" valign="top" colspan="4">
+								<IMG alt="barra_top" src="https://wwwsn.infoemail.bradesco.com.br/images/varejo/saldos_extratos.png" width="555" height="136">
+							</td>
+						</tr>
+					</table>
+					<table cellpadding="0" cellspacing="0" width="555" border="0">
+						<tr>
+							<td width="15">&nbsp;</td>
+							<td style="background-color: #FFFFFF;">
+								<table cellpadding="0" cellspacing="0" width="100%" border="0">
+									<tr>
+										<td style="padding-top: 15px; padding-bottom: 15px; padding-left: 30px; font-size:14px; font-family:Tahoma,Arial,Sans-Serif;">Eduardo Henrique Bogoni,</td>
+									</tr>
+									<tr>
+										<td style="padding-left: 30px; padding-bottom: 20px; font-size:13px; font-family:Tahoma,Arial,Sans-Serif;">Voc&#234; acaba de receber o seu Infoemail Bradesco - Saldos & Extratos.</td>
+									</tr>
+									<tr>
+										<td style="padding-left: 30px; font-size:13px; font-family:Tahoma,Arial,Sans-Serif;">Ag&#234;ncia: XX92</td>
+									</tr>
+									<tr>
+										<td style="padding-left: 30px; font-size:13px; font-family:Tahoma,Arial,Sans-Serif;">Conta: XXXXX68-8</td>
+									</tr>
+									<tr>
+										<td style="padding-top: 20px; padding-left: 30px; font-size:13px; font-family:Tahoma,Arial,Sans-Serif; padding-right:10px; padding-bottom:20px;">Sem estar conectado &#224; internet, voc&#234; visualiza seu saldo, extratos e outras informa&#231;&#245;es solicitadas sobre sua conta.</td>
+									</tr>
+									<tr>
+										<td style="padding-left: 30px; margin-top:10px; font-size:13px; font-family:Tahoma,Arial,Sans-Serif;">Obs.: Clique no arquivo anexo para visualiz&#225;-lo.</td>
+									</tr>
+									<tr>
+										<td style="padding-left: 30px; margin-top:10px; font-size:13px; font-family:Tahoma,Arial,Sans-Serif;">&nbsp;</td>
+									</tr>
+									<tr>
+										<td style="border-bottom:1px solid #E0D9BC;">&nbsp;</td>
+									</tr>
+									<tr>
+										<td>&nbsp;</td>
+									</tr>
+								</table>
+							</td>
+							<td width="15">&nbsp;</td>
+						</tr>
+						<tr>
+							<td colspan="3" height="15">&nbsp;</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

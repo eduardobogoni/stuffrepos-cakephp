@@ -47,7 +47,7 @@ class MailParser {
     }
 
     private static function _buildBodies($parsedData) {
-        if ($parsedData['content-type'] == 'multipart/alternative') {
+        if (strpos($parsedData['content-type'],'multipart/') === 0) {
             return self::_buildBodiesFromMultipart($parsedData['body'], $parsedData['content-boundary']);
         } else {
             return array(
@@ -70,7 +70,7 @@ class MailParser {
     }
 
     private static function _extractBody($parsedData, $content) {
-        $body = substr($content, $parsedData['starting-pos-body'], $parsedData['ending-pos-body'] - $parsedData['starting-pos-body']);
+        $body = substr($content, $parsedData['starting-pos-body']);
         if (!empty($parsedData['transfer-encoding']) && $parsedData['transfer-encoding'] == 'quoted-printable') {
             $body = quoted_printable_decode($body);
         }
