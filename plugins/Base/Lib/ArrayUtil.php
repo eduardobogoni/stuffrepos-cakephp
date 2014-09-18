@@ -116,6 +116,19 @@ class ArrayUtil {
         call_user_func_array('array_multisort', $args);
         return array_pop($args);
     }
+    
+    public static function keysTree($array) {
+        $keys = array();
+        foreach($array as $key => $value) {            
+            if (is_array($value)) {
+                $keys[$key] = self::keysTree($value);
+            }
+            else {
+                $keys[$key] = gettype($value);
+            }
+        }
+        return $keys;
+    }
 
 }
 
