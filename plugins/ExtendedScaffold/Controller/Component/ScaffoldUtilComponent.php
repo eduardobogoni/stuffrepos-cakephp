@@ -128,7 +128,7 @@ class ScaffoldUtilComponent extends Component {
     private function _fieldNameEquals(\Controller $controller, \FieldDefinition $extendedFieldsParserField, $name) {
         $defaultModel = empty($controller->uses[0]) ?
                 null :
-                $controller->{$controller->uses[0]}->alias;
+                ClassRegistry::init($controller->uses[0])->alias;
         return Basics::fieldFullName($extendedFieldsParserField->getName(), $defaultModel) ==
         Basics::fieldFullName($name, $defaultModel);
     }
