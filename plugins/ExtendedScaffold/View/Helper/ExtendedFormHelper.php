@@ -231,8 +231,7 @@ class ExtendedFormHelper extends FormHelper {
 
     public function text($fieldName, $options = array()) {
         if (!empty($options['mask'])) {
-            $input = new InputMasked($this,$fieldName,$options);
-            return $input->output();
+            return InputMasked::maskedText($this, $fieldName, $options);
         } else if (!empty($options['search'])) {
             $input = new InputSearchable($this,$fieldName,$options);
             return $input->output();            
