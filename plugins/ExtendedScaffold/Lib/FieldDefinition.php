@@ -13,6 +13,7 @@ class FieldDefinition {
             'accessObject' => false,
             'readAccessObject' => false,
             'accessObjectType' => false,
+            'valueFunction' => false,
                 ), $options);
     }
 
@@ -30,6 +31,10 @@ class FieldDefinition {
 
     public function getAccessObjectType() {
         return $this->options['accessObjectType'];
+    }
+    
+    public function getValueFunction() {
+        return $this->options['valueFunction'];
     }
 
     /**
