@@ -43,6 +43,14 @@ class ExtendedFieldSetHelper extends AppHelper {
     }
 
     private function _fieldValue(\FieldDefinition $field, $scaffoldVars) {
+        if ($field->getValueFunction()) {
+            return call_user_func(
+                    $field->getValueFunction()
+                    , $this->CakeLayers->getCurrentView()
+                    , $scaffoldVars['instance'][ClassRegistry::init($scaffoldVars['modelClass'])->alias]
+                    , $field
+            );
+        }
         return $this->ViewUtil->autoFormat(
                         ModelTraverser::displayValue(
                                 $this->_model($scaffoldVars)

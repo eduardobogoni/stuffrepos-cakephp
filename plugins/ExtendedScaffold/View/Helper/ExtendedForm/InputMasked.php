@@ -2,51 +2,37 @@
 
 class InputMasked {
 
-    public function __construct(ExtendedFormHelper $parent, $fieldName, $options) {
-        $this->parent = $parent;
-        $this->fieldName = $fieldName;
-        $this->options = $options;
-        $this->hiddenInputId = $this->parent->createNewDomId();
-        $this->visibleInputId = $this->parent->createNewDomId();
+    public static function maskedText(ExtendedFormHelper $helper, $fieldName, $options) {
+        $id = $helper->createNewDomId();
+        $hiddenInput = self::__hiddenInput($helper, $fieldName);
+        $visibleInput = self::__visibleInput($helper, $fieldName, $options);
+        $initData = json_encode(array(
+            'mask' => $options['mask'],
+        ));
+        return <<<EOT
+<span id="$id" initCallback="ExtendedFormHelper.InputMasked.initInput" initData='$initData' >
+    $hiddenInput
+    $visibleInput
+</span>
+EOT;
     }
 
-    public function output() {
-        $b = $this->_hiddenInput();
-        $b .= $this->_visibleInput();
-        $b .= $this->_maskedTextOnDocumentReady();
-
-        $this->parent->getInputsOnSubmit()->addInput('text', $this->visibleInputId, $this->hiddenInputId);
-
-        return $b;
+    private static function __hiddenInput($helper, $fieldName) {
+        return $helper->hidden($fieldName, array('subId' => 'hiddenInput'));
     }
 
-    private function _hiddenInput() {
-        return $this->parent->hidden($this->fieldName, array('id' => $this->hiddenInputId));
-    }
-
-    private function _visibleInput() {
-        $visibleInputName = $this->fieldName . '_masked';
-        $this->parent->setEntity($visibleInputName);
-        $visibleOptions = $this->options;
-        unset($visibleOptions['mask']);
-        return $this->parent->text(
+    private static function __visibleInput($helper, $fieldName, $attributes) {
+        $visibleInputName = $fieldName . '_masked';
+        $helper->setEntity($visibleInputName);
+        $visibleId = $helper->createNewDomId();
+        return $helper->nonExtendedText(
                         $visibleInputName, array_merge(
-                                $visibleOptions, array(
-                            'id' => $this->visibleInputId,
-                                    'initCallback' => 'ExtendedFormHelper.InputMasked.initCallback'
+                                $attributes, array(
+                    'id' => $visibleId,
+                    'subId' => 'visibleInput',
                                 )
                         )
         );
     }
 
-    private function _maskedTextOnDocumentReady() {
-        return $this->parent->javascriptTag(
-                        "\$(document).ready(function(){
-   \$('#{$this->visibleInputId}').inputmask({'mask': '{$this->options['mask']}', 'autoUnmask': true});
-   \$('#{$this->visibleInputId}').inputmask('setvalue',\$('#{$this->hiddenInputId}').val());            
-});");
-    }
-
 }
-
-?>

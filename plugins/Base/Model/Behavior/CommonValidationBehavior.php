@@ -4,6 +4,41 @@ App::import('Lib', 'Base.Basics');
 
 class CommonValidationBehavior extends ModelBehavior {
 
+    const EMPTY_VALUE = '@EMPTY_VALUE@';
+
+    private $modelSettingsDefault = array(
+        'forceValidateEmpty' => array(),
+    );
+
+    public function setup(\Model $model, $config = array()) {
+        parent::setup($model, $config);
+        $this->settings[$model->name] = array_merge($this->modelSettingsDefault, $config);
+    }
+
+    public function beforeValidate(\Model $model, $options = array()) {
+        if (!parent::beforeValidate($model, $options)) {
+            return false;
+        }
+        foreach ($this->settings[$model->name]['forceValidateEmpty'] as $field) {
+            if (empty($model->data[$model->alias][$field]) || trim($model->data[$model->alias][$field]) == '') {
+                $model->data[$model->alias][$field] = self::EMPTY_VALUE;
+            }
+        }
+        return true;
+    }
+
+    public function beforeSave(\Model $model, $options = array()) {
+        if (!parent::beforeSave($model, $options)) {
+            return false;
+        }
+        foreach ($this->settings[$model->name]['forceValidateEmpty'] as $field) {
+            if ($model->data[$model->alias][$field] == self::EMPTY_VALUE) {
+                $model->data[$model->alias][$field] = '';
+            }
+        }
+        return true;
+    }
+
     public static function isUniqueInContext(Model $model, $check, $contextFields = array()) {
         $contextFields = ArrayUtil::arraylize($contextFields);                
 

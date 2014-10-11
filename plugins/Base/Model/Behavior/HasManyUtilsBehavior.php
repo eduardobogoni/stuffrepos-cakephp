@@ -26,7 +26,7 @@ class HasManyUtilsBehavior extends ModelBehavior {
         if ($results) {
             foreach ($model->hasMany as $alias => $association) {
                 foreach (array_keys($results) as $k) {
-                    if (!empty($results[$k][$alias]) && is_array($results[$k][$alias])) {
+                    if (!empty($results[$k][$alias]) && is_array($results[$k][$alias]) && in_array($alias, $this->options[$model->name][self::SETTING_ASSOCIATIONS])) {
                         $results[$k][$alias] = $this->_applyAfterFind($model->{$alias}, $results[$k][$alias]);
                     }
                 }
