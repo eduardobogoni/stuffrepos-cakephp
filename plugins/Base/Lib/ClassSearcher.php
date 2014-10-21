@@ -2,6 +2,11 @@
 
 class ClassSearcher {
 
+    /**
+     * 
+     * @param string $path
+     * @return string[]
+     */
     public static function findClasses($path) {
         $classes = array();
         foreach (CakePlugin::loaded() as $plugin) {
@@ -16,6 +21,11 @@ class ClassSearcher {
         );
     }
 
+    /**
+     * 
+     * @param string $path
+     * @return object[]
+     */
     public static function findInstances($path) {
         $instances = array();
         foreach(self::findClasses($path) as $className => $path) {
@@ -24,6 +34,13 @@ class ClassSearcher {
         return $instances;
     }
     
+    /**
+     * 
+     * @param string $path
+     * @param string $className
+     * @return object
+     * @throws Exception
+     */
     public static function findInstance($path, $className) {
         $classes = self::findClasses($path);
         if (empty($classes[$className])) {
@@ -35,20 +52,33 @@ class ClassSearcher {
 
     /**
      * 
-     * @param type $path
-     * @param type $className
-     * @return type
+     * @param string $path
+     * @param string $className
+     * @return object
      * @deprecated Uses ClassSearcher::findInstance().
      */
     public static function findInstanceAndInstantiate($path, $className) {
         return self::findInstance($path, $className);
     }
     
+    /**
+     * 
+     * @param string $className
+     * @param string $path
+     * @return object
+     */
     private static function _createInstance($className, $path) {
         App::uses($className, $path);
         return new $className();
     }
 
+    /**
+     * 
+     * @param string $pluginName
+     * @param string  $pluginRoot
+     * @param string $path
+     * @return array
+     */
     public static function _findClassesOnPlugin($pluginName, $pluginRoot, $path) {
         $fileSystemPath = $pluginRoot . implode(DS, explode('/', $path));
         if (!is_dir($fileSystemPath)) {
