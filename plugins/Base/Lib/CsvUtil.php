@@ -2,15 +2,14 @@
 
 class CsvUtil {
 
-    public static function fileToArray($filePath) {
-        $lines = array();
-        if (($handle = fopen($filePath, "r")) !== FALSE) {
-            while (($data = fgetcsv($handle)) !== FALSE) {
-                $lines[] = $data;                
-            }
-            fclose($handle);
-        }
-        return $lines;
+    private static $defaultOptions = array(
+        'delimiter' => ',',
+        'enclosure' => '"',
+        'encoding' => false,
+    );
+
+    public static function fileToArray($filePath, $options = array()) {
+        return self::contentToArray(file_get_contents($filePath), $options);
     }
 
     public static function fileToArrayWithColumns($filePath,
@@ -27,14 +26,18 @@ class CsvUtil {
         return $ret;
     }
 
-    public static function contentToArray($content, $delimiter = ',',
-            $enclosure = '"') {
+    public static function contentToArray($content, $options = array()) {
+        assert(is_array($options), '$options is not a array: ' . var_export($options, true));
+        $options += self::$defaultOptions;
+        if ($options['encoding']) {
+            $content = mb_convert_encoding($content, mb_internal_encoding(), $options['encoding']);
+        }
         $lines = array();
         foreach (preg_split ('/\R/', $content) as $k => $sourceLine) {
             if (trim($sourceLine) == '') {
                 continue;
             }
-            $lines[] = str_getcsv($sourceLine, $delimiter, $enclosure);
+            $lines[] = str_getcsv($sourceLine, $options['delimiter'], $options['enclosure']);
         }
         return $lines;
     }
