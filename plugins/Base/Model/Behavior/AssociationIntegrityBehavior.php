@@ -66,7 +66,8 @@ class AssociationIntegrityBehavior extends ModelBehavior {
             }
             $key = $associationAlias . '.' . $model->{$associationAlias}->primaryKey;
             $associationRow = $model->{$associationAlias}->find('first', array(
-                'conditions' => array($key => $value)
+                'conditions' => array($key => $value),
+                'recursive' => -1,
             ));
             if (empty($associationRow)) {
                 return false;
