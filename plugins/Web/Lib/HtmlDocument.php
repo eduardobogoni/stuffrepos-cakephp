@@ -24,6 +24,12 @@ class HtmlDocument {
         return new HtmlDocument($domDocument);
     }
 
+    /**
+     * 
+     * @param string $url
+     * @return \HtmlDocument
+     * @throws Exception
+     */
     public static function createFromUrl($url) {
         $domDocument = new DOMDocument;
 
@@ -34,6 +40,11 @@ class HtmlDocument {
         return new HtmlDocument($domDocument);
     }
 
+    /**
+     * 
+     * @param DOMDocument $domDocument
+     * @param DOMNode $contextNode
+     */
     private function __construct(DOMDocument $domDocument, DOMNode $contextNode = null) {
         $this->document = $domDocument;
         $this->contextNode = $contextNode;
@@ -66,6 +77,11 @@ class HtmlDocument {
         return $result;
     }
 
+    /**
+     * 
+     * @param string $xpathQuery
+     * @return \DOMNode
+     */
     public function queryUniqueNode($xpathQuery) {
         foreach ($this->queryNodes($xpathQuery) as $node) {
             return $node;
@@ -74,6 +90,11 @@ class HtmlDocument {
         return null;
     }
 
+    /**
+     * 
+     * @param string $xpathQuery
+     * @return array
+     */
     public function queryValues($xpathQuery) {
         $values = array();
         foreach ($this->queryNodes($xpathQuery) as $node) {
@@ -83,6 +104,11 @@ class HtmlDocument {
         return $values;
     }
 
+    /**
+     * 
+     * @param string $xpathQuery
+     * @return string
+     */
     public function queryUniqueValue($xpathQuery) {
         foreach ($this->queryValues($xpathQuery) as $value) {
             return $value;
@@ -107,6 +133,4 @@ class HtmlDocument {
         return $this->contextNode;
     }
 
-    }
-
-?>
+}
