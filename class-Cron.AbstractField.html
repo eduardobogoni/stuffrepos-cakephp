@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="generator" content="ApiGen 2.8.0">
+
+	<title>Class Cron\AbstractField</title>
+
+	<script type="text/javascript" src="resources/combined.js?3770084987"></script>
+	<script type="text/javascript" src="elementlist.js?1080186404"></script>
+	<link rel="stylesheet" type="text/css" media="all" href="resources/style.css?3505392360">
+
+</head>
+
+<body>
+<div id="left">
+	<div id="menu">
+		<a href="index.html" title="Overview"><span>Overview</span></a>
+
+
+		<div id="groups">
+			<h3>Namespaces</h3>
+			<ul>
+				<li class="active"><a href="namespace-Cron.html">Cron</a>
+						</li>
+				<li><a href="namespace-None.html">None</a>
+						</li>
+			</ul>
+		</div>
+
+		<hr>
+
+
+		<div id="elements">
+			<h3>Classes</h3>
+			<ul>
+				<li class="active"><a href="class-Cron.AbstractField.html">AbstractField</a></li>
+				<li><a href="class-Cron.CronExpression.html">CronExpression</a></li>
+				<li><a href="class-Cron.DayOfMonthField.html">DayOfMonthField</a></li>
+				<li><a href="class-Cron.DayOfWeekField.html">DayOfWeekField</a></li>
+				<li><a href="class-Cron.FieldFactory.html">FieldFactory</a></li>
+				<li><a href="class-Cron.HoursField.html">HoursField</a></li>
+				<li><a href="class-Cron.MinutesField.html">MinutesField</a></li>
+				<li><a href="class-Cron.MonthField.html">MonthField</a></li>
+				<li><a href="class-Cron.YearField.html">YearField</a></li>
+			</ul>
+
+			<h3>Interfaces</h3>
+			<ul>
+				<li><a href="class-Cron.FieldInterface.html">FieldInterface</a></li>
+			</ul>
+
+
+
+
+		</div>
+	</div>
+</div>
+
+<div id="splitter"></div>
+
+<div id="right">
+<div id="rightInner">
+	<form id="search">
+		<input type="hidden" name="cx" value="">
+		<input type="hidden" name="ie" value="UTF-8">
+		<input type="text" name="q" class="text">
+		<input type="submit" value="Search">
+	</form>
+
+	<div id="navigation">
+		<ul>
+			<li>
+				<a href="index.html" title="Overview"><span>Overview</span></a>
+			</li>
+			<li>
+				<a href="namespace-Cron.html" title="Summary of Cron"><span>Namespace</span></a>
+			</li>
+			<li class="active">
+<span>Class</span>			</li>
+		</ul>
+		<ul>
+			<li>
+				<a href="tree.html" title="Tree view of classes, interfaces, traits and exceptions"><span>Tree</span></a>
+			</li>
+		</ul>
+		<ul>
+		</ul>
+	</div>
+
+<div id="content" class="class">
+	<h1>Class AbstractField</h1>
+
+
+	<div class="description">
+	
+<p>Abstract CRON expression field</p>
+
+	</div>
+
+	<dl class="tree">
+		<dd style="padding-left:0px">
+<b><span>Cron\AbstractField</span></b>			
+			 implements 
+				<a href="class-Cron.FieldInterface.html"><span>Cron\FieldInterface</span></a>
+			
+			
+		</dd>
+	</dl>
+
+
+	<div>
+		<h4>Direct known subclasses</h4>
+			<a href="class-Cron.DayOfMonthField.html">Cron\DayOfMonthField</a>, 
+			<a href="class-Cron.DayOfWeekField.html">Cron\DayOfWeekField</a>, 
+			<a href="class-Cron.HoursField.html">Cron\HoursField</a>, 
+			<a href="class-Cron.MinutesField.html">Cron\MinutesField</a>, 
+			<a href="class-Cron.MonthField.html">Cron\MonthField</a>, 
+			<a href="class-Cron.YearField.html">Cron\YearField</a>
+	</div>
+
+
+
+
+
+
+	<div class="info">
+		<b>Abstract</b><br>
+		
+		<b>Namespace:</b> <a href="namespace-Cron.html">Cron</a><br>
+		
+
+		<b>Located at</b> <a href="source-class-Cron.AbstractField.html#5-100" title="Go to source code">Scheduling/Vendor/CronExpression/src/Cron/AbstractField.php</a><br>
+	</div>
+
+
+
+	<table class="summary" id="methods">
+	<caption>Methods summary</caption>
+	<tr data-order="isSatisfied" id="_isSatisfied">
+
+		<td class="attributes"><code>
+			 public 
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isSatisfied">#</a>
+		<code><a href="source-class-Cron.AbstractField.html#10-27" title="Go to source code">isSatisfied</a>( <span>string <var>$dateValue</var></span>, <span>string <var>$value</var></span> )</code>
+
+		<div class="description short">
+			
+<p>Check to see if a field is satisfied by a value</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Check to see if a field is satisfied by a value</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$dateValue</var></dt>
+					<dd><code>string</code><br>$dateValue Date value to check</dd>
+					<dt><var>$value</var></dt>
+					<dd><code>string</code><br>$value Value to test</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>boolean</code><br>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isRange" id="_isRange">
+
+		<td class="attributes"><code>
+			 public 
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isRange">#</a>
+		<code><a href="source-class-Cron.AbstractField.html#29-39" title="Go to source code">isRange</a>( <span>string <var>$value</var></span> )</code>
+
+		<div class="description short">
+			
+<p>Check if a value is a range</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Check if a value is a range</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$value</var></dt>
+					<dd><code>string</code><br>$value Value to test</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>boolean</code><br>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isIncrementsOfRanges" id="_isIncrementsOfRanges">
+
+		<td class="attributes"><code>
+			 public 
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isIncrementsOfRanges">#</a>
+		<code><a href="source-class-Cron.AbstractField.html#41-51" title="Go to source code">isIncrementsOfRanges</a>( <span>string <var>$value</var></span> )</code>
+
+		<div class="description short">
+			
+<p>Check if a value is an increments of ranges</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Check if a value is an increments of ranges</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$value</var></dt>
+					<dd><code>string</code><br>$value Value to test</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>boolean</code><br>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isInRange" id="_isInRange">
+
+		<td class="attributes"><code>
+			 public 
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isInRange">#</a>
+		<code><a href="source-class-Cron.AbstractField.html#53-66" title="Go to source code">isInRange</a>( <span>string <var>$dateValue</var></span>, <span>string <var>$value</var></span> )</code>
+
+		<div class="description short">
+			
+<p>Test if a value is within a range</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Test if a value is within a range</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$dateValue</var></dt>
+					<dd><code>string</code><br>$dateValue Set date value</dd>
+					<dt><var>$value</var></dt>
+					<dd><code>string</code><br>$value Value to test</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>boolean</code><br>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isInIncrementsOfRanges" id="_isInIncrementsOfRanges">
+
+		<td class="attributes"><code>
+			 public 
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isInIncrementsOfRanges">#</a>
+		<code><a href="source-class-Cron.AbstractField.html#68-99" title="Go to source code">isInIncrementsOfRanges</a>( <span>string <var>$dateValue</var></span>, <span>string <var>$value</var></span> )</code>
+
+		<div class="description short">
+			
+<p>Test if a value is within an increments of ranges (offset[-to]/step size)</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Test if a value is within an increments of ranges (offset[-to]/step size)</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$dateValue</var></dt>
+					<dd><code>string</code><br>$dateValue Set date value</dd>
+					<dt><var>$value</var></dt>
+					<dd><code>string</code><br>$value Value to test</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>boolean</code><br>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	</table>
+
+	<table class="summary inherited">
+	<caption>Methods inherited from <a href="class-Cron.FieldInterface.html#methods">Cron\FieldInterface</a></caption>
+	<tr>
+		<td><code>
+			<a href="class-Cron.FieldInterface.html#_increment">increment()</a>, 
+			<a href="class-Cron.FieldInterface.html#_isSatisfiedBy">isSatisfiedBy()</a>, 
+			<a href="class-Cron.FieldInterface.html#_validate">validate()</a>
+		</code></td>
+	</tr>
+	</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+	<div id="footer">
+		 API documentation generated by <a href="http://apigen.org">ApiGen 2.8.0</a>
+	</div>
+</div>
+</div>
+</body>
+</html>

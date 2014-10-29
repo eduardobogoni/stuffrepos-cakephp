@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="generator" content="ApiGen 2.8.0">
+
+	<title>Class Cron\CronExpression</title>
+
+	<script type="text/javascript" src="resources/combined.js?3770084987"></script>
+	<script type="text/javascript" src="elementlist.js?1080186404"></script>
+	<link rel="stylesheet" type="text/css" media="all" href="resources/style.css?3505392360">
+
+</head>
+
+<body>
+<div id="left">
+	<div id="menu">
+		<a href="index.html" title="Overview"><span>Overview</span></a>
+
+
+		<div id="groups">
+			<h3>Namespaces</h3>
+			<ul>
+				<li class="active"><a href="namespace-Cron.html">Cron</a>
+						</li>
+				<li><a href="namespace-None.html">None</a>
+						</li>
+			</ul>
+		</div>
+
+		<hr>
+
+
+		<div id="elements">
+			<h3>Classes</h3>
+			<ul>
+				<li><a href="class-Cron.AbstractField.html">AbstractField</a></li>
+				<li class="active"><a href="class-Cron.CronExpression.html">CronExpression</a></li>
+				<li><a href="class-Cron.DayOfMonthField.html">DayOfMonthField</a></li>
+				<li><a href="class-Cron.DayOfWeekField.html">DayOfWeekField</a></li>
+				<li><a href="class-Cron.FieldFactory.html">FieldFactory</a></li>
+				<li><a href="class-Cron.HoursField.html">HoursField</a></li>
+				<li><a href="class-Cron.MinutesField.html">MinutesField</a></li>
+				<li><a href="class-Cron.MonthField.html">MonthField</a></li>
+				<li><a href="class-Cron.YearField.html">YearField</a></li>
+			</ul>
+
+			<h3>Interfaces</h3>
+			<ul>
+				<li><a href="class-Cron.FieldInterface.html">FieldInterface</a></li>
+			</ul>
+
+
+
+
+		</div>
+	</div>
+</div>
+
+<div id="splitter"></div>
+
+<div id="right">
+<div id="rightInner">
+	<form id="search">
+		<input type="hidden" name="cx" value="">
+		<input type="hidden" name="ie" value="UTF-8">
+		<input type="text" name="q" class="text">
+		<input type="submit" value="Search">
+	</form>
+
+	<div id="navigation">
+		<ul>
+			<li>
+				<a href="index.html" title="Overview"><span>Overview</span></a>
+			</li>
+			<li>
+				<a href="namespace-Cron.html" title="Summary of Cron"><span>Namespace</span></a>
+			</li>
+			<li class="active">
+<span>Class</span>			</li>
+		</ul>
+		<ul>
+			<li>
+				<a href="tree.html" title="Tree view of classes, interfaces, traits and exceptions"><span>Tree</span></a>
+			</li>
+		</ul>
+		<ul>
+		</ul>
+	</div>
+
+<div id="content" class="class">
+	<h1>Class CronExpression</h1>
+
+
+	<div class="description">
+	
+<p>CRON expression parser that can determine whether or not a CRON expression is
+due to run, the next run date and previous run date of a CRON expression. The
+determinations made by this class are accurate if checked run once per minute
+(seconds are dropped from date time comparisons).</p>
+
+<p>Schedule parts must map to: minute [0-59], hour [0-23], day of month, month
+[1-12|JAN-DEC], day of week [1-7|MON-SUN], and an optional year.</p>
+
+	</div>
+
+
+
+
+
+
+
+
+
+	<div class="info">
+		
+		
+		<b>Namespace:</b> <a href="namespace-Cron.html">Cron</a><br>
+		
+
+				<b>Link:</b>
+				<a href="http://en.wikipedia.org/wiki/Cron">http://en.wikipedia.org/wiki/Cron</a><br>
+		<b>Located at</b> <a href="source-class-Cron.CronExpression.html#5-333" title="Go to source code">Scheduling/Vendor/CronExpression/src/Cron/CronExpression.php</a><br>
+	</div>
+
+
+
+	<table class="summary" id="methods">
+	<caption>Methods summary</caption>
+	<tr data-order="factory" id="_factory">
+
+		<td class="attributes"><code>
+			 public static
+			<code><a href="class-Cron.CronExpression.html">Cron\CronExpression</a></code>
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_factory">#</a>
+		<code><a href="source-class-Cron.CronExpression.html#41-73" title="Go to source code">factory</a>( <span>string <var>$expression</var></span>, <span><code><a href="class-Cron.FieldFactory.html">Cron\FieldFactory</a></code> <var>$fieldFactory</var> = <span class="php-keyword1">null</span></span> )</code>
+
+		<div class="description short">
+			
+<p>Factory method to create a new CronExpression.</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Factory method to create a new CronExpression.</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$expression</var></dt>
+					<dd><code>string</code><br>$expression The CRON expression to create. There are several special predefined
+values which can be used to substitute the CRON expression:</dd>
+					<dt><var>$fieldFactory</var></dt>
+					<dd><code><code><a href="class-Cron.FieldFactory.html">Cron\FieldFactory</a></code></code><br>$fieldFactory Field factory to use</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code><code><a href="class-Cron.CronExpression.html">Cron\CronExpression</a></code></code><br>
+				</div>
+
+
+				<h4>Daily</h4>
+				<div class="list">
+						- Run once a day, midnight - 0 0 * * *<br>
+				</div>
+				<h4>Hourly</h4>
+				<div class="list">
+						- Run once an hour, first minute - 0 * * * *<br>
+				</div>
+				<h4>Monthly</h4>
+				<div class="list">
+						- Run once a month, midnight, first of month - 0 0 1 * *<br>
+				</div>
+				<h4>Weekly</h4>
+				<div class="list">
+						- Run once a week, midnight on Sun - 0 0 * * 0<br>
+				</div>
+				<h4>Yearly,</h4>
+				<div class="list">
+						@annually) - Run once a year, midnight, Jan. 1 - 0 0 1 1 *<br>
+				</div>
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="__construct" id="___construct">
+
+		<td class="attributes"><code>
+			 public 
+			
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#___construct">#</a>
+		<code><a href="source-class-Cron.CronExpression.html#75-85" title="Go to source code">__construct</a>( <span>string <var>$expression</var></span>, <span><code><a href="class-Cron.FieldFactory.html">Cron\FieldFactory</a></code> <var>$fieldFactory</var></span> )</code>
+
+		<div class="description short">
+			
+<p>Parse a CRON expression</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Parse a CRON expression</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$expression</var></dt>
+					<dd><code>string</code><br>$expression CRON expression (e.g. '8 * * * *')</dd>
+					<dt><var>$fieldFactory</var></dt>
+					<dd><code><code><a href="class-Cron.FieldFactory.html">Cron\FieldFactory</a></code></code><br>$fieldFactory Factory to create cron fields</dd>
+				</dl></div>
+
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="setExpression" id="_setExpression">
+
+		<td class="attributes"><code>
+			 public 
+			<code><a href="class-Cron.CronExpression.html">Cron\CronExpression</a></code>
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_setExpression">#</a>
+		<code><a href="source-class-Cron.CronExpression.html#87-109" title="Go to source code">setExpression</a>( <span>string <var>$value</var></span> )</code>
+
+		<div class="description short">
+			
+<p>Set or change the CRON expression</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Set or change the CRON expression</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$value</var></dt>
+					<dd><code>string</code><br>$value CRON expression (e.g. 8 * * * *)</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code><code><a href="class-Cron.CronExpression.html">Cron\CronExpression</a></code></code><br>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					<code>InvalidArgumentException</code><br>if not a valid CRON expression<br>
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="setPart" id="_setPart">
+
+		<td class="attributes"><code>
+			 public 
+			<code><a href="class-Cron.CronExpression.html">Cron\CronExpression</a></code>
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_setPart">#</a>
+		<code><a href="source-class-Cron.CronExpression.html#111-131" title="Go to source code">setPart</a>( <span>integer <var>$position</var></span>, <span>string <var>$value</var></span> )</code>
+
+		<div class="description short">
+			
+<p>Set part of the CRON expression</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Set part of the CRON expression</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$position</var></dt>
+					<dd><code>integer</code><br>$position The position of the CRON expression to set</dd>
+					<dt><var>$value</var></dt>
+					<dd><code>string</code><br>$value The value to set</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code><code><a href="class-Cron.CronExpression.html">Cron\CronExpression</a></code></code><br>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					<code>InvalidArgumentException</code><br>if the value is not valid for the part<br>
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getNextRunDate" id="_getNextRunDate">
+
+		<td class="attributes"><code>
+			 public 
+			DateTime
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getNextRunDate">#</a>
+		<code><a href="source-class-Cron.CronExpression.html#133-152" title="Go to source code">getNextRunDate</a>( <span>string|DateTime <var>$currentTime</var> = <span class="php-quote">'now'</span></span>, <span>integer <var>$nth</var> = <span class="php-num">0</span></span>, <span>boolean <var>$allowCurrentDate</var> = <span class="php-keyword1">false</span></span> )</code>
+
+		<div class="description short">
+			
+<p>Get a next run date relative to the current date or a specific date</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Get a next run date relative to the current date or a specific date</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$currentTime</var></dt>
+					<dd><code>string|DateTime</code><br>$currentTime Relative calculation date</dd>
+					<dt><var>$nth</var></dt>
+					<dd><code>integer</code><br>$nth Number of matches to skip before returning a matching next run date. 0, the
+default, will return the current date and time if the next run date falls on the
+current date and time. Setting this value to 1 will skip the first match and go
+to the second match. Setting this value to 2 will skip the first 2 matches and
+so on.</dd>
+					<dt><var>$allowCurrentDate</var></dt>
+					<dd><code>boolean</code><br>$allowCurrentDate Set to TRUE to return the current date if it matches the cron
+expression.</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>DateTime</code><br>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					<code>RuntimeException</code><br>on too many iterations<br>
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getPreviousRunDate" id="_getPreviousRunDate">
+
+		<td class="attributes"><code>
+			 public 
+			DateTime
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getPreviousRunDate">#</a>
+		<code><a href="source-class-Cron.CronExpression.html#154-169" title="Go to source code">getPreviousRunDate</a>( <span>string|DateTime <var>$currentTime</var> = <span class="php-quote">'now'</span></span>, <span>integer <var>$nth</var> = <span class="php-num">0</span></span>, <span>boolean <var>$allowCurrentDate</var> = <span class="php-keyword1">false</span></span> )</code>
+
+		<div class="description short">
+			
+<p>Get a previous run date relative to the current date or a specific date</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Get a previous run date relative to the current date or a specific date</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$currentTime</var></dt>
+					<dd><code>string|DateTime</code><br>$currentTime Relative calculation date</dd>
+					<dt><var>$nth</var></dt>
+					<dd><code>integer</code><br>$nth Number of matches to skip before returning</dd>
+					<dt><var>$allowCurrentDate</var></dt>
+					<dd><code>boolean</code><br>$allowCurrentDate Set to TRUE to return the current date if it matches the cron
+expression</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>DateTime</code><br>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					<code>RuntimeException</code><br>on too many iterations<br>
+				</div>
+
+				<h4>See</h4>
+				<div class="list">
+						<code><code><a href="class-Cron.CronExpression.html#_getNextRunDate">Cron\CronExpression::getNextRunDate()</a></code></code><br>
+				</div>
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getMultipleRunDates" id="_getMultipleRunDates">
+
+		<td class="attributes"><code>
+			 public 
+			array
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getMultipleRunDates">#</a>
+		<code><a href="source-class-Cron.CronExpression.html#171-190" title="Go to source code">getMultipleRunDates</a>( <span>integer <var>$total</var></span>, <span>string|DateTime <var>$currentTime</var> = <span class="php-quote">'now'</span></span>, <span>boolean <var>$invert</var> = <span class="php-keyword1">false</span></span>, <span>boolean <var>$allowCurrentDate</var> = <span class="php-keyword1">false</span></span> )</code>
+
+		<div class="description short">
+			
+<p>Get multiple run dates starting at the current date or a specific date</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Get multiple run dates starting at the current date or a specific date</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$total</var></dt>
+					<dd><code>integer</code><br>$total Set the total number of dates to calculate</dd>
+					<dt><var>$currentTime</var></dt>
+					<dd><code>string|DateTime</code><br>$currentTime Relative calculation date</dd>
+					<dt><var>$invert</var></dt>
+					<dd><code>boolean</code><br>$invert Set to TRUE to retrieve previous dates</dd>
+					<dt><var>$allowCurrentDate</var></dt>
+					<dd><code>boolean</code><br>$allowCurrentDate Set to TRUE to return the current date if it matches the cron
+expression</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>array</code><br>Returns an array of run dates<br>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getExpression" id="_getExpression">
+
+		<td class="attributes"><code>
+			 public 
+			string|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getExpression">#</a>
+		<code><a href="source-class-Cron.CronExpression.html#192-210" title="Go to source code">getExpression</a>( <span>string <var>$part</var> = <span class="php-keyword1">null</span></span> )</code>
+
+		<div class="description short">
+			
+<p>Get all or part of the CRON expression</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Get all or part of the CRON expression</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$part</var></dt>
+					<dd><code>string</code><br>$part Specify the part to retrieve or NULL to get the full cron schedule string.</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>string|null</code><br>Returns the CRON expression, a part of the CRON expression, or NULL if the part
+was specified but not found<br>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="__toString" id="___toString">
+
+		<td class="attributes"><code>
+			 public 
+			string
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#___toString">#</a>
+		<code><a href="source-class-Cron.CronExpression.html#212-220" title="Go to source code">__toString</a>( )</code>
+
+		<div class="description short">
+			
+<p>Helper method to output the full expression.</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Helper method to output the full expression.</p>
+
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>string</code><br>Full CRON expression<br>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isDue" id="_isDue">
+
+		<td class="attributes"><code>
+			 public 
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isDue">#</a>
+		<code><a href="source-class-Cron.CronExpression.html#222-250" title="Go to source code">isDue</a>( <span>string|DateTime <var>$currentTime</var> = <span class="php-quote">'now'</span></span> )</code>
+
+		<div class="description short">
+			
+<p>Determine if the cron is due to run based on the current date or a specific
+date. This method assumes that the current number of seconds are irrelevant, and
+should be called once per minute.</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Determine if the cron is due to run based on the current date or a specific
+date. This method assumes that the current number of seconds are irrelevant, and
+should be called once per minute.</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$currentTime</var></dt>
+					<dd><code>string|DateTime</code><br>$currentTime Relative calculation date</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>boolean</code><br>Returns TRUE if the cron is due to run or FALSE if not<br>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getRunDate" id="_getRunDate">
+
+		<td class="attributes"><code>
+			 protected 
+			DateTime
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getRunDate">#</a>
+		<code><a href="source-class-Cron.CronExpression.html#252-332" title="Go to source code">getRunDate</a>( <span>string|DateTime <var>$currentTime</var> = <span class="php-keyword1">null</span></span>, <span>integer <var>$nth</var> = <span class="php-num">0</span></span>, <span>boolean <var>$invert</var> = <span class="php-keyword1">false</span></span>, <span>boolean <var>$allowCurrentDate</var> = <span class="php-keyword1">false</span></span> )</code>
+
+		<div class="description short">
+			
+<p>Get the next or previous run date of the expression relative to a date</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Get the next or previous run date of the expression relative to a date</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$currentTime</var></dt>
+					<dd><code>string|DateTime</code><br>$currentTime Relative calculation date</dd>
+					<dt><var>$nth</var></dt>
+					<dd><code>integer</code><br>$nth Number of matches to skip before returning</dd>
+					<dt><var>$invert</var></dt>
+					<dd><code>boolean</code><br>$invert Set to TRUE to go backwards in time</dd>
+					<dt><var>$allowCurrentDate</var></dt>
+					<dd><code>boolean</code><br>$allowCurrentDate Set to TRUE to return the current date if it matches the cron
+expression</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>DateTime</code><br>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					<code>RuntimeException</code><br>on too many iterations<br>
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	</table>
+
+
+
+
+
+
+
+
+	<table class="summary" id="constants">
+	<caption>Constants summary</caption>
+	<tr data-order="MINUTE" id="MINUTE">
+
+		<td class="attributes"><code>integer</code></td>
+		<td class="name"><code>
+				<a href="source-class-Cron.CronExpression.html#19" title="Go to source code"><b>MINUTE</b></a>
+		</code></td>
+		<td class="value"><code><span class="php-num">0</span></code></td>
+		<td class="description"><div>
+			<a href="#MINUTE" class="anchor">#</a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</div></td>
+	</tr>
+	<tr data-order="HOUR" id="HOUR">
+
+		<td class="attributes"><code>integer</code></td>
+		<td class="name"><code>
+				<a href="source-class-Cron.CronExpression.html#20" title="Go to source code"><b>HOUR</b></a>
+		</code></td>
+		<td class="value"><code><span class="php-num">1</span></code></td>
+		<td class="description"><div>
+			<a href="#HOUR" class="anchor">#</a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</div></td>
+	</tr>
+	<tr data-order="DAY" id="DAY">
+
+		<td class="attributes"><code>integer</code></td>
+		<td class="name"><code>
+				<a href="source-class-Cron.CronExpression.html#21" title="Go to source code"><b>DAY</b></a>
+		</code></td>
+		<td class="value"><code><span class="php-num">2</span></code></td>
+		<td class="description"><div>
+			<a href="#DAY" class="anchor">#</a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</div></td>
+	</tr>
+	<tr data-order="MONTH" id="MONTH">
+
+		<td class="attributes"><code>integer</code></td>
+		<td class="name"><code>
+				<a href="source-class-Cron.CronExpression.html#22" title="Go to source code"><b>MONTH</b></a>
+		</code></td>
+		<td class="value"><code><span class="php-num">3</span></code></td>
+		<td class="description"><div>
+			<a href="#MONTH" class="anchor">#</a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</div></td>
+	</tr>
+	<tr data-order="WEEKDAY" id="WEEKDAY">
+
+		<td class="attributes"><code>integer</code></td>
+		<td class="name"><code>
+				<a href="source-class-Cron.CronExpression.html#23" title="Go to source code"><b>WEEKDAY</b></a>
+		</code></td>
+		<td class="value"><code><span class="php-num">4</span></code></td>
+		<td class="description"><div>
+			<a href="#WEEKDAY" class="anchor">#</a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</div></td>
+	</tr>
+	<tr data-order="YEAR" id="YEAR">
+
+		<td class="attributes"><code>integer</code></td>
+		<td class="name"><code>
+				<a href="source-class-Cron.CronExpression.html#24" title="Go to source code"><b>YEAR</b></a>
+		</code></td>
+		<td class="value"><code><span class="php-num">5</span></code></td>
+		<td class="description"><div>
+			<a href="#YEAR" class="anchor">#</a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</div></td>
+	</tr>
+	</table>
+
+
+
+
+
+
+
+
+
+
+</div>
+
+	<div id="footer">
+		 API documentation generated by <a href="http://apigen.org">ApiGen 2.8.0</a>
+	</div>
+</div>
+</div>
+</body>
+</html>
