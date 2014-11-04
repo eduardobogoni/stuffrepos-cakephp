@@ -18,7 +18,7 @@ class AssociationIntegrityBehavior extends ModelBehavior {
             return $parentResult;
         }
         foreach ($model->hasMany as $alias => $config) {
-            if ($this->__hasHasManyAssociations($model, $alias)) {
+            if (!($cascade && $config['dependent']) && $this->__hasHasManyAssociations($model, $alias)) {
                 return false;
             }
         }
