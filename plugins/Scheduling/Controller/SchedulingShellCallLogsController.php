@@ -14,5 +14,17 @@ class SchedulingShellCallLogsController extends AppController {
      * @var mixed
      */
     public $scaffold;
+    public $components = array(
+        'ExtendedScaffold.ScaffoldUtil' => array(
+            'indexSetFields' => array(
+                'scheduling',
+                'shell',
+                'next_run',
+                'args',
+                'next_run',
+                'state',
+            ),
+        )
+    );
 
 }
