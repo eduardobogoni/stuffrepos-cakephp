@@ -107,18 +107,16 @@ class DumperShell extends Shell {
 
     public function dump() {
         $this->_parseArgs();
-
-        $this->out("Connection: {$this->connection}");
-
-        $dumper = $this->_getDumper($this->connection);
-        $dumpPath = $this->_newDumpPath();
-
-        $dumper->dump(
+        if ($this->dumpPath == '') {
+			$this->dumpPath = $this->_newDumpPath();
+			$this->dumpName = basename($this->dumpPath);
+		}
+		$this->_outArguments();
+        $this->dumper->dump(
             ConnectionManager::getDataSource($this->connection)
-            , $dumpPath
+            , $this->dumpPath
         );
-
-        $this->out("Dump created: \"{$dumpPath}\"");
+        $this->out("Dump created: \"{$this->dumpPath}\"");
     }
 
     public function load() {
