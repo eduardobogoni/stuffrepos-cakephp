@@ -11,31 +11,35 @@ class MysqlDumper implements DatasourceDumper {
         if (!$this->_commandExists($this->dumpCommand)) {
             throw new Exception("Command \"{$this->dumpCommand}\" no exists");
         }
-        $this->_executeMysqlCommand(
-                $ds,
-                escapeshellarg($this->dumpCommand) .
-                ' ' . escapeshellarg('--lock-tables=false'),
-                ' > ' . escapeshellarg($filepath));
+        $this->__executeCommand(
+			escapeshellarg($this->dumpCommand) . 
+			' ' . escapeshellarg('--lock-tables=false') .
+			$this->__mysqlConnectionOptions($ds) .
+			' | gzip -9 -c > ' . escapeshellarg($filepath)
+        );
     }
 
     public function load(\Datasource $ds, $filepath) {
         if (!$this->_commandExists($this->loadCommand)) {
             throw new Exception("Command \"{$this->loadCommand}\" no exists");
         }
-        $this->_executeMysqlCommand(
-                $ds, escapeshellarg($this->loadCommand),
-                ' < ' . escapeshellarg($filepath));
+        $this->__executeCommand(
+			'gzip -9 -d -c < ' . escapeshellarg($filepath) .
+			' | ' . escapeshellarg($this->loadCommand) . 			
+			$this->__mysqlConnectionOptions($ds)
+        );
     }
 
-    private function _executeMysqlCommand(\Datasource $ds, $command, $append) {
-        $command = $this->__mysqlCommand($ds, $command).' ' . $append;
+    private function __executeCommand($command) {
+		echo $command."\n";
         exec($command, $output, $return);
         if ($return != 0) {
             throw new Exception("Command \"$command\" returned $return. Output: " . implode("\n", $output));
         }
     }
     
-    private function __mysqlCommand(\Datasource $ds, $command) {
+    private function __mysqlConnectionOptions(\Datasource $ds) {
+		$command = '';
 		$options = ['host' => 'h', 'port' => 'P', 'login' => 'u'];
 		foreach($options as $config => $option) {
 			if ($ds->config[$config]) {
