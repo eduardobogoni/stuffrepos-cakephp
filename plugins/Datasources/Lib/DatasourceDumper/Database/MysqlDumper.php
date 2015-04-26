@@ -28,29 +28,25 @@ class MysqlDumper implements DatasourceDumper {
     }
 
     private function _executeMysqlCommand(\Datasource $ds, $command, $append) {
-        if ($ds->config['host']) {
-            $command .= ' -h ' . escapeshellarg($ds->config['host']);
-        }
-
-        if ($ds->config['port']) {
-            $command .= ' -P ' . escapeshellarg($ds->config['port']);
-        }
-
-        if ($ds->config['password']) {
-            $command .= ' ' . escapeshellarg('-p' . $ds->config['password']);
-        }
-
-        if ($ds->config['login']) {
-            $command .= ' -u ' . escapeshellarg($ds->config['login']);
-        }
-
-        $command .= ' ' . escapeshellarg($ds->config['database']);
-        $command .= ' ' . $append;
+        $command = $this->__mysqlCommand($ds, $command).' ' . $append;
         exec($command, $output, $return);
-
         if ($return != 0) {
             throw new Exception("Command \"$command\" returned $return. Output: " . implode("\n", $output));
         }
+    }
+    
+    private function __mysqlCommand(\Datasource $ds, $command) {
+		$options = ['host' => 'h', 'port' => 'P', 'login' => 'u'];
+		foreach($options as $config => $option) {
+			if ($ds->config[$config]) {
+				$command .= ' -'.$option.' ' . escapeshellarg($ds->config[$config]);
+			}
+		}
+        if ($ds->config['password']) {
+            $command .= ' ' . escapeshellarg('-p' . $ds->config['password']);
+        }
+        $command .= ' ' . escapeshellarg($ds->config['database']);
+        return $command;
     }
 
     private function _commandExists($command) {
