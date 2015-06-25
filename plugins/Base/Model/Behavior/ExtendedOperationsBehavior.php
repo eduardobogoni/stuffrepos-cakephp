@@ -130,6 +130,30 @@ class ExtendedOperationsBehavior extends ModelBehavior {
         return $ret;
     }
 
+    public function associationJoin(\Model $model, $associationName) {
+        $config = $this->__associationConfigByName($model, $associationName);
+        $associationPrimaryKey = $model->{$associationName}->primaryKey;
+        return [
+            'table' => $model->{$associationName}->table,
+            'alias' => $associationName,
+            'type' => 'INNER',
+            'conditions' => [
+                "{$model->alias}.{$config['foreignKey']} = {$associationName}.{$associationPrimaryKey}"
+            ]
+        ];
+    }
+
+    private function __associationConfigByName(\Model $model, $associationName) {
+        foreach ($model->associations() as $type) {
+            foreach ($model->{$type} as $name => $config) {
+                if ($associationName == $name) {
+                    return $config;
+                }
+            }
+        }
+        throw exception("Association \"$associationName\" not found for \"$model->name\"");
+    }
+
     /**
      * Retorna a validação inList de um campo se existir.
      * @param mixed $fieldName O array da validação ou FALSE caso não exista
