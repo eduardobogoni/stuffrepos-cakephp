@@ -49,10 +49,10 @@ class ImapParserShell extends AppShell {
         if (($parser = $this->_getParser($mailData))) {
             $this->out('Parser found: ' . get_class($parser));
             $parser->parse($mailData);
-            $mailBox->setAsSeen($messageId, true);
         } else {
             $this->out('<error>Parser not found</error>');
         }
+        $mailBox->setAsSeen($messageId, true);
     }
 
     private function _getParser($mailData) {
